@@ -8,6 +8,7 @@
         <DebugType>None</DebugType>
         <DebugSymbols>false</DebugSymbols>
         <Deterministic>true</Deterministic>
+        <UnityReferenceDir Condition="'$(UnityReferenceDir)' == ''">lib</UnityReferenceDir>
         <OutputPath>$(BuildDir)/Unity.IL2CPP</OutputPath>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     </PropertyGroup>
@@ -29,15 +30,15 @@
     </ItemGroup>
     <ItemGroup>
         <Reference Include="Unity.InputSystem">
-            <HintPath>lib\Unity.InputSystem.dll</HintPath>
+            <HintPath>$(UnityReferenceDir)\Unity.InputSystem.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.CoreModule">
-            <HintPath>lib\UnityEngine.CoreModule.dll</HintPath>
+            <HintPath>$(UnityReferenceDir)\UnityEngine.CoreModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.InputLegacyModule">
-            <HintPath>lib\UnityEngine.InputLegacyModule.dll</HintPath>
+            <HintPath>$(UnityReferenceDir)\UnityEngine.InputLegacyModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
     </ItemGroup>

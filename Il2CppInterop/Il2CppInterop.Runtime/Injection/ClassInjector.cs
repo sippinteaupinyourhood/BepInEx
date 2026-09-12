@@ -70,7 +70,7 @@ public static unsafe partial class ClassInjector
     private static readonly HashSet<string> InjectedTypes = new();
 
     /// <summary> (method) : (method_inst, method) </summary>
-    internal static readonly ConcurrentDictionary<IntPtr, (MethodInfo, ConcurrentDictionary<IntPtr, IntPtr>)>
+    internal static readonly Dictionary<IntPtr, (MethodInfo, Dictionary<IntPtr, IntPtr>)>
         InflatedMethodFromContextDictionary = new();
 
     private static readonly ConcurrentDictionary<string, Delegate> InvokerCache = new();
@@ -226,7 +226,6 @@ public static unsafe partial class ClassInjector
                 methods.Add(method);
             interfaceMethods.Add(methods.ToArray());
         }
-
         if (baseClassPointer.ValueType || baseClassPointer.EnumType)
             throw new ArgumentException($"Base class {baseType} is value type and can't be inherited from");
 
@@ -241,7 +240,6 @@ public static unsafe partial class ClassInjector
 
         if (interfaces.Any(i => (i.Flags & Il2CppClassAttributes.TYPE_ATTRIBUTE_INTERFACE) == 0))
             throw new ArgumentException($"Some of the interfaces in {interfaces} are not interfaces");
-
         lock (InjectedTypes)
         {
             if (!InjectedTypes.Add(type.FullName))
@@ -284,7 +282,6 @@ public static unsafe partial class ClassInjector
         classPointer.Flags = baseClassPointer.Flags; // todo: adjust flags?
 
         if (!type.IsAbstract) classPointer.Flags &= ~Il2CppClassAttributes.TYPE_ATTRIBUTE_ABSTRACT;
-
         var fieldsToInject = type
             .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
             .Where(IsFieldEligible)
@@ -359,7 +356,6 @@ public static unsafe partial class ClassInjector
 
         classPointer.InstanceSize = (uint)(fieldOffset + sizeof(InjectedClassData));
         classPointer.ActualSize = classPointer.InstanceSize;
-
         var methodsOffset = type.IsAbstract ? 1 : 2; // 1 is the finalizer, 1 is empty ctor
         var methodCount = methodsOffset + eligibleMethods.Length;
 
@@ -374,18 +370,20 @@ public static unsafe partial class ClassInjector
             .Where(IsFieldEligible)
             .ToArray();
 
-        if (!type.IsAbstract) methodPointerArray[1] = ConvertStaticMethod(CreateEmptyCtor(type, fieldsToInitialize), ".ctor", classPointer);
+        if (!type.IsAbstract)
+        {
+            var emptyCtor = CreateEmptyCtor(type, fieldsToInitialize);
+            methodPointerArray[1] = ConvertStaticMethod(emptyCtor, ".ctor", classPointer);
+        }
         var infos = new Dictionary<(string, int, bool), int>(eligibleMethods.Length);
         for (var i = 0; i < eligibleMethods.Length; i++)
         {
             var methodInfo = eligibleMethods[i];
             var methodInfoPointer = methodPointerArray[i + methodsOffset] = ConvertMethodInfo(methodInfo, classPointer);
             if (methodInfo.IsGenericMethod && !methodInfo.IsAbstract)
-                InflatedMethodFromContextDictionary.TryAdd((IntPtr)methodInfoPointer,
-                    (methodInfo, new ConcurrentDictionary<IntPtr, IntPtr>()));
+                InflatedMethodFromContextDictionary.Add((IntPtr)methodInfoPointer, (methodInfo, new Dictionary<IntPtr, IntPtr>()));
             infos[(methodInfo.Name, methodInfo.GetParameters().Length, methodInfo.IsGenericMethod)] = i + methodsOffset;
         }
-
         var vTablePointer = (VirtualInvokeData*)classPointer.VTable;
         var baseVTablePointer = (VirtualInvokeData*)baseClassPointer.VTable;
         classPointer.VtableCount = (ushort)(baseClassPointer.VtableCount + interfaceFunctionCount + abstractMethods.Length);
@@ -536,7 +534,6 @@ public static unsafe partial class ClassInjector
                 ++index;
             }
         }
-
         var interfaceCount = baseClassPointer.InterfaceCount + interfaces.Count;
         classPointer.InterfaceCount = (ushort)interfaceCount;
         classPointer.ImplementedInterfaces = null;
@@ -567,7 +564,6 @@ public static unsafe partial class ClassInjector
                     offset = offsets[i - baseClassPointer.InterfaceOffsetsCount]
                 };
         }
-
         for (var i = 0; i < abstractMethods.Length; i++)
         {
             vTablePointer[index++] = default;
@@ -579,7 +575,6 @@ public static unsafe partial class ClassInjector
         for (var i = 0; i < TypeHierarchyDepth; i++)
             classPointer.TypeHierarchy[i] = baseClassPointer.TypeHierarchy[i];
         classPointer.TypeHierarchy[TypeHierarchyDepth - 1] = classPointer.ClassPointer;
-
         classPointer.ByValArg.Data =
             classPointer.ThisArg.Data = (IntPtr)InjectorHelpers.CreateClassToken(classPointer.Pointer);
 
@@ -587,7 +582,6 @@ public static unsafe partial class ClassInjector
         Il2CppClassPointerStore.SetNativeClassPointer(type, classPointer.Pointer);
 
         InjectorHelpers.AddTypeToLookup(type, classPointer.Pointer);
-
         if (options.LogSuccess)
             Logger.Instance.LogInformation("Registered mono type {Type} in il2cpp domain", type);
     }
@@ -666,24 +660,16 @@ public static unsafe partial class ClassInjector
         converted.Name = Marshal.StringToCoTaskMemUTF8(methodName);
         converted.Class = declaringClass.ClassPointer;
 
-        var nativeInvoker = methodName == ".ctor" ? FindNativeParameterlessConstructorInvoker(declaringClass.Parent) : IntPtr.Zero;
-        if (nativeInvoker != IntPtr.Zero)
-        {
-            converted.InvokerMethod = nativeInvoker;
-            converted.MethodPointer = Marshal.GetFunctionPointerForDelegate(voidCtor);
-        }
+        Delegate invoker;
+        if (UnityVersionHandler.IsMetadataV29OrHigher)
+            invoker = new InvokerDelegateMetadataV29(StaticVoidIntPtrInvoker_MetadataV29);
         else
-        {
-            Delegate invoker;
-            if (UnityVersionHandler.IsMetadataV29OrHigher)
-                invoker = new InvokerDelegateMetadataV29(StaticVoidIntPtrInvoker_MetadataV29);
-            else
-                invoker = new InvokerDelegate(StaticVoidIntPtrInvoker);
+            invoker = new InvokerDelegate(StaticVoidIntPtrInvoker);
 
-            GCHandle.Alloc(invoker);
-            converted.InvokerMethod = Marshal.GetFunctionPointerForDelegate(invoker);
-            converted.MethodPointer = Marshal.GetFunctionPointerForDelegate(voidCtor);
-        }
+        GCHandle.Alloc(invoker);
+        converted.InvokerMethod = Marshal.GetFunctionPointerForDelegate(invoker);
+        converted.MethodPointer = Marshal.GetFunctionPointerForDelegate(voidCtor);
+
         converted.Slot = ushort.MaxValue;
         converted.ReturnType =
             (Il2CppTypeStruct*)IL2CPP.il2cpp_class_get_type(Il2CppClassPointerStore<Void>.NativeClassPtr);
@@ -694,27 +680,6 @@ public static unsafe partial class ClassInjector
                           Il2CppMethodFlags.METHOD_ATTRIBUTE_RT_SPECIAL_NAME;
 
         return converted.MethodInfoPointer;
-    }
-
-    private static IntPtr FindNativeParameterlessConstructorInvoker(Il2CppClass* parent)
-    {
-        for (var current = parent; current != null; current = UnityVersionHandler.Wrap(current)?.Parent)
-        {
-            var nativeClass = UnityVersionHandler.Wrap(current);
-            if (nativeClass?.Methods == null)
-                continue;
-
-            for (var index = 0; index < nativeClass.MethodCount; index++)
-            {
-                var method = UnityVersionHandler.Wrap(nativeClass.Methods[index]);
-                if (method == null || method.Name == IntPtr.Zero || method.ParametersCount != 0)
-                    continue;
-                if (Marshal.PtrToStringUTF8(method.Name) == ".ctor" && method.InvokerMethod != IntPtr.Zero)
-                    return method.InvokerMethod;
-            }
-        }
-
-        return IntPtr.Zero;
     }
 
     internal static Il2CppMethodInfo* ConvertMethodInfo(MethodInfo monoMethod, INativeClassStruct declaringClass)
@@ -880,9 +845,22 @@ public static unsafe partial class ClassInjector
 
         body.Emit(OpCodes.Ret);
 
-        var @delegate = (VoidCtorDelegate)method.CreateDelegate(typeof(VoidCtorDelegate));
-        GCHandle.Alloc(@delegate); // pin it forever
-        return @delegate;
+        var constructor = (VoidCtorDelegate)method.CreateDelegate(typeof(VoidCtorDelegate));
+        VoidCtorDelegate guardedConstructor = objectPointer =>
+        {
+            try
+            {
+                constructor(objectPointer);
+            }
+            catch (Exception ex)
+            {
+                Logger.Instance.LogError(ex, "Injected constructor callback failed");
+            }
+        };
+
+        GCHandle.Alloc(constructor);
+        GCHandle.Alloc(guardedConstructor);
+        return guardedConstructor;
     }
 
     public static void Finalize(IntPtr ptr)
@@ -1001,7 +979,14 @@ public static unsafe partial class ClassInjector
     private static void StaticVoidIntPtrInvoker_MetadataV29(IntPtr methodPointer, Il2CppMethodInfo* methodInfo, IntPtr obj,
         IntPtr* args, IntPtr* returnValue)
     {
-        Marshal.GetDelegateForFunctionPointer<VoidCtorDelegate>(methodPointer)(obj);
+        try
+        {
+            Marshal.GetDelegateForFunctionPointer<VoidCtorDelegate>(methodPointer)(obj);
+        }
+        catch (Exception ex)
+        {
+            Logger.Instance.LogError(ex, "Injected constructor/finalizer callback failed");
+        }
     }
 
     private static Delegate CreateTrampoline(MethodInfo monoMethod)
@@ -1270,4 +1255,5 @@ public static unsafe partial class ClassInjector
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate void VoidCtorDelegate(IntPtr objectPointer);
+
 }

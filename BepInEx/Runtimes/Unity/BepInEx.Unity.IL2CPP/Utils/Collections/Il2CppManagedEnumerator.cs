@@ -6,7 +6,6 @@ using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
 using Il2CppSystem;
 using ArgumentNullException = System.ArgumentNullException;
-using InvalidOperationException = System.InvalidOperationException;
 using Il2CppIEnumerator = Il2CppSystem.Collections.IEnumerator;
 using IntPtr = System.IntPtr;
 using NotSupportedException = System.NotSupportedException;
@@ -30,16 +29,8 @@ public class Il2CppManagedEnumerator : Object
 
     public Il2CppManagedEnumerator(IntPtr ptr) : base(ptr) { }
 
-    private static IntPtr GetClassPointer()
-    {
-        var classPointer = Il2CppClassPointerStore<Il2CppManagedEnumerator>.NativeClassPtr;
-        if (classPointer == IntPtr.Zero)
-            throw new InvalidOperationException($"Failed to register {typeof(Il2CppManagedEnumerator).FullName}");
-        return classPointer;
-    }
-
     public Il2CppManagedEnumerator(IEnumerator enumerator)
-        : base(Il2CppInterop.Runtime.IL2CPP.il2cpp_object_new(GetClassPointer()))
+        : base(ClassInjector.DerivedConstructorPointer<Il2CppManagedEnumerator>())
     {
         this.enumerator = enumerator ?? throw new ArgumentNullException(nameof(enumerator));
         ClassInjector.DerivedConstructorBody(this);

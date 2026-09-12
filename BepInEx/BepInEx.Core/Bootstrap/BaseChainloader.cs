@@ -322,7 +322,7 @@ public abstract class BaseChainloader<TPlugin>
             }
             catch (Exception ex)
             {
-                Logger.Log(LogLevel.Error, $"Error occurred in a Chainloader.Finished event handler: {ex}");
+                Logger.Log(LogLevel.Error, $"Error occurred in a Chainloader.Finished event handler: {ExceptionFormatter.Format(ex)}");
             }
         }
         catch (Exception ex)
@@ -333,7 +333,7 @@ public abstract class BaseChainloader<TPlugin>
             }
             catch { }
 
-            Logger.Log(LogLevel.Error, $"Error occurred loading plugins: {ex}");
+            Logger.Log(LogLevel.Error, $"Error occurred loading plugins: {ExceptionFormatter.Format(ex)}");
         }
 
         Logger.Log(LogLevel.Message, "Chainloader startup complete");
@@ -447,7 +447,7 @@ public abstract class BaseChainloader<TPlugin>
                 Plugins.Remove(plugin.Metadata.GUID);
 
                 Logger.Log(LogLevel.Error,
-                           $"Error loading [{plugin}]: {(ex is ReflectionTypeLoadException re ? TypeLoader.TypeLoadExceptionToString(re) : ex.ToString())}");
+                           $"Error loading [{plugin}]: {ExceptionFormatter.Format(ex)}");
             }
         }
 
@@ -481,7 +481,7 @@ public abstract class BaseChainloader<TPlugin>
         catch (Exception e)
         {
             Logger.Log(LogLevel.Warning,
-                       $"Couldn't run Module constructor for {assembly.FullName}::{plugin.TypeName}: {e}");
+                       $"Couldn't run Module constructor for {assembly.FullName}::{plugin.TypeName}: {ExceptionFormatter.Format(e)}");
         }
     }
 

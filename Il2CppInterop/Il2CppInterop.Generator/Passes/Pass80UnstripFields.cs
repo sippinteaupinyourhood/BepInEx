@@ -13,6 +13,7 @@ public static class Pass80UnstripFields
     {
         var fieldsUnstripped = 0;
         var fieldsIgnored = 0;
+        var enumConstantsRestored = 0;
 
         foreach (var unityAssembly in context.UnityAssemblies.Assemblies)
         {
@@ -26,7 +27,23 @@ public static class Pass80UnstripFields
                 if (processedType == null) continue;
 
                 if (unityType.IsEnum)
-                    continue;// Enum fields do not get stripped.
+                {
+                    foreach (var unityField in unityType.Fields)
+                    {
+                        if (!unityField.HasConstant()) continue;
+
+                        foreach (var generatedField in processedType.NewType.Fields)
+                        {
+                            if (generatedField.Name != unityField.Name) continue;
+                            if (generatedField.Constant == unityField.Constant) break;
+                            generatedField.Constant = unityField.Constant;
+                            enumConstantsRestored++;
+                            break;
+                        }
+                    }
+
+                    continue;
+                }
 
                 foreach (var unityField in unityType.Fields)
                 {
@@ -61,5 +78,6 @@ public static class Pass80UnstripFields
 
         Logger.Instance.LogInformation("Restored {FieldsUnstripped} fields", fieldsUnstripped);
         Logger.Instance.LogInformation("Failed to restore {FieldsIgnored} fields", fieldsIgnored);
+        Logger.Instance.LogInformation("Restored {EnumConstantsRestored} enum constants", enumConstantsRestored);
     }
 }

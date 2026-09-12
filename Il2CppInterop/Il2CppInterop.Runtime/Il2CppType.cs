@@ -30,15 +30,7 @@ public static class Il2CppType
             return null;
         }
 
-        var reflectionType = IL2CPP.il2cpp_type_get_object(il2CppType);
-        if (reflectionType == IntPtr.Zero)
-        {
-            if (throwOnFailure)
-                throw new ArgumentException($"{typeName} does not have a corresponding IL2CPP reflection type");
-            return null;
-        }
-
-        return new Type(reflectionType);
+        return Type.internal_from_handle(il2CppType);
     }
 
     public static Type From(System.Type type)

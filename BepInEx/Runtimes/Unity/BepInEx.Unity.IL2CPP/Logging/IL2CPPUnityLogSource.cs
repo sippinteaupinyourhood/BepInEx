@@ -23,9 +23,6 @@ public class IL2CPPUnityLogSource : ILogSource
 
     public void UnityLogCallback(string logLine, string exception, LogType type)
     {
-        if (string.Equals(logLine, "Failed to locate input module.", StringComparison.Ordinal))
-            return;
-
         if (logLine.StartsWith("Target is empty: KeyDoesNotExist https://assets.vrchat.com/content-home-upload/", StringComparison.Ordinal))
             return;
 

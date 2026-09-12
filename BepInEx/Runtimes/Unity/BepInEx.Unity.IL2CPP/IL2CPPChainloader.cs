@@ -21,12 +21,11 @@ namespace BepInEx.Unity.IL2CPP;
 public class IL2CPPChainloader : BaseChainloader<BasePlugin>
 {
     private static RuntimeInvokeDetourDelegate originalInvoke;
-    private static RuntimeInvokeDetourDelegate directInvoke;
     private static int startupGate;
 
     private static readonly ConfigEntry<bool> ConfigUnityLogging = ConfigFile.CoreConfig.Bind(
      "Logging", "UnityLogListening",
-     false,
+     true,
      "Enables showing unity log messages in the BepInEx logging system.");
 
     private static readonly ConfigEntry<bool> ConfigDiskWriteUnityLog = ConfigFile.CoreConfig.Bind(
@@ -72,18 +71,14 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
 
         var runtimeInvokePtr = ResolveRuntimeInvoke(il2CppHandle);
         var directInvokePtr = FollowRelativeJump(runtimeInvokePtr);
-        directInvoke = Marshal.GetDelegateForFunctionPointer<RuntimeInvokeDetourDelegate>(directInvokePtr);
         RuntimeInvokeDetourDelegate invokeMethodDetour = OnInvokeMethod;
         RuntimeInvokeDetour =
-            INativeDetour.CreateAndApply(runtimeInvokePtr, invokeMethodDetour, out originalInvoke);
+            INativeDetour.CreateAndApply(directInvokePtr, invokeMethodDetour, out originalInvoke);
     }
 
     private static IntPtr ResolveRuntimeInvoke(IntPtr il2CppHandle)
     {
         if (NativeLibrary.TryGetExport(il2CppHandle, "il2cpp_runtime_invoke", out var address))
-            return address;
-
-        if (NativeLibrary.TryGetExport(il2CppHandle, "UPSmEOKKvNa", out address))
             return address;
 
         var mapPath = Path.Combine(Paths.GameRootPath, "bepinex-il2cpp-signature-scan.json");
@@ -97,7 +92,12 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
                 return address;
         }
 
-        if (NativeLibrary.TryGetExport(il2CppHandle, "QUnIxupvmev", out address) ||
+        if (Il2CppInterop.Runtime.Il2CppExportMap.TryGetAlias("il2cpp_runtime_invoke", out var alias) &&
+            NativeLibrary.TryGetExport(il2CppHandle, alias, out address))
+            return address;
+
+        if (NativeLibrary.TryGetExport(il2CppHandle, "bXpRzmesLff", out address) ||
+            NativeLibrary.TryGetExport(il2CppHandle, "QUnIxupvmev", out address) ||
             NativeLibrary.TryGetExport(il2CppHandle, "oBGsYjJdmzU", out address))
             return address;
 
@@ -115,27 +115,29 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
 
     private static bool IsChainloaderTrigger(IntPtr method)
     {
-        try
-        {
-            var methodName = Marshal.PtrToStringAnsi(Il2CppInterop.Runtime.IL2CPP.il2cpp_method_get_name(method));
-            if (methodName != "Internal_ActiveSceneChanged") return false;
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Logger.Log(LogLevel.Fatal, "Unable to execute IL2CPP chainloader, no plugins will be loaded");
-            Logger.Log(LogLevel.Error, ex);
+        if (method == IntPtr.Zero)
             return false;
-        }
+
+        var name = Marshal.PtrToStringUTF8(Il2CppInterop.Runtime.IL2CPP.il2cpp_method_get_name(method));
+        if (name != "Internal_ActiveSceneChanged")
+            return false;
+
+        var declaringType = Il2CppInterop.Runtime.IL2CPP.il2cpp_method_get_class(method);
+        return declaringType != IntPtr.Zero
+               && Marshal.PtrToStringUTF8(Il2CppInterop.Runtime.IL2CPP.il2cpp_class_get_name(declaringType)) == "SceneManager"
+               && Marshal.PtrToStringUTF8(Il2CppInterop.Runtime.IL2CPP.il2cpp_class_get_namespace(declaringType)) == "UnityEngine.SceneManagement"
+               && Il2CppInterop.Runtime.IL2CPP.il2cpp_method_get_param_count(method) == 2
+               && !Il2CppInterop.Runtime.IL2CPP.il2cpp_method_is_instance(method);
     }
 
     private static void StartChainloader()
     {
         try
         {
-            SetupUnityLogging();
+            var repairedEnums = RuntimeEnumRepair.Repair(Il2CppInteropManager.IL2CPPInteropAssemblyPath);
+            Logger.Log(LogLevel.Info, $"Runtime enum repair staged {repairedEnums} constants");
             Il2CppInteropManager.PreloadInteropAssemblies();
+            SetupUnityLogging();
             Instance.Execute();
         }
         catch (Exception ex)
@@ -148,7 +150,7 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
     private static IntPtr OnInvokeMethod(IntPtr method, IntPtr obj, IntPtr parameters, IntPtr exc)
     {
         if (Interlocked.CompareExchange(ref startupGate, 1, 0) != 0)
-            return directInvoke(method, obj, parameters, exc);
+            return originalInvoke(method, obj, parameters, exc);
 
         var unhook = false;
         try

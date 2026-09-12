@@ -29,6 +29,9 @@ public static unsafe class IL2CPP
     private delegate IntPtr FieldPointerDelegate(IntPtr field);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    private delegate IntPtr ClassIteratorDelegate(IntPtr klass, ref IntPtr iterator);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     private delegate uint FieldOffsetDelegate(IntPtr field);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -40,6 +43,11 @@ public static unsafe class IL2CPP
     private static readonly Lazy<FieldPointerDelegate> FieldGetName = CreateResolver<FieldPointerDelegate>("il2cpp_field_get_name");
     private static readonly Lazy<FieldPointerDelegate> FieldGetParent = CreateResolver<FieldPointerDelegate>("il2cpp_field_get_parent");
     private static readonly Lazy<FieldPointerDelegate> FieldGetType = CreateResolver<FieldPointerDelegate>("il2cpp_field_get_type");
+    private static readonly Lazy<ClassIteratorDelegate> ClassGetEvents = CreateResolver<ClassIteratorDelegate>("il2cpp_class_get_events");
+    private static readonly Lazy<ClassIteratorDelegate> ClassGetFields = CreateResolver<ClassIteratorDelegate>("il2cpp_class_get_fields");
+    private static readonly Lazy<ClassIteratorDelegate> ClassGetNestedTypes = CreateResolver<ClassIteratorDelegate>("il2cpp_class_get_nested_types");
+    private static readonly Lazy<ClassIteratorDelegate> ClassGetInterfaces = CreateResolver<ClassIteratorDelegate>("il2cpp_class_get_interfaces");
+    private static readonly Lazy<ClassIteratorDelegate> ClassGetProperties = CreateResolver<ClassIteratorDelegate>("il2cpp_class_get_properties");
     private static readonly Lazy<FieldStaticValueDelegate> FieldStaticGetValue = CreateResolver<FieldStaticValueDelegate>("il2cpp_field_static_get_value");
     private static readonly Lazy<FieldStaticValueDelegate> FieldStaticSetValue = CreateResolver<FieldStaticValueDelegate>("il2cpp_field_static_set_value");
 
@@ -298,9 +306,19 @@ public static unsafe class IL2CPP
             return RuntimeReflectionHelper.GetNestedTypeViaReflection(enclosingType, nestedTypeName);
         }
 
-        while ((nestedTypePtr = il2cpp_class_get_nested_types(enclosingType, ref iter)) != IntPtr.Zero)
-            if (il2cpp_class_get_name_(nestedTypePtr) == nestedTypeName)
-                return nestedTypePtr;
+        try
+        {
+            while ((nestedTypePtr = il2cpp_class_get_nested_types(enclosingType, ref iter)) != IntPtr.Zero)
+                if (il2cpp_class_get_name_(nestedTypePtr) == nestedTypeName)
+                    return nestedTypePtr;
+        }
+        catch (Exception exception) when (exception is EntryPointNotFoundException
+                                          or MissingMethodException
+                                          or ArgumentNullException)
+        {
+            Logger.Instance.LogDebug(exception,
+                "Native nested-type enumeration is unavailable; using runtime reflection");
+        }
 
         nestedTypePtr = RuntimeReflectionHelper.GetNestedTypeViaReflection(enclosingType, nestedTypeName);
         if (nestedTypePtr != IntPtr.Zero)
@@ -437,49 +455,49 @@ public static unsafe class IL2CPP
     }
 
     // IL2CPP Functions
-    [DllImport("GameAssembly", EntryPoint = "wcFuyyMHlLr", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "NBSAlQOsuaq", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_init(IntPtr domain_name);
 
-    [DllImport("GameAssembly", EntryPoint = "QTyNUiCgCBo", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "sxlqIKSgXol", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_init_utf16(IntPtr domain_name);
 
-    [DllImport("GameAssembly", EntryPoint = "iXVXrGhrTXj", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "IhNHpp_XBcU", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_shutdown();
 
-    [DllImport("GameAssembly", EntryPoint = "lUEZVhGTrVV", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "FVwFArLdO_y", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_set_config_dir(IntPtr config_path);
 
-    [DllImport("GameAssembly", EntryPoint = "AduYkwousTM", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "GmITYMnMNzO", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_set_data_dir(IntPtr data_path);
 
-    [DllImport("GameAssembly", EntryPoint = "tbDiH_YGrFK", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "lnurhzfiqIh", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_set_temp_dir(IntPtr temp_path);
 
-    [DllImport("GameAssembly", EntryPoint = "SCxSXLpZRKk", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "wJkRPPwDaYB", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_set_commandline_arguments(int argc, IntPtr argv, IntPtr basedir);
 
-    [DllImport("GameAssembly", EntryPoint = "SnRfpqaKydv", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "WFyTFJoMOpa", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_set_commandline_arguments_utf16(int argc, IntPtr argv, IntPtr basedir);
 
-    [DllImport("GameAssembly", EntryPoint = "vMJDjWOxm_q", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "LXAREeBvNBM", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_set_config_utf16(IntPtr executablePath);
 
-    [DllImport("GameAssembly", EntryPoint = "tnYqQnkpbab", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "_M_arDaIULe", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_set_config(IntPtr executablePath);
 
-    [DllImport("GameAssembly", EntryPoint = "IPcaUSPUepT", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ooWXJwRzGkR", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_set_memory_callbacks(IntPtr callbacks);
 
-    [DllImport("GameAssembly", EntryPoint = "wkvazbPVXUm", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "OwFgJrBKOku", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_get_corlib();
 
-    [DllImport("GameAssembly", EntryPoint = "OGgcPnJlNDE", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "SIEoYjQHdrd", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_add_internal_call(IntPtr name, IntPtr method);
 
-    [DllImport("GameAssembly", EntryPoint = "umJrGZzsxtO", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "drpzlEOAsSw", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_resolve_icall([MarshalAs(UnmanagedType.LPStr)] string name);
 
-    [DllImport("GameAssembly", EntryPoint = "GPELQyujGZL", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "aZBAJMdRWuh", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_alloc(uint size);
 
     [DllImport("GameAssembly", EntryPoint = "il2cpp_free", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
@@ -500,29 +518,29 @@ public static unsafe class IL2CPP
         return checked((uint)length);
     }
 
-    [DllImport("GameAssembly", EntryPoint = "yfVZkaCPXYZ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "wmnGgzOdFRx", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern uint il2cpp_array_get_byte_length(IntPtr array);
 
     public static IntPtr il2cpp_array_new(IntPtr elementTypeInfo, ulong length)
         => ArrayNew.Value(elementTypeInfo, length);
 
-    [DllImport("GameAssembly", EntryPoint = "qERBKIjlDGF", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "bGgorcCRyzI", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_array_new_specific(IntPtr arrayTypeInfo, ulong length);
 
-    [DllImport("GameAssembly", EntryPoint = "ihzDrcvpVQW", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "CsCljiiPZBg", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_array_new_full(IntPtr array_class, ref ulong lengths, ref ulong lower_bounds);
 
-    [DllImport("GameAssembly", EntryPoint = "zxNBCNcPeNC", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "QXZxzATFzKE", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_bounded_array_class_get(IntPtr element_class, uint rank,
         [MarshalAs(UnmanagedType.I1)] bool bounded);
 
-    [DllImport("GameAssembly", EntryPoint = "CQMxHDBQpFL", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "SaFUdrbenta", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int il2cpp_array_element_size(IntPtr array_class);
 
-    public static IntPtr il2cpp_assembly_get_image(IntPtr assembly)
-        => assembly == IntPtr.Zero ? IntPtr.Zero : Marshal.ReadIntPtr(assembly);
+    [DllImport("GameAssembly", EntryPoint = "bCCtgFgXmLj", CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr il2cpp_assembly_get_image(IntPtr assembly);
 
-    [DllImport("GameAssembly", EntryPoint = "_rrCxeMjXqI", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "nwIqhCWvRpp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_class_enum_basetype(IntPtr klass);
 
     public static bool il2cpp_class_is_generic(IntPtr klass)
@@ -538,23 +556,23 @@ public static unsafe class IL2CPP
         return nativeClass?.ByValArg?.Type == Il2CppTypeEnum.IL2CPP_TYPE_GENERICINST;
     }
 
-    [DllImport("GameAssembly", EntryPoint = "RWELuUYNIbW", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "LmLdepSWGGR", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_class_is_assignable_from(IntPtr klass, IntPtr oklass);
 
-    [DllImport("GameAssembly", EntryPoint = "mexBDgIHWvt", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "xJRCCpHBetw", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_class_is_subclass_of(IntPtr klass, IntPtr klassc,
         [MarshalAs(UnmanagedType.I1)] bool check_interfaces);
 
-    [DllImport("GameAssembly", EntryPoint = "cxmcROhQlMn", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "UzLkwsUMjqS", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_class_has_parent(IntPtr klass, IntPtr klassc);
 
-    [DllImport("GameAssembly", EntryPoint = "oQbALanOaVu", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ezKy_juUvqa", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_class_from_il2cpp_type(IntPtr type);
 
-    [DllImport("GameAssembly", EntryPoint = "eGcVXosuX_V", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ovcEUQeQXQv", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_class_from_name(IntPtr image, [MarshalAs(UnmanagedType.LPUTF8Str)] string namespaze,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
 
@@ -567,48 +585,33 @@ public static unsafe class IL2CPP
         return nativeType == IntPtr.Zero ? IntPtr.Zero : il2cpp_class_from_type(nativeType);
     }
 
-    [DllImport("GameAssembly", EntryPoint = "CpyYDPJYEPq", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "hHDPjODpPqJ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_class_get_element_class(IntPtr klass);
 
     public static IntPtr il2cpp_class_get_events(IntPtr klass, ref IntPtr iter)
-        => GetClassStructArrayElement(klass, ref iter, 0x58, 0x122, 0x38);
+        => ClassGetEvents.Value(klass, ref iter);
 
     public static IntPtr il2cpp_class_get_fields(IntPtr klass, ref IntPtr iter)
-        => GetClassStructArrayElement(klass, ref iter, 0x80, 0x124, 0x20);
+        => ClassGetFields.Value(klass, ref iter);
 
     public static IntPtr il2cpp_class_get_nested_types(IntPtr klass, ref IntPtr iter)
-        => GetClassPointerArrayElement(klass, ref iter, 0xA0, 0x128);
+        => ClassGetNestedTypes.Value(klass, ref iter);
 
     public static IntPtr il2cpp_class_get_interfaces(IntPtr klass, ref IntPtr iter)
-        => GetClassPointerArrayElement(klass, ref iter, 0xA8, 0x12C);
+        => ClassGetInterfaces.Value(klass, ref iter);
 
     public static IntPtr il2cpp_class_get_properties(IntPtr klass, ref IntPtr iter)
-        => GetClassStructArrayElement(klass, ref iter, 0x90, 0x126, 0x28);
+        => ClassGetProperties.Value(klass, ref iter);
 
-    public static IntPtr il2cpp_class_get_property_from_name(IntPtr klass, IntPtr name)
-    {
-        if (klass == IntPtr.Zero || name == IntPtr.Zero)
-            return IntPtr.Zero;
+    [DllImport("GameAssembly", EntryPoint = "gSNYvFDvuTn",
+        CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    public static extern IntPtr il2cpp_class_get_property_from_name(IntPtr klass, IntPtr name);
 
-        var requestedName = Marshal.PtrToStringUTF8(name);
-        for (var current = klass; current != IntPtr.Zero; current = il2cpp_class_get_parent(current))
-        {
-            var iter = IntPtr.Zero;
-            IntPtr property;
-            while ((property = il2cpp_class_get_properties(current, ref iter)) != IntPtr.Zero)
-                if (string.Equals(Marshal.PtrToStringUTF8(Marshal.ReadIntPtr(property, 0x08)), requestedName,
-                        StringComparison.Ordinal))
-                    return property;
-        }
-
-        return IntPtr.Zero;
-    }
-
-    [DllImport("GameAssembly", EntryPoint = "FZOoKkQcXXF", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "VCihnLyhObh", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_class_get_field_from_name(IntPtr klass,
         [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
 
-    [DllImport("GameAssembly", EntryPoint = "nVnxgXSkJqb", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "bMWicMPTxGB", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_class_get_methods(IntPtr klass, ref IntPtr iter);
 
     public static IntPtr il2cpp_class_get_method_from_name(IntPtr klass, string name, int argsCount)
@@ -632,74 +635,38 @@ public static unsafe class IL2CPP
         return IntPtr.Zero;
     }
 
-    public static nint il2cpp_class_get_name(IntPtr klass)
-        => klass == IntPtr.Zero ? IntPtr.Zero : UnityVersionHandler.Wrap((Il2CppClass*)klass).Name;
+    [DllImport("GameAssembly", EntryPoint = "JjMzCq_cfXy", CallingConvention = CallingConvention.Cdecl,
+        CharSet = CharSet.Ansi)]
+    public static extern nint il2cpp_class_get_name(IntPtr klass);
 
     public static string? il2cpp_class_get_name_(IntPtr klass)
         => Marshal.PtrToStringUTF8(il2cpp_class_get_name(klass));
 
-    public static nint il2cpp_class_get_namespace(IntPtr klass)
-        => klass == IntPtr.Zero ? IntPtr.Zero : UnityVersionHandler.Wrap((Il2CppClass*)klass).Namespace;
+    [DllImport("GameAssembly", EntryPoint = "MtTte_PIvYZ", CallingConvention = CallingConvention.Cdecl,
+        CharSet = CharSet.Ansi)]
+    public static extern nint il2cpp_class_get_namespace(IntPtr klass);
 
     public static string? il2cpp_class_get_namespace_(IntPtr klass)
         => Marshal.PtrToStringUTF8(il2cpp_class_get_namespace(klass));
 
-    private static IntPtr GetClassPointerArrayElement(IntPtr klass, ref IntPtr iter, int arrayOffset, int countOffset)
-    {
-        if (klass == IntPtr.Zero)
-            return IntPtr.Zero;
+    [DllImport("GameAssembly", EntryPoint = "thgybmnc_vt", CallingConvention = CallingConvention.Cdecl,
+        CharSet = CharSet.Ansi)]
+    public static extern IntPtr il2cpp_class_get_parent(IntPtr klass);
 
-        var count = Marshal.ReadInt16(klass, countOffset);
-        if (count <= 0)
-            return IntPtr.Zero;
+    [DllImport("GameAssembly", EntryPoint = "QJhqkuS_VIy",
+        CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr il2cpp_class_get_declaring_type(IntPtr klass);
 
-        var array = Marshal.ReadIntPtr(klass, arrayOffset);
-        if (array == IntPtr.Zero)
-            return IntPtr.Zero;
-
-        var index = iter == IntPtr.Zero ? 0 : iter.ToInt64() - 1;
-        if ((ulong)index >= (ulong)count)
-            return IntPtr.Zero;
-
-        iter = new IntPtr(index + 2);
-        return Marshal.ReadIntPtr(array, checked((int)(index * IntPtr.Size)));
-    }
-
-    private static IntPtr GetClassStructArrayElement(IntPtr klass, ref IntPtr iter, int arrayOffset, int countOffset,
-        int elementSize)
-    {
-        if (klass == IntPtr.Zero)
-            return IntPtr.Zero;
-
-        var count = Marshal.ReadInt16(klass, countOffset);
-        var array = Marshal.ReadIntPtr(klass, arrayOffset);
-        if (count <= 0 || array == IntPtr.Zero)
-            return IntPtr.Zero;
-
-        var index = iter == IntPtr.Zero ? 0 : iter.ToInt64() - 1;
-        if ((ulong)index >= (ulong)count)
-            return IntPtr.Zero;
-
-        iter = new IntPtr(index + 2);
-        return IntPtr.Add(array, checked((int)(index * elementSize)));
-    }
-
-    public static IntPtr il2cpp_class_get_parent(IntPtr klass)
-        => klass == IntPtr.Zero ? IntPtr.Zero : Marshal.ReadIntPtr(klass, 0x88);
-
-    public static IntPtr il2cpp_class_get_declaring_type(IntPtr klass)
-        => klass == IntPtr.Zero ? IntPtr.Zero : Marshal.ReadIntPtr(klass, 0x70);
-
-    [DllImport("GameAssembly", EntryPoint = "tTSXTpXzULO", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "eJZJWlshBHx", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int il2cpp_class_instance_size(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "mkvScKEqsqc", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "IZmRmSD_QPO", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern uint il2cpp_class_num_fields(IntPtr enumKlass);
 
     public static bool il2cpp_class_is_valuetype(IntPtr klass)
         => klass != IntPtr.Zero && UnityVersionHandler.Wrap((Il2CppClass*)klass).ValueType;
 
-    [DllImport("GameAssembly", EntryPoint = "JHbMc_nxoYZ", CallingConvention = CallingConvention.Cdecl,
+    [DllImport("GameAssembly", EntryPoint = "VeKcLpwOHDY", CallingConvention = CallingConvention.Cdecl,
         CharSet = CharSet.Ansi)]
     public static extern int il2cpp_class_value_size(IntPtr klass, ref uint align);
 
@@ -709,84 +676,83 @@ public static unsafe class IL2CPP
     public static int il2cpp_class_get_flags(IntPtr klass)
         => klass == IntPtr.Zero ? 0 : Marshal.ReadInt32(klass, 0x118);
 
-    [DllImport("GameAssembly", EntryPoint = "McSomelMpJa", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "iBcRBHjXTtl", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_class_is_abstract(IntPtr klass);
 
     public static bool il2cpp_class_is_interface(IntPtr klass)
         => klass != IntPtr.Zero && (Marshal.ReadInt32(klass, 0x118) & 0x20) != 0;
 
-    [DllImport("GameAssembly", EntryPoint = "muJafdnTwns", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "HfIe_zlCpwz", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int il2cpp_class_array_element_size(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "oQbALanOaVu", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ezKy_juUvqa", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_class_from_type(IntPtr type);
 
-    [DllImport("GameAssembly", EntryPoint = "rGYyDkAT_iT", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "vvXwORFeWVg", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_class_get_type(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "ElVuffXvuGg", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "qZTOaXxgpXz", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern uint il2cpp_class_get_type_token(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "sXGLbRb_cLn", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "vUNqHMMuwUN", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_class_has_attribute(IntPtr klass, IntPtr attr_class);
 
-    [DllImport("GameAssembly", EntryPoint = "jtTKPODKugH", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "aTutWhIgNWR", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_class_has_references(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "QFVTvtcihYB", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "PqpLjZLcQlb", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_class_is_enum(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "ovOClb_DVbi", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ctDvff_dj_H", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_class_get_image(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "gfaZrSmHYCC", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ZWWgn_RTZfa", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern nint il2cpp_class_get_assemblyname(IntPtr klass);
 
     public static string? il2cpp_class_get_assemblyname_(IntPtr klass)
         => Marshal.PtrToStringUTF8(il2cpp_class_get_assemblyname(klass));
 
-    [DllImport("GameAssembly", EntryPoint = "NdrhSXzZxyy", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ZzlNwXjZDMS", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int il2cpp_class_get_rank(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "KrbVlIu_dQI", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "vhilFYHZALB", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern uint il2cpp_class_get_bitmap_size(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "JwfRbPNwlJk", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "RcvGKniCuiP", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_class_get_bitmap(IntPtr klass, ref uint bitmap);
 
     public static bool il2cpp_stats_dump_to_file(IntPtr path) => false;
 
-    //[DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     //public extern static ulong il2cpp_stats_get_value(IL2CPP_Stat stat);
     public static IntPtr il2cpp_domain_get() => new(1);
 
-    [DllImport("GameAssembly", EntryPoint = "cDsdGuvksgW", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "mSQNVXUSYqN", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_domain_assembly_open(IntPtr domain, IntPtr name);
 
-    [DllImport("GameAssembly", EntryPoint = "tReyvQBXGqO", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "zfCkNXePxRp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr* il2cpp_domain_get_assemblies(IntPtr domain, ref nuint size);
 
-    [DllImport("GameAssembly", EntryPoint = "lEgPxzCptOX", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "_OiKazpgsZd", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr
         il2cpp_exception_from_name_msg(IntPtr image, IntPtr name_space, IntPtr name, IntPtr msg);
 
-    [DllImport("GameAssembly", EntryPoint = "kYcHLF_Lrgq", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "GlBJFHTGFZE", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_get_exception_argument_null(IntPtr arg);
 
-    [DllImport("GameAssembly", EntryPoint = "bRVcFdppOes", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "excXZKOzBmQ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_format_exception(IntPtr ex, void* message, int message_size);
 
-    [DllImport("GameAssembly", EntryPoint = "sBBTSmkeSCa", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "oGoEnKNbmOz", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_format_stack_trace(IntPtr ex, void* output, int output_size);
 
-    [DllImport("GameAssembly", EntryPoint = "mkujMKTache", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ECTOGjeML_J", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_unhandled_exception(IntPtr ex);
 
-    [DllImport("GameAssembly", EntryPoint = "KehzMY_GKJm", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "vaTGQganPXj", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int il2cpp_field_get_flags(IntPtr field);
 
     public static nint il2cpp_field_get_name(IntPtr field) => FieldGetName.Value(field);
@@ -797,66 +763,68 @@ public static unsafe class IL2CPP
     public static IntPtr il2cpp_field_get_parent(IntPtr field) => FieldGetParent.Value(field);
 
     public static uint il2cpp_field_get_offset(IntPtr field)
-        => field == IntPtr.Zero ? 0u : unchecked((uint)Marshal.ReadInt32(field, 0x1C));
+        => field == IntPtr.Zero
+            ? 0
+            : unchecked((uint)UnityVersionHandler.Wrap((Il2CppFieldInfo*)field).Offset);
 
     public static IntPtr il2cpp_field_get_type(IntPtr field) => FieldGetType.Value(field);
 
-    [DllImport("GameAssembly", EntryPoint = "cQFrZhNYEjS", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "XVidHRjgGG_", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_field_get_value(IntPtr obj, IntPtr field, void* value);
 
-    [DllImport("GameAssembly", EntryPoint = "NOqHdYrbQCN", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "scMkiDdcRLF", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_field_get_value_object(IntPtr field, IntPtr obj);
 
-    [DllImport("GameAssembly", EntryPoint = "yxYpdphblDQ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "etcGxexNSaL", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_field_has_attribute(IntPtr field, IntPtr attr_class);
 
-    [DllImport("GameAssembly", EntryPoint = "U_mbVCbpXNM", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "iuvCOEazjhw", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_field_set_value(IntPtr obj, IntPtr field, void* value);
 
     public static void il2cpp_field_static_get_value(IntPtr field, void* value) => FieldStaticGetValue.Value(field, value);
 
     public static void il2cpp_field_static_set_value(IntPtr field, void* value) => FieldStaticSetValue.Value(field, value);
 
-    [DllImport("GameAssembly", EntryPoint = "btrcrMLFgKu", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "KeXaHvgwiv_", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_field_set_value_object(IntPtr instance, IntPtr field, IntPtr value);
 
-    [DllImport("GameAssembly", EntryPoint = "opSboBybIfA", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "GGxWFczMbqP", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_gc_collect(int maxGenerations);
 
-    [DllImport("GameAssembly", EntryPoint = "YLzGJghUUJb", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ksmmmqHYtvI", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int il2cpp_gc_collect_a_little();
 
-    [DllImport("GameAssembly", EntryPoint = "mJtCwXSZrtR", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "PVuKFLqGQuV", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_gc_disable();
 
-    [DllImport("GameAssembly", EntryPoint = "UrUeQtSsoCM", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ftL_vVntAbQ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_gc_enable();
 
-    [DllImport("GameAssembly", EntryPoint = "YahZmmPNIkq", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "OmMCEmRmQqx", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_gc_is_disabled();
 
-    [DllImport("GameAssembly", EntryPoint = "_CiVzDueBB_", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "cW_fRcTSzCQ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern long il2cpp_gc_get_used_size();
 
-    [DllImport("GameAssembly", EntryPoint = "_CiVzDueBB_", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "qiwSAUqWwst", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern long il2cpp_gc_get_heap_size();
 
-    [DllImport("GameAssembly", EntryPoint = "ZveEKZkuxLD", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ClgbcIXTSTz", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_gc_wbarrier_set_field(IntPtr obj, IntPtr targetAddress, IntPtr gcObj);
 
-    [DllImport("GameAssembly", EntryPoint = "KUZulelZoCy", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "xwNZtFLEFQd", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern nint il2cpp_gchandle_new(IntPtr obj, [MarshalAs(UnmanagedType.I1)] bool pinned);
 
-    [DllImport("GameAssembly", EntryPoint = "MHaleuaBdai", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "RApNyPhWohX", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern nint il2cpp_gchandle_new_weakref(IntPtr obj,
         [MarshalAs(UnmanagedType.I1)] bool track_resurrection);
 
     [DllImport("GameAssembly", EntryPoint = "il2cpp_gchandle_get_target", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_gchandle_get_target(nint gchandle);
 
-    [DllImport("GameAssembly", EntryPoint = "WxVSQuJkWPd", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "aSftCSdGfVw", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_gchandle_free(nint gchandle);
 
     public static IntPtr il2cpp_unity_liveness_calculation_begin(IntPtr filter, int max_object_count,
@@ -952,7 +920,7 @@ public static unsafe class IL2CPP
     public static IntPtr il2cpp_method_get_class(IntPtr method)
         => il2cpp_method_get_declaring_type(method);
 
-    [DllImport("GameAssembly", EntryPoint = "lkjFRnNxQvt", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "LfAwwrIeaBa", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_method_has_attribute(IntPtr method, IntPtr attr_class);
 
@@ -1003,13 +971,13 @@ public static unsafe class IL2CPP
     {
     }
 
-    [DllImport("GameAssembly", EntryPoint = "NmRHXzqdRCd", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "AdTiinIloxM", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern uint il2cpp_property_get_flags(IntPtr prop);
 
-    [DllImport("GameAssembly", EntryPoint = "_LEjTkwsJmL", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ggFANwE_XUa", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_property_get_get_method(IntPtr prop);
 
-    [DllImport("GameAssembly", EntryPoint = "WTbzsLdsaHw", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "axcDSxPJlLf", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_property_get_set_method(IntPtr prop);
 
     public static nint il2cpp_property_get_name(IntPtr prop)
@@ -1020,7 +988,7 @@ public static unsafe class IL2CPP
     public static string? il2cpp_property_get_name_(IntPtr prop)
         => Marshal.PtrToStringUTF8(il2cpp_property_get_name(prop));
 
-    [DllImport("GameAssembly", EntryPoint = "yi_DSPPSFyN", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ckIruwNKykr", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_property_get_parent(IntPtr prop);
 
     public static IntPtr il2cpp_object_get_class(IntPtr obj)
@@ -1032,139 +1000,137 @@ public static unsafe class IL2CPP
         return klass == IntPtr.Zero ? 0 : *(uint*)((byte*)klass + 0xF8);
     }
 
-    [DllImport("GameAssembly", EntryPoint = "bdetPLUGbMl", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ugMFmsxWHzt", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_object_get_virtual_method(IntPtr obj, IntPtr method);
 
-    [DllImport("GameAssembly", EntryPoint = "fdQySFUbQRI", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "BDqOXRrcrpK", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_object_new(IntPtr klass);
-
 
     public static IntPtr il2cpp_object_unbox(IntPtr obj)
         => obj == IntPtr.Zero ? IntPtr.Zero : obj + (2 * IntPtr.Size);
 
-    [DllImport("GameAssembly", EntryPoint = "kfRjLqgoDfp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "SyEwDMJiSzN", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_value_box(IntPtr klass, IntPtr data);
 
-    [DllImport("GameAssembly", EntryPoint = "hjlcmtwuiOn", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "gmS_YpCtrYi", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_monitor_enter(IntPtr obj);
 
-    [DllImport("GameAssembly", EntryPoint = "XciMatVgZBL", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "CdWmJlChnVC", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_monitor_try_enter(IntPtr obj, uint timeout);
 
-    [DllImport("GameAssembly", EntryPoint = "VAxDZKpDGYp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "gpufhuilGKk", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_monitor_exit(IntPtr obj);
 
-    [DllImport("GameAssembly", EntryPoint = "kpSkOkDOHex", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "Bsqq_aZAvSh", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_monitor_pulse(IntPtr obj);
 
-    [DllImport("GameAssembly", EntryPoint = "yiUnJdHnSjQ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "LcVvFckgkrg", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_monitor_pulse_all(IntPtr obj);
 
-    [DllImport("GameAssembly", EntryPoint = "wIDbvDtpBXN", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "kXUS_GivugS", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_monitor_wait(IntPtr obj);
 
-    [DllImport("GameAssembly", EntryPoint = "legIIoGfFPc", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "aNdPBrtIhbv", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_monitor_try_wait(IntPtr obj, uint timeout);
 
-    [DllImport("GameAssembly", EntryPoint = "UPSmEOKKvNa", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "lpFPPGakHWI", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_runtime_invoke(IntPtr method, IntPtr obj, void** param, ref IntPtr exc);
 
-    [DllImport("GameAssembly", EntryPoint = "wxwmdwXHzJB", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "sHYdjEdmAFb", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     // param can be of Il2CppObject*
     public static extern IntPtr il2cpp_runtime_invoke_convert_args(IntPtr method, IntPtr obj, void** param,
         int paramCount, ref IntPtr exc);
 
-    [DllImport("GameAssembly", EntryPoint = "zoAvzVWlTDk", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "FI_vHaxAYjj", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_runtime_class_init(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "_yPYMXAfWVB", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "rhdUmSGqTjw", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_runtime_object_init(IntPtr obj);
 
-    [DllImport("GameAssembly", EntryPoint = "vCoeiHusAlp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "QpHXAkLgRg_", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_runtime_object_init_exception(IntPtr obj, ref IntPtr exc);
 
-    // [DllImport("GameAssembly", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     // public extern static void il2cpp_runtime_unhandled_exception_policy_set(IL2CPP_RuntimeUnhandledExceptionPolicy value);
-    [DllImport("GameAssembly", EntryPoint = "zHAxRjeysoX", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "GpizxpRpIBt", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int il2cpp_string_length(IntPtr str);
 
-    [DllImport("GameAssembly", EntryPoint = "mrQEtxuutFi", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "mMMJfFrWMWg", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern char* il2cpp_string_chars(IntPtr str);
 
-    [DllImport("GameAssembly", EntryPoint = "rRpOavDcJjQ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "nagrXzmvcLA", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_string_new(string str);
 
-    [DllImport("GameAssembly", EntryPoint = "eVrtxFNoNgv", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "UJuYSFSmBJD", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_string_new_len(string str, uint length);
 
-    [DllImport("GameAssembly", EntryPoint = "SlRLNWxveku", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "LhuDGNrdwOB", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_string_new_utf16(char* text, int len);
 
-    [DllImport("GameAssembly", EntryPoint = "rRpOavDcJjQ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "nagrXzmvcLA", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_string_new_wrapper(string str);
 
-    [DllImport("GameAssembly", EntryPoint = "EFEFMOTiZFT", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "iArGYTkHnvn", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_string_intern(string str);
 
-    [DllImport("GameAssembly", EntryPoint = "xAxRUuBmYhI", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "gdOSabwbkxV", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_string_is_interned(string str);
 
-    [DllImport("GameAssembly", EntryPoint = "comANrJMGDW", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "qXGIjmbgCpH", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_thread_current();
 
-    [DllImport("GameAssembly", EntryPoint = "OPmhRVifFhM", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ilypoAw_kgc", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_thread_attach(IntPtr domain);
 
-    [DllImport("GameAssembly", EntryPoint = "mFRvBORPgnr", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "IlPsIwAbjyz", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_thread_detach(IntPtr thread);
 
-    [DllImport("GameAssembly", EntryPoint = "POvoavzjjgL", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "GWhYKYjbuvR", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void** il2cpp_thread_get_all_attached_threads(ref uint size);
 
-    [DllImport("GameAssembly", EntryPoint = "xcTy__DTPCr", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "jpPjh_NqgAn", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_is_vm_thread(IntPtr thread);
 
-    [DllImport("GameAssembly", EntryPoint = "mdpkZLFFlGe", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "oNciZxPEVLu", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_current_thread_walk_frame_stack(IntPtr func, IntPtr user_data);
 
-    [DllImport("GameAssembly", EntryPoint = "abGVMYTYaEX", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "xWanlXcrfTO", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_thread_walk_frame_stack(IntPtr thread, IntPtr func, IntPtr user_data);
 
-    [DllImport("GameAssembly", EntryPoint = "YOhMOKNfFrq", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ATDHpXUEatN", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_current_thread_get_top_frame(IntPtr frame);
 
-    [DllImport("GameAssembly", EntryPoint = "GPNWhwVgomj", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "uksqqTrhsaM", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_thread_get_top_frame(IntPtr thread, IntPtr frame);
 
-    [DllImport("GameAssembly", EntryPoint = "PnOfWnHiQrW", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "gxvxXevsan_", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_current_thread_get_frame_at(int offset, IntPtr frame);
 
-    [DllImport("GameAssembly", EntryPoint = "JbKd_rQmCPM", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "rhJITnpMHTH", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_thread_get_frame_at(IntPtr thread, int offset, IntPtr frame);
 
-    [DllImport("GameAssembly", EntryPoint = "YaJwgmYLVQg", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "gSrnjKOcDsw", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int il2cpp_current_thread_get_stack_depth();
 
-    [DllImport("GameAssembly", EntryPoint = "VLjfTwiNhlm", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "IZVrLIwUOvO", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int il2cpp_thread_get_stack_depth(IntPtr thread);
 
-    [DllImport("GameAssembly", EntryPoint = "iEbdxvAvURT", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "qWanxtxOcKp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_type_get_object(IntPtr type);
 
-    [DllImport("GameAssembly", EntryPoint = "IZsiBCsnQgy", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "nQfjMgVCNqA", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern int il2cpp_type_get_type(IntPtr type);
 
-    [DllImport("GameAssembly", EntryPoint = "QcFzNwJhNiH", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "bTOKJnOzxeu", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_type_get_class_or_element_class(IntPtr type);
 
-    [DllImport("GameAssembly", EntryPoint = "xxRQNlWTvVU", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "ZweLEmgTivz", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern nint il2cpp_type_get_name(IntPtr type);
 
     public static string? il2cpp_type_get_name_(IntPtr type)
@@ -1174,38 +1140,38 @@ public static unsafe class IL2CPP
         => type != IntPtr.Zero
            && (UnityVersionHandler.Wrap((Il2CppTypeStruct*)type)?.ByRef ?? false);
 
-    [DllImport("GameAssembly", EntryPoint = "DNQolFF_Rkf", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "EDDmfSLdudJ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern uint il2cpp_type_get_attrs(IntPtr type);
 
-    [DllImport("GameAssembly", EntryPoint = "xiXqcTFLsSA", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "CmWJwkpTUKd", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_type_equals(IntPtr type, IntPtr otherType);
 
-    [DllImport("GameAssembly", EntryPoint = "TNqkLCvleZp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "DNcHIduQcxF", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_type_get_assembly_qualified_name(IntPtr type);
 
-    [DllImport("GameAssembly", EntryPoint = "WTbzsLdsaHw", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "Oge_GifnCGe", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_image_get_assembly(IntPtr image);
 
-    [DllImport("GameAssembly", EntryPoint = "zdVUCEElvaJ", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "LXivnsSxLps", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern nint il2cpp_image_get_name(IntPtr image);
 
     public static string? il2cpp_image_get_name_(IntPtr image)
         => Marshal.PtrToStringUTF8(il2cpp_image_get_name(image));
 
-    [DllImport("GameAssembly", EntryPoint = "yi_DSPPSFyN", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "AarTPqjxzGu", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern nint il2cpp_image_get_filename(IntPtr image);
 
     public static string? il2cpp_image_get_filename_(IntPtr image)
         => Marshal.PtrToStringUTF8(il2cpp_image_get_filename(image));
 
-    [DllImport("GameAssembly", EntryPoint = "mRlTxuIYXOB", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "AQQbRzQtrHD", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_image_get_entry_point(IntPtr image);
 
-    [DllImport("GameAssembly", EntryPoint = "NmRHXzqdRCd", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "VLtaCuyrrDI", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern uint il2cpp_image_get_class_count(IntPtr image);
 
-    [DllImport("GameAssembly", EntryPoint = "VyIwDMHEORj", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "yRjRp_HTCjG", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_image_get_class(IntPtr image, uint index);
 
     public static IntPtr il2cpp_capture_memory_snapshot() => IntPtr.Zero;
@@ -1214,7 +1180,7 @@ public static unsafe class IL2CPP
     {
     }
 
-    [DllImport("GameAssembly", EntryPoint = "ylQOdUsuWGE", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "enRjwJFfjpE", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_set_find_plugin_callback(IntPtr method);
 
     public static void il2cpp_register_log_callback(IntPtr method)
@@ -1231,22 +1197,22 @@ public static unsafe class IL2CPP
     {
     }
 
-    [DllImport("GameAssembly", EntryPoint = "zdXrqEeRYCm", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "STUlhJPmGzK", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_custom_attrs_from_class(IntPtr klass);
 
-    [DllImport("GameAssembly", EntryPoint = "bMTGFOUnXhr", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "WiuOqkdlFFP", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_custom_attrs_from_method(IntPtr method);
 
-    [DllImport("GameAssembly", EntryPoint = "ViNBsYmCAMk", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "XDLjqylCSOE", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_custom_attrs_get_attr(IntPtr ainfo, IntPtr attr_klass);
 
-    [DllImport("GameAssembly", EntryPoint = "vjDJcqzusNH", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "LYVKflgLxsp", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     [return: MarshalAs(UnmanagedType.I1)]
     public static extern bool il2cpp_custom_attrs_has_attr(IntPtr ainfo, IntPtr attr_klass);
 
-    [DllImport("GameAssembly", EntryPoint = "Pj_sIHRuXRz", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "XOqaZiPvktf", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern IntPtr il2cpp_custom_attrs_construct(IntPtr cinfo);
 
-    [DllImport("GameAssembly", EntryPoint = "hTDtFrSKPwe", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+    [DllImport("GameAssembly", EntryPoint = "oXcuBhPrxGr", CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     public static extern void il2cpp_custom_attrs_free(IntPtr ainfo);
 }

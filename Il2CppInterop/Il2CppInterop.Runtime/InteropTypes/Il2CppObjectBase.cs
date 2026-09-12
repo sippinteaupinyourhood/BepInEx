@@ -4,8 +4,8 @@ using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using Il2CppInterop.Runtime.Injection;
 using Il2CppInterop.Runtime.Runtime;
+using Il2CppInterop.Runtime.Injection;
 
 namespace Il2CppInterop.Runtime.InteropTypes;
 
@@ -157,14 +157,17 @@ public class Il2CppObjectBase
         if (nestedTypeClassPointer == IntPtr.Zero)
             throw new ArgumentException($"{typeof(T)} is not an Il2Cpp reference type");
 
-        var ownClass = IL2CPP.il2cpp_object_get_class(Pointer);
-        if (!IL2CPP.il2cpp_class_is_assignable_from(nestedTypeClassPointer, ownClass))
-            return null;
+        if (this is T currentManagedView)
+            return currentManagedView;
 
+        var ownClass = IL2CPP.il2cpp_object_get_class(Pointer);
         if (RuntimeSpecificsStore.IsInjected(ownClass))
         {
-            if (ClassInjectorBase.GetMonoObjectFromIl2CppPointer(Pointer) is T monoObject) return monoObject;
+            if (ClassInjectorBase.GetMonoObjectFromIl2CppPointer(Pointer) is T injectedObject)
+                return injectedObject;
         }
+        if (!IL2CPP.il2cpp_class_is_assignable_from(nestedTypeClassPointer, ownClass))
+            return null;
 
         return InitializerStore<T>.Initializer(Pointer);
     }

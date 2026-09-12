@@ -52,27 +52,6 @@ internal static partial class Il2CppInteropManager
         LibCpp2IlBinaryRegistry.RegisterBuiltInBinarySupport();
     }
 
-    private static readonly ConfigEntry<bool> UpdateInteropAssemblies =
-        ConfigFile.CoreConfig.Bind("IL2CPP",
-                                   "UpdateInteropAssemblies",
-                                   true,
-                                   new StringBuilder()
-                                       .AppendLine("Whether to run Il2CppInterop automatically to generate Il2Cpp support assemblies when they are outdated.")
-                                       .AppendLine("If disabled assemblies in `BepInEx/interop` won't be updated between game or BepInEx updates!")
-                                       .ToString());
-
-    private static readonly ConfigEntry<bool> LowSpecMode = ConfigFile.CoreConfig.Bind(
-        "IL2CPP", "LowSpecMode", false,
-        "Limit IL2CPP generation and preload concurrency on systems with constrained memory or CPU resources.");
-
-    private static readonly ConfigEntry<int> LowSpecMaxParallelism = ConfigFile.CoreConfig.Bind(
-        "IL2CPP", "LowSpecMaxParallelism", 2,
-        "Maximum Cpp2IL, Il2CppInterop, and preload concurrency when LowSpecMode is enabled.");
-
-    private static readonly ConfigEntry<bool> LowSpecFastHashCheck = ConfigFile.CoreConfig.Bind(
-        "IL2CPP", "LowSpecFastHashCheck", false,
-        "Use file metadata instead of reading the full GameAssembly file during update checks when LowSpecMode is enabled.");
-
     private static readonly ConfigEntry<string> UnityBaseLibrariesSource = ConfigFile.CoreConfig.Bind(
      "IL2CPP", "UnityBaseLibrariesSource",
      "https://unity.bepinex.dev/libraries/{VERSION}.zip",
@@ -143,8 +122,6 @@ internal static partial class Il2CppInteropManager
                                              Path.Combine(Paths.GameRootPath,
                                                           "GameAssembly." + PlatformHelper.LibrarySuffix);
 
-    private static string HashPath => Path.Combine(IL2CPPInteropAssemblyPath, "assembly-hash.txt");
-
     private static string IL2CPPBasePath {
         get {
             if (il2cppInteropBasePath != null)
@@ -162,94 +139,68 @@ internal static partial class Il2CppInteropManager
 
     private static string RenameMapPath => Path.Combine(Paths.BepInExRootPath, "DeobfuscationMap.csv.gz");
 
+    private static string FingerprintPath => Path.Combine(IL2CPPInteropAssemblyPath, "interop-fingerprint.bin");
+
     private static ILoggerFactory LoggerFactory { get; } = MSLoggerFactory.Create(b =>
     {
         b.AddProvider(new BepInExLoggerProvider())
          .SetMinimumLevel(LogLevel.Trace); // Each BepInEx log listener has its own filtering
     });
 
-    private static string ComputeHash()
-    {
-        using var md5 = MD5.Create();
-
-        static void HashFile(ICryptoTransform hash, string file)
-        {
-            const int defaultCopyBufferSize = 81920;
-            using var fs = File.OpenRead(file);
-            var buffer = new byte[defaultCopyBufferSize];
-            int read;
-            while ((read = fs.Read(buffer)) > 0)
-                hash.TransformBlock(buffer, 0, read, buffer, 0);
-        }
-
-        static void HashString(ICryptoTransform hash, string str)
-        {
-            var buffer = Encoding.UTF8.GetBytes(str);
-            hash.TransformBlock(buffer, 0, buffer.Length, buffer, 0);
-        }
-
-        if (LowSpecMode.Value && LowSpecFastHashCheck.Value)
-        {
-            var gameAssembly = new FileInfo(GameAssemblyPath);
-            HashString(md5, gameAssembly.Length.ToString());
-            HashString(md5, gameAssembly.LastWriteTimeUtc.Ticks.ToString());
-        }
-        else
-        {
-            HashFile(md5, GameAssemblyPath);
-        }
-
-        if (Directory.Exists(UnityBaseLibsDirectory))
-            foreach (var file in Directory.EnumerateFiles(UnityBaseLibsDirectory, "*.dll",
-                                                          SearchOption.TopDirectoryOnly)
-                                          .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase))
-            {
-                HashString(md5, Path.GetFileName(file));
-                HashFile(md5, file);
-            }
-
-        if (File.Exists(RenameMapPath))
-        {
-            HashFile(md5, RenameMapPath);
-        }
-
-        HashFile(md5, typeof(InteropAssemblyGenerator).Assembly.Location);
-        HashFile(md5, typeof(Cpp2IlApi).Assembly.Location);
-        HashFile(md5, typeof(LibCpp2IlMain).Assembly.Location);
-        HashString(md5, "protected-metadata-pipeline-v2");
-
-        md5.TransformFinalBlock(new byte[0], 0, 0);
-
-        return Utility.ByteArrayToString(md5.Hash);
-    }
-
     private static bool CheckIfGenerationRequired()
     {
-        static bool NeedGenerationOrSkip()
+        if (!HasRequiredInteropAssemblies() || !File.Exists(FingerprintPath))
+            return true;
+
+        try
         {
-            if (!UpdateInteropAssemblies.Value)
+            return !CryptographicOperations.FixedTimeEquals(File.ReadAllBytes(FingerprintPath), ComputeFingerprint());
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning($"Could not validate the interop fingerprint; regenerating: {ex.Message}");
+            return true;
+        }
+    }
+
+    private static bool HasRequiredInteropAssemblies() =>
+        Directory.Exists(IL2CPPInteropAssemblyPath) &&
+        File.Exists(Path.Combine(IL2CPPInteropAssemblyPath, "Il2Cppmscorlib.dll")) &&
+        File.Exists(Path.Combine(IL2CPPInteropAssemblyPath, "UnityEngine.CoreModule.dll")) &&
+        File.Exists(Path.Combine(IL2CPPInteropAssemblyPath, "Assembly-CSharp.dll"));
+
+    private static byte[] ComputeFingerprint()
+    {
+        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        var buffer = new byte[81920];
+
+        void AppendFile(string path)
+        {
+            using var stream = File.OpenRead(path);
+            int read;
+            while ((read = stream.Read(buffer, 0, buffer.Length)) != 0)
+                hash.AppendData(buffer, 0, read);
+        }
+
+        void AppendString(string value) => hash.AppendData(Encoding.UTF8.GetBytes(value));
+
+        AppendFile(GameAssemblyPath);
+        if (Directory.Exists(UnityBaseLibsDirectory))
+        {
+            foreach (string file in Directory.EnumerateFiles(UnityBaseLibsDirectory, "*.dll", SearchOption.TopDirectoryOnly)
+                                             .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase))
             {
-                var hash = ComputeHash();
-                Logger.LogWarning($"Interop assemblies are possibly out of date. To disable this message, create file {HashPath} with the following contents: {hash}");
-                return false;
+                AppendString(Path.GetFileName(file));
+                AppendFile(file);
             }
-
-            return true;
         }
-
-        if (!Directory.Exists(IL2CPPInteropAssemblyPath))
-            return true;
-
-        if (!File.Exists(HashPath))
-            return NeedGenerationOrSkip();
-
-        if (ComputeHash() != File.ReadAllText(HashPath) && NeedGenerationOrSkip())
-        {
-            Logger.LogInfo("Detected outdated interop assemblies, will regenerate them now");
-            return true;
-        }
-
-        return false;
+        if (File.Exists(RenameMapPath))
+            AppendFile(RenameMapPath);
+        AppendFile(typeof(InteropAssemblyGenerator).Assembly.Location);
+        AppendFile(typeof(Cpp2IlApi).Assembly.Location);
+        AppendFile(typeof(LibCpp2IL.LibCpp2IlMain).Assembly.Location);
+        AppendString("protected-metadata-pipeline-v6-native-names-binary-fingerprint");
+        return hash.GetHashAndReset();
     }
 
     private static Assembly ResolveInteropAssemblies(object sender, ResolveEventArgs args)
@@ -311,11 +262,10 @@ internal static partial class Il2CppInteropManager
 
             RunIl2CppInteropGenerator(cpp2IlResult, stagingPath);
 
-            InteropAssemblyValidator.NormalizeDuplicateTypeNames(stagingPath);
+            InteropOutputValidator.NormalizeAndValidate(stagingPath, asmResolverAssemblies.Count,
+                                                        UnityBaseLibsDirectory);
 
-            ValidateGeneratedInteropAssemblies(stagingPath, asmResolverAssemblies.Count);
-
-            File.WriteAllText(Path.Combine(stagingPath, "assembly-hash.txt"), ComputeHash());
+            File.WriteAllBytes(Path.Combine(stagingPath, "interop-fingerprint.bin"), ComputeFingerprint());
 
             if (Directory.Exists(backupPath))
                 Directory.Delete(backupPath, true);
@@ -354,11 +304,40 @@ internal static partial class Il2CppInteropManager
             {
             }
             Logger.LogError($"Failed to generate Il2Cpp interop assemblies: {e}");
+
+            if (e is FormatException && HasRequiredInteropAssemblies())
+            {
+                try
+                {
+                    File.WriteAllBytes(FingerprintPath, ComputeFingerprint());
+                    Logger.LogWarning("Protected metadata is not yet supported; retained the existing interop set for this exact input fingerprint.");
+                }
+                catch (Exception fingerprintError)
+                {
+                    Logger.LogWarning($"Could not save the binary interop fingerprint: {fingerprintError.Message}");
+                }
+
+                return;
+            }
+
+            throw;
         }
     }
 
     private static void ValidateGeneratedInteropAssemblies(string outputDirectory, int sourceAssemblyCount)
-        => InteropAssemblyValidator.Validate(outputDirectory, sourceAssemblyCount);
+    {
+        var generatedAssemblies = Directory.EnumerateFiles(outputDirectory, "*.dll", SearchOption.TopDirectoryOnly)
+                                           .Count();
+        if (generatedAssemblies < sourceAssemblyCount)
+            throw new InvalidDataException($"Interop generation produced only {generatedAssemblies} assemblies for {sourceAssemblyCount} source assemblies.");
+
+        foreach (var requiredAssembly in new[] { "Il2Cppmscorlib.dll", "UnityEngine.CoreModule.dll", "Assembly-CSharp.dll" })
+        {
+            var path = Path.Combine(outputDirectory, requiredAssembly);
+            if (!File.Exists(path) || new FileInfo(path).Length == 0)
+                throw new InvalidDataException($"Interop generation did not produce required assembly {requiredAssembly}.");
+        }
+    }
 
     private static void DownloadUnityAssemblies() {
         var unityVersion = UnityInfo.Version;
@@ -419,9 +398,6 @@ internal static partial class Il2CppInteropManager
 
     private static Cpp2IlResult RunCpp2Il()
     {
-        Cpp2IL.Core.Utils.ParallelismOptions.MaxDegreeOfParallelism = LowSpecMode.Value
-            ? Math.Clamp(LowSpecMaxParallelism.Value, 1, 4)
-            : -1;
         var metadataPath = GlobalMetadataPathOverride ?? Path.Combine(Paths.GameRootPath,
                                         GlobalMetadataPath.Value
                                                           .Replace("{BepInEx}", Paths.BepInExRootPath)
@@ -449,7 +425,6 @@ internal static partial class Il2CppInteropManager
 
         List<Cpp2IlProcessingLayer> processingLayers = new()
         {
-            new StableRenamingProcessingLayer(),
             new AttributeInjectorProcessingLayer(),
         };
 
@@ -503,7 +478,6 @@ internal static partial class Il2CppInteropManager
             ObfuscatedNamesRegex = !string.IsNullOrEmpty(ConfigUnhollowerDeobfuscationRegex.Value)
                                        ? new Regex(ConfigUnhollowerDeobfuscationRegex.Value)
                                        : null,
-            Parallel = !LowSpecMode.Value,
         };
         opts.NamespacesAndAssembliesToPrefix.Add("Newtonsoft");
         foreach (var pair in cpp2IlResult.NativeTypeNames)
@@ -538,13 +512,7 @@ internal static partial class Il2CppInteropManager
 
         var files = Directory.EnumerateFiles(IL2CPPInteropAssemblyPath);
         var loaded = 0;
-        var parallelOptions = new ParallelOptions
-        {
-            MaxDegreeOfParallelism = LowSpecMode.Value
-                ? Math.Clamp(LowSpecMaxParallelism.Value, 1, 4)
-                : -1
-        };
-        Parallel.ForEach(files, parallelOptions, file =>
+        Parallel.ForEach(files, file =>
         {
             if (!file.EndsWith(".dll", StringComparison.OrdinalIgnoreCase)) return;
             var name = Path.GetFileNameWithoutExtension(file);

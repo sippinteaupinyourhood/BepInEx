@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -51,8 +50,6 @@ public static unsafe class EnumInjector
         var il2cppEnum = UnityVersionHandler.Wrap((Il2CppClass*)enumPtr);
         var newFieldCount = il2cppEnum.FieldCount + valuesToAdd.Count;
         var newFields = (Il2CppFieldInfo*)Marshal.AllocHGlobal(newFieldCount * UnityVersionHandler.FieldInfoSize());
-        if (newFieldCount > 0)
-            new Span<byte>(newFields, newFieldCount * UnityVersionHandler.FieldInfoSize()).Clear();
 
         int fieldIdx;
         for (fieldIdx = 0; fieldIdx < il2cppEnum.FieldCount; ++fieldIdx)
@@ -248,8 +245,6 @@ public static unsafe class EnumInjector
 
         var il2cppFields =
             (Il2CppFieldInfo*)Marshal.AllocHGlobal(il2cppEnum.FieldCount * UnityVersionHandler.FieldInfoSize());
-        if (il2cppEnum.FieldCount > 0)
-            new Span<byte>(il2cppFields, il2cppEnum.FieldCount * UnityVersionHandler.FieldInfoSize()).Clear();
         var valueField = UnityVersionHandler.Wrap(il2cppFields);
         valueField.Name = value__Cached;
         valueField.Parent = il2cppEnum.ClassPointer;

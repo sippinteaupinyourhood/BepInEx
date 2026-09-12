@@ -16,6 +16,13 @@ public static class Pass11ComputeTypeSpecifics
     private static void ComputeSpecifics(TypeRewriteContext typeContext)
     {
         if (typeContext.ComputedTypeSpecifics != TypeRewriteContext.TypeSpecifics.NotComputed) return;
+
+        if (typeContext.OriginalType is null)
+        {
+            typeContext.ComputedTypeSpecifics = TypeRewriteContext.TypeSpecifics.ReferenceType;
+            return;
+        }
+
         typeContext.ComputedTypeSpecifics = TypeRewriteContext.TypeSpecifics.Computing;
 
         foreach (var originalField in typeContext.OriginalType.Fields)
@@ -39,7 +46,16 @@ public static class Pass11ComputeTypeSpecifics
                 return;
             }
 
-            var fieldTypeContext = typeContext.AssemblyContext.GlobalContext.GetNewTypeForOriginal(fieldType.Resolve()!);
+            var resolvedFieldType = fieldType.Resolve();
+            var fieldTypeContext = resolvedFieldType is null
+                ? null
+                : typeContext.AssemblyContext.GlobalContext.TryGetNewTypeForOriginal(resolvedFieldType);
+            if (fieldTypeContext is null)
+            {
+                typeContext.ComputedTypeSpecifics = TypeRewriteContext.TypeSpecifics.NonBlittableStruct;
+                return;
+            }
+
             ComputeSpecifics(fieldTypeContext);
             if (fieldTypeContext.ComputedTypeSpecifics != TypeRewriteContext.TypeSpecifics.BlittableStruct)
             {

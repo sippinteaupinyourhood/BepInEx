@@ -5,7 +5,7 @@ namespace BepInEx.Unity.IL2CPP.Utils.Collections;
 public static class CollectionExtensions
 {
     public static IEnumerator WrapToIl2Cpp(this System.Collections.IEnumerator self) =>
-        new(new Il2CppManagedEnumerator(self).Pointer);
+        new Il2CppManagedEnumerator(self).Cast<IEnumerator>();
 
     public static System.Collections.IEnumerator WrapToManaged(this IEnumerator self) =>
         new ManagedIl2CppEnumerator(self);

@@ -44,48 +44,42 @@ public static class Pass16ScanMethodRefs
 
         context.MethodStartAddresses.Sort();
 
-        var methods = context.Assemblies.SelectMany(it => it.Types).SelectMany(it => it.Methods).ToArray();
-        void ProcessMethod(MethodRewriteContext originalTypeMethod)
-        {
-            var address = originalTypeMethod.FileOffset;
-            if (address == 0) return;
-
-            if (!options.NoXrefCache)
+        context.Assemblies.SelectMany(it => it.Types).SelectMany(it => it.Methods).AsParallel().ForAll(
+            originalTypeMethod =>
             {
-                var pair = XrefScanMetadataGenerationUtil.FindMetadataInitForMethod(originalTypeMethod, gameAssemblyPtr);
-                originalTypeMethod.MetadataInitFlagRva = pair.FlagRva;
-                originalTypeMethod.MetadataInitTokenRva = pair.TokenRva;
-            }
-
-            var nextMethodStart = context.MethodStartAddresses.BinarySearch(address + 1);
-            if (nextMethodStart < 0) nextMethodStart = ~nextMethodStart;
-            var length = nextMethodStart >= context.MethodStartAddresses.Count
-                ? 1024 * 1024
-                : context.MethodStartAddresses[nextMethodStart] - address;
-            foreach (var callTargetGlobal in XrefScanner.XrefScanImpl(
-                         XrefScanner.DecoderForAddress(IntPtr.Add(gameAssemblyPtr, (int)address), (int)length),
-                         true))
-            {
-                var callTarget = callTargetGlobal.RelativeToBase(gameAssemblyPtr + (nint)originalTypeMethod.FileOffset - (nint)originalTypeMethod.Rva);
-                if (callTarget.Type == XrefType.Method)
-                {
-                    var targetRelative = callTarget.Pointer;
-                    methodToCallersMap.GetOrAdd(targetRelative, _ => new List<XrefInstance>()).AddLocked(
-                        new XrefInstance(XrefType.Method, (nint)originalTypeMethod.Rva, callTarget.FoundAt));
-                    methodToCalleesMap.GetOrAdd(originalTypeMethod.Rva, _ => new List<nint>())
-                        .AddLocked(targetRelative);
-                }
+                var address = originalTypeMethod.FileOffset;
+                if (address == 0) return;
 
                 if (!options.NoXrefCache)
-                    originalTypeMethod.XrefScanResults.Add(callTarget);
-            }
-        }
+                {
+                    var pair = XrefScanMetadataGenerationUtil.FindMetadataInitForMethod(originalTypeMethod, gameAssemblyPtr);
+                    originalTypeMethod.MetadataInitFlagRva = pair.FlagRva;
+                    originalTypeMethod.MetadataInitTokenRva = pair.TokenRva;
+                }
 
-        if (options.Parallel)
-            methods.AsParallel().ForAll(ProcessMethod);
-        else
-            foreach (var method in methods)
-                ProcessMethod(method);
+                var nextMethodStart = context.MethodStartAddresses.BinarySearch(address + 1);
+                if (nextMethodStart < 0) nextMethodStart = ~nextMethodStart;
+                var length = nextMethodStart >= context.MethodStartAddresses.Count
+                    ? 1024 * 1024
+                    : context.MethodStartAddresses[nextMethodStart] - address;
+                foreach (var callTargetGlobal in XrefScanner.XrefScanImpl(
+                             XrefScanner.DecoderForAddress(IntPtr.Add(gameAssemblyPtr, (int)address), (int)length),
+                             true))
+                {
+                    var callTarget = callTargetGlobal.RelativeToBase(gameAssemblyPtr + (nint)originalTypeMethod.FileOffset - (nint)originalTypeMethod.Rva);
+                    if (callTarget.Type == XrefType.Method)
+                    {
+                        var targetRelative = callTarget.Pointer;
+                        methodToCallersMap.GetOrAdd(targetRelative, _ => new List<XrefInstance>()).AddLocked(
+                            new XrefInstance(XrefType.Method, (nint)originalTypeMethod.Rva, callTarget.FoundAt));
+                        methodToCalleesMap.GetOrAdd(originalTypeMethod.Rva, _ => new List<nint>())
+                            .AddLocked(targetRelative);
+                    }
+
+                    if (!options.NoXrefCache)
+                        originalTypeMethod.XrefScanResults.Add(callTarget);
+                }
+            });
 
         MapOfCallers = methodToCallersMap;
 

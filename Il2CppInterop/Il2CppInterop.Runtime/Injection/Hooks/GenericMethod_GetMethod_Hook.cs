@@ -39,46 +39,25 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
             if (gmethod == null || gmethod->methodDefinition == null)
                 return Original(gmethod, copyMethodPtr);
 
-            try
+            if (ClassInjector.InflatedMethodFromContextDictionary.TryGetValue((IntPtr)gmethod->methodDefinition, out var methods))
             {
-                if (!ClassInjector.InflatedMethodFromContextDictionary.TryGetValue(
-                        (IntPtr)gmethod->methodDefinition, out var methods) || methods.Item1 == null)
-                    return Original(gmethod, copyMethodPtr);
-
                 var instancePointer = gmethod->context.method_inst;
-                if (instancePointer == null || instancePointer->type_argc == 0 ||
-                    instancePointer->type_argc > 256 || instancePointer->type_argv == null)
-                    return Original(gmethod, copyMethodPtr);
-
-                lock (methods.Item2)
-                {
-                    if (methods.Item2.TryGetValue((IntPtr)instancePointer, out var inflatedMethodPointer))
-                        return (Il2CppMethodInfo*)inflatedMethodPointer;
-
-                    var typeArguments = new Type[instancePointer->type_argc];
-                    for (var i = 0; i < instancePointer->type_argc; i++)
-                    {
-                        var argument = instancePointer->type_argv[i];
-                        if (argument == null)
-                            return Original(gmethod, copyMethodPtr);
-                        typeArguments[i] = ClassInjector.SystemTypeFromIl2CppType(argument);
-                        if (typeArguments[i] == null)
-                            return Original(gmethod, copyMethodPtr);
-                    }
-
-                    var inflatedMethod = methods.Item1.MakeGenericMethod(typeArguments);
-                    inflatedMethodPointer = (IntPtr)ClassInjector.ConvertMethodInfo(inflatedMethod,
-                        UnityVersionHandler.Wrap(UnityVersionHandler.Wrap(gmethod->methodDefinition).Class));
-                    if (inflatedMethodPointer == IntPtr.Zero)
-                        return Original(gmethod, copyMethodPtr);
-                    methods.Item2[(IntPtr)instancePointer] = inflatedMethodPointer;
+                if (methods.Item2.TryGetValue((IntPtr)instancePointer, out var inflatedMethodPointer))
                     return (Il2CppMethodInfo*)inflatedMethodPointer;
-                }
+
+                var typeArguments = new Type[instancePointer->type_argc];
+                for (var i = 0; i < instancePointer->type_argc; i++)
+                    typeArguments[i] = ClassInjector.SystemTypeFromIl2CppType(instancePointer->type_argv[i]);
+                var inflatedMethod = methods.Item1.MakeGenericMethod(typeArguments);
+                Logger.Instance.LogTrace("Inflated method: {InflatedMethod}", inflatedMethod.Name);
+                inflatedMethodPointer = (IntPtr)ClassInjector.ConvertMethodInfo(inflatedMethod,
+                    UnityVersionHandler.Wrap(UnityVersionHandler.Wrap(gmethod->methodDefinition).Class));
+                methods.Item2.Add((IntPtr)instancePointer, inflatedMethodPointer);
+
+                return (Il2CppMethodInfo*)inflatedMethodPointer;
             }
-            catch
-            {
-                return Original(gmethod, copyMethodPtr);
-            }
+
+            return Original(gmethod, copyMethodPtr);
         }
 
         private static readonly MemoryUtils.SignatureDefinition[] s_Signatures =

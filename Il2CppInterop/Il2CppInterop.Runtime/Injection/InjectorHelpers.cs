@@ -1,13 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using System.Threading;
 using Il2CppInterop.Common;
 using Il2CppInterop.Common.Extensions;
@@ -29,33 +27,11 @@ namespace Il2CppInterop.Runtime.Injection
         internal static Assembly Il2CppMscorlib = typeof(Il2CppSystem.Type).Assembly;
         internal static INativeAssemblyStruct InjectedAssembly;
         internal static INativeImageStruct InjectedImage;
-        internal static ProcessModule Il2CppModule = ResolveIl2CppModule();
+        internal static ProcessModule Il2CppModule = Process.GetCurrentProcess()
+            .Modules.OfType<ProcessModule>()
+            .Single((x) => x.ModuleName is "GameAssembly.dll" or "GameAssembly.dylib" or "GameAssembly.so" or "UserAssembly.dll" || string.Equals(x.ModuleName, "GameAssembly.dll", StringComparison.OrdinalIgnoreCase));
 
         internal static IntPtr Il2CppHandle = NativeLibrary.Load("GameAssembly", typeof(InjectorHelpers).Assembly, null);
-
-        private static ProcessModule ResolveIl2CppModule()
-        {
-            var modules = Process.GetCurrentProcess().Modules.OfType<ProcessModule>().ToArray();
-            static bool IsIl2CppModule(ProcessModule module)
-            {
-                var name = module.ModuleName;
-                if (string.Equals(name, "GameAssembly.dll", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(name, "GameAssembly.dylib", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(name, "GameAssembly.so", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(name, "UserAssembly.dll", StringComparison.OrdinalIgnoreCase))
-                    return true;
-
-                var fileName = module.FileName;
-                return !string.IsNullOrEmpty(fileName) &&
-                       (fileName.EndsWith("GameAssembly.dll", StringComparison.OrdinalIgnoreCase) ||
-                        fileName.EndsWith("GameAssembly.dylib", StringComparison.OrdinalIgnoreCase) ||
-                        fileName.EndsWith("GameAssembly.so", StringComparison.OrdinalIgnoreCase) ||
-                        fileName.EndsWith("UserAssembly.dll", StringComparison.OrdinalIgnoreCase));
-            }
-
-            return modules.FirstOrDefault(IsIl2CppModule)
-                   ?? throw new DllNotFoundException("The loaded IL2CPP module could not be found in the process module list");
-        }
 
         internal static readonly Dictionary<Type, OpCode> StIndOpcodes = new()
         {
@@ -156,56 +132,8 @@ namespace Il2CppInterop.Runtime.Injection
             if (NativeLibrary.TryGetExport(Il2CppHandle, name, out address))
                 return true;
 
-            foreach (var mapPath in new[]
-                     {
-                         Path.Combine(Path.GetDirectoryName(Environment.ProcessPath) ?? string.Empty,
-                             "bepinex-il2cpp-signature-scan.json"),
-                         Path.Combine(AppContext.BaseDirectory, "bepinex-il2cpp-signature-scan.json"),
-                         Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "bepinex-il2cpp-signature-scan.json")),
-                         Path.Combine(Environment.CurrentDirectory, "bepinex-il2cpp-signature-scan.json")
-                     })
-            {
-                try
-                {
-                    if (!File.Exists(mapPath)) continue;
-                    var json = File.ReadAllText(mapPath);
-                    var match = Regex.Match(json,
-                        "\\\"api\\\"\\s*:\\s*\\\"" + Regex.Escape(name) +
-                        "\\\"(?:(?!\\\"api\\\")[\\s\\S])*?\\\"export\\\"\\s*:\\s*\\\"([^\\\"]+)\\\"" +
-                        "(?:(?!\\\"api\\\")[\\s\\S])*?\\\"status\\\"\\s*:\\s*\\\"(?:unique|resolved)\\\"",
-                        RegexOptions.IgnoreCase);
-                    if (match.Success && NativeLibrary.TryGetExport(Il2CppHandle, match.Groups[1].Value, out address))
-                        return true;
-                }
-                catch (IOException) { }
-            }
-
-            var alias = name switch
-            {
-                "il2cpp_object_get_virtual_method" => "bdetPLUGbMl",
-                "il2cpp_object_new" => "fdQySFUbQRI",
-                "il2cpp_value_box" => "kfRjLqgoDfp",
-                "il2cpp_method_get_token" => "btrfNAUVGNc",
-                "il2cpp_class_get_methods" => "nVnxgXSkJqb",
-                "il2cpp_class_get_field_from_name" => "FZOoKkQcXXF",
-                "il2cpp_class_from_name" => "eGcVXosuX_V",
-                "il2cpp_class_from_il2cpp_type" => "oQbALanOaVu",
-                "il2cpp_runtime_class_init" => "zoAvzVWlTDk",
-                "il2cpp_runtime_invoke" => "UPSmEOKKvNa",
-                "il2cpp_gchandle_new" => "KUZulelZoCy",
-                "il2cpp_gchandle_new_weakref" => "MHaleuaBdai",
-                "il2cpp_array_new" => "TRPYdGIRWWf",
-                "il2cpp_image_get_class" => "VyIwDMHEORj",
-                "il2cpp_field_get_name" => "bpbZmcGasEt",
-                "il2cpp_field_get_parent" => "cEEujTMeKxt",
-                "il2cpp_field_get_offset" => "crlvcScZkMC",
-                "il2cpp_field_get_type" => "BmCgtBkwLob",
-                "il2cpp_field_static_get_value" => "XTRIwAekovu",
-                "il2cpp_field_static_set_value" => "IEmYkLTqwJX",
-                _ => null,
-            };
-
-            return alias is not null && NativeLibrary.TryGetExport(Il2CppHandle, alias, out address);
+            return Il2CppExportMap.TryGetAlias(name, out var alias) &&
+                   NativeLibrary.TryGetExport(Il2CppHandle, alias, out address);
         }
 
         internal static IntPtr GetIl2CppMethodPointer(MethodBase proxyMethod)
@@ -260,6 +188,18 @@ namespace Il2CppInterop.Runtime.Injection
 
         private static d_ClassInit FindClassInit()
         {
+            static nint GetClassInitFromExport()
+            {
+                if (!TryGetIl2CppExport(nameof(IL2CPP.il2cpp_class_has_references), out nint exportedMethod))
+                    return 0;
+
+                MemoryUtils.SignatureDefinition signature = s_ClassInitSignatures[2];
+                nint call = MemoryUtils.FindSignatureInBlock(exportedMethod, 64, signature.pattern, signature.mask);
+                return call == 0
+                    ? 0
+                    : XrefScannerLowLevel.JumpTargets(call).Distinct().SingleOrDefault();
+            }
+
             static nint GetClassInitSubstitute()
             {
                 if (TryGetIl2CppExport("mono_class_instance_size", out nint classInit))
@@ -281,9 +221,29 @@ namespace Il2CppInterop.Runtime.Injection
                 Logger.Instance.LogTrace("GameAssembly.dll: 0x{Il2CppModuleAddress}", Il2CppModule.BaseAddress.ToInt64().ToString("X2"));
                 throw new NotSupportedException("Failed to use signature for Class::Init and a substitute cannot be found, please create an issue and report your unity version & game");
             }
-            nint pClassInit = s_ClassInitSignatures
-                .Select(s => MemoryUtils.FindSignatureInModule(Il2CppModule, s))
-                .FirstOrDefault(p => p != 0);
+
+            if (string.Equals(Environment.GetEnvironmentVariable(
+                    "MELONLOADER_COMPATIBILITY_AUTOMATIC"), "1", StringComparison.Ordinal))
+                return Marshal.GetDelegateForFunctionPointer<d_ClassInit>(GetClassInitSubstitute());
+
+            nint pClassInit = GetClassInitFromExport();
+            foreach (MemoryUtils.SignatureDefinition signature in s_ClassInitSignatures)
+            {
+                if (pClassInit != 0)
+                    break;
+
+                try
+                {
+                    pClassInit = MemoryUtils.FindSignatureInModule(Il2CppModule, signature);
+                }
+                catch (AmbiguousMatchException)
+                {
+                    continue;
+                }
+
+                if (pClassInit != 0)
+                    break;
+            }
 
             if (pClassInit == 0)
             {

@@ -131,9 +131,15 @@ public class AssemblyRewriteContext
             return sourceModule.DefaultImporter.ImportType(GlobalContext.GetAssemblyByName("mscorlib")
                 .GetTypeByName("System.Attribute").NewType).ToTypeSignature();
 
-        var originalTypeDef = typeRef.Resolve()!;
-        var targetAssembly = GlobalContext.GetNewAssemblyForOriginal(originalTypeDef.DeclaringModule!.Assembly!);
-        var target = targetAssembly.GetContextForOriginalType(originalTypeDef).NewType;
+        var originalTypeDef = typeRef.Resolve();
+        if (originalTypeDef?.DeclaringModule?.Assembly is null)
+            return Imports.Il2CppObjectBase;
+
+        var targetContext = GlobalContext.TryGetNewTypeForOriginal(originalTypeDef);
+        if (targetContext is null)
+            return Imports.Il2CppObjectBase;
+
+        var target = targetContext.NewType;
 
         return sourceModule.DefaultImporter.ImportType(target).ToTypeSignature();
     }

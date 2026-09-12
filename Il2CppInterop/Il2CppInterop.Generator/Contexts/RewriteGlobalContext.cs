@@ -102,8 +102,12 @@ public class RewriteGlobalContext : IDisposable
             or GenericInstanceTypeSignature)
             return TypeRewriteContext.TypeSpecifics.ReferenceType;
 
-        var fieldTypeContext = GetNewTypeForOriginal(typeRef.Resolve() ?? throw new($"Could not resolve {typeRef.FullName}"));
-        return fieldTypeContext.ComputedTypeSpecifics;
+        var resolvedType = typeRef.Resolve();
+        if (resolvedType is null)
+            return TypeRewriteContext.TypeSpecifics.NonBlittableStruct;
+
+        var fieldTypeContext = TryGetNewTypeForOriginal(resolvedType);
+        return fieldTypeContext?.ComputedTypeSpecifics ?? TypeRewriteContext.TypeSpecifics.NonBlittableStruct;
     }
 
     public AssemblyRewriteContext GetAssemblyByName(string name)

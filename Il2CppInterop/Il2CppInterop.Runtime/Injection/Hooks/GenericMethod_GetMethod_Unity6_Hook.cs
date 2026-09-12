@@ -5,6 +5,7 @@ using Il2CppInterop.Common;
 using Il2CppInterop.Common.XrefScans;
 using Il2CppInterop.Runtime.Runtime;
 using Il2CppInterop.Runtime.Startup;
+using Microsoft.Extensions.Logging;
 
 namespace Il2CppInterop.Runtime.Injection.Hooks
 {
@@ -23,47 +24,54 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
 
             try
             {
-                if (!ClassInjector.InflatedMethodFromContextDictionary.TryGetValue(
-                        (IntPtr)methodDefinition, out var methods) || methods.Item1 == null)
+                if (ClassInjector.InflatedMethodFromContextDictionary == null)
                     return Original(methodDefinition, classInst, methodInst);
 
-                if (methodInst == null || methodInst->type_argc == 0 || methodInst->type_argc > 256 ||
-                    methodInst->type_argv == null)
-                    return Original(methodDefinition, classInst, methodInst);
-
-                lock (methods.Item2)
+                if (ClassInjector.InflatedMethodFromContextDictionary.TryGetValue((IntPtr)methodDefinition, out var methods))
                 {
+                    if (methods.Item1 == null || methods.Item2 == null)
+                        return Original(methodDefinition, classInst, methodInst);
+
+                    if (methodInst == null)
+                        return Original(methodDefinition, classInst, methodInst);
+
                     if (methods.Item2.TryGetValue((IntPtr)methodInst, out var inflatedMethodPointer))
                         return (Il2CppMethodInfo*)inflatedMethodPointer;
+
+                    if (methodInst->type_argc > 256 || methodInst->type_argv == null)
+                        return Original(methodDefinition, classInst, methodInst);
 
                     var typeArguments = new Type[methodInst->type_argc];
                     for (var i = 0; i < methodInst->type_argc; i++)
                     {
                         var il2cppType = methodInst->type_argv[i];
-                        if (il2cppType == null)
-                            return Original(methodDefinition, classInst, methodInst);
+                        if (il2cppType == null) return Original(methodDefinition, classInst, methodInst);
+
                         typeArguments[i] = ClassInjector.SystemTypeFromIl2CppType(il2cppType);
-                        if (typeArguments[i] == null)
-                            return Original(methodDefinition, classInst, methodInst);
                     }
 
                     var inflatedMethod = methods.Item1.MakeGenericMethod(typeArguments);
+                    Logger.Instance.LogTrace("Inflated method: {InflatedMethod}", inflatedMethod.Name);
+
                     var wrappedMethod = UnityVersionHandler.Wrap(methodDefinition);
-                    if (wrappedMethod == null)
-                        return Original(methodDefinition, classInst, methodInst);
+                    if (wrappedMethod == null) return Original(methodDefinition, classInst, methodInst);
 
                     inflatedMethodPointer = (IntPtr)ClassInjector.ConvertMethodInfo(
                         inflatedMethod, UnityVersionHandler.Wrap(wrappedMethod.Class));
-                    if (inflatedMethodPointer == IntPtr.Zero)
-                        return Original(methodDefinition, classInst, methodInst);
-                    methods.Item2[(IntPtr)methodInst] = inflatedMethodPointer;
+
+                    methods.Item2.Add((IntPtr)methodInst, inflatedMethodPointer);
+
                     return (Il2CppMethodInfo*)inflatedMethodPointer;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                return Original(methodDefinition, classInst, methodInst);
+#if DEBUG
+                Logger.Instance.LogError($"[GenericHook] Exception: {ex.Message}");
+#endif
             }
+
+            return Original(methodDefinition, classInst, methodInst);
         }
 
         public override IntPtr FindTargetMethod()
@@ -78,12 +86,18 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
             if (xrefs.Length == 0) return IntPtr.Zero;
 
             IntPtr getGenericVirtualMethod = xrefs.Last();
+
             var finalXrefs = XrefScannerLowLevel.JumpTargets(getGenericVirtualMethod).ToArray();
 
             if (finalXrefs.Length == 0)
                 return IntPtr.Zero;
 
             IntPtr candidate = finalXrefs.Last();
+
+#if DEBUG
+            Logger.Instance.LogDebug($"[Scanner] Found GenericMethod::GetMethod candidate: 0x{candidate:X}");
+#endif
+
             return candidate;
         }
     }

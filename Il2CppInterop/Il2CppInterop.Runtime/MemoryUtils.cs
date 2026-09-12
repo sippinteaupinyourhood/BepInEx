@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.Versioning;
 using Il2CppInterop.Common.XrefScans;
 using TerraFX.Interop.Windows;
@@ -12,6 +13,8 @@ internal class MemoryUtils
 {
     public static unsafe nint FindSignatureInModule(ProcessModule module, SignatureDefinition sigDef)
     {
+        if (sigDef.pattern is null || sigDef.mask is null) throw new ArgumentException("Missing native signature pattern.");
+        ValidatePattern(sigDef.pattern.ToCharArray(), sigDef.mask.ToCharArray());
         // On newer Unity (6000.x) the loaded GameAssembly maps some pages PAGE_NOACCESS / guard pages; the raw
         // linear byte walk in FindSignatureInBlock dereferences them and throws a fatal AccessViolationException.
         // Use VirtualQuery to enumerate the module's regions and scan only the readable committed ones, skipping
@@ -21,28 +24,18 @@ internal class MemoryUtils
         nint ptr = 0;
         if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
         {
-            // Protections that permit reading; TerraFX defines no single composite of these.
-            const uint pageReadable = PAGE.PAGE_READONLY | PAGE.PAGE_READWRITE | PAGE.PAGE_WRITECOPY |
-                                      PAGE.PAGE_EXECUTE_READ | PAGE.PAGE_EXECUTE_READWRITE | PAGE.PAGE_EXECUTE_WRITECOPY;
+            const uint pageReadable = PAGE.PAGE_EXECUTE_READ | PAGE.PAGE_EXECUTE_READWRITE | PAGE.PAGE_EXECUTE_WRITECOPY;
             var regions = GetModuleRegions(module);
-            var moduleStart = (long)module.BaseAddress;
-            var moduleEnd = checked(moduleStart + module.ModuleMemorySize);
             foreach (var region in regions)
             {
                 if (region.State != MEM.MEM_COMMIT || (region.Protect & PAGE.PAGE_GUARD) != 0 ||
                     (region.Protect & pageReadable) == 0)
                     continue;
-
-                var regionStart = Math.Max(moduleStart, (long)region.BaseAddress);
-                var rawRegionEnd = (long)region.BaseAddress + (long)region.RegionSize;
-                var regionEnd = Math.Min(moduleEnd, rawRegionEnd);
-                if (regionStart < moduleStart || regionStart >= moduleEnd || regionEnd <= regionStart)
-                    continue;
-
-                ptr = FindSignatureInBlock((nint)regionStart, regionEnd - regionStart,
+                nint candidate = FindSignatureInBlock((nint)region.BaseAddress, (long)region.RegionSize,
                     sigDef.pattern, sigDef.mask, sigDef.offset);
-                if (ptr != 0)
-                    break;
+                if (candidate == 0) continue;
+                if (ptr != 0) throw new AmbiguousMatchException("Native signature matched multiple executable regions.");
+                ptr = candidate;
             }
         }
         else
@@ -52,7 +45,7 @@ internal class MemoryUtils
         }
 
         if (ptr != 0 && sigDef.xref)
-            ptr = XrefScannerLowLevel.JumpTargets(ptr).FirstOrDefault();
+            ptr = XrefScannerLowLevel.JumpTargets(ptr).Distinct().SingleOrDefault();
         return ptr;
     }
 
@@ -64,6 +57,10 @@ internal class MemoryUtils
     public static unsafe nint FindSignatureInBlock(nint block, long blockSize, char[] pattern, char[] mask,
         long sigOffset = 0)
     {
+        ValidatePattern(pattern, mask);
+        if (block == 0 || blockSize < 0 || (ulong)blockSize > (ulong)nuint.MaxValue - (ulong)(nuint)block)
+            throw new ArgumentOutOfRangeException(nameof(blockSize));
+        nint result = 0;
         // Stop at blockSize - mask.Length so the inner read (block + address + mask.Length - 1) never passes the
         // end of this block. When the caller scans per-region (Unity 6 readable regions interleaved with guard /
         // PAGE_NOACCESS pages), an overread off the tail would fault the adjacent page -> a fatal
@@ -79,10 +76,24 @@ internal class MemoryUtils
                 }
 
             if (found)
-                return (nint)(address + block + sigOffset);
+            {
+                if (result != 0) throw new AmbiguousMatchException("Native signature matched multiple locations.");
+                long target = checked(address + sigOffset);
+                if (target < 0 || target >= blockSize)
+                    throw new ArgumentOutOfRangeException(nameof(sigOffset));
+                result = (nint)((nuint)block + (nuint)target);
+            }
         }
 
-        return 0;
+        return result;
+    }
+
+    private static void ValidatePattern(char[] pattern, char[] mask)
+    {
+        if (pattern is null || mask is null || pattern.Length == 0 || pattern.Length > 512 ||
+            pattern.Length != mask.Length || pattern.Any(value => value > byte.MaxValue) ||
+            mask.Any(value => value != 'x' && value != '?') || !mask.Contains('x'))
+            throw new ArgumentException("Invalid native signature pattern.");
     }
 
     /// <summary>
@@ -102,16 +113,18 @@ internal class MemoryUtils
             if (result == 0)
                 break; // error, or reached the end of the module's mapped memory
 
-            var regionBase = (long)memoryInfo.BaseAddress;
-            var regionSize = (long)memoryInfo.RegionSize;
-            if (regionSize <= 0 || regionBase > long.MaxValue - regionSize)
-                break;
-
-            regions.Add(memoryInfo);
-            var nextAddress = regionBase + regionSize;
-            if (nextAddress <= currentAddress)
-                break;
-            currentAddress = nextAddress;
+            long regionStart = (long)memoryInfo.BaseAddress;
+            long regionEnd = checked(regionStart + (long)memoryInfo.RegionSize);
+            if (regionEnd <= currentAddress) throw new InvalidOperationException("Memory region enumeration did not advance.");
+            long clippedStart = Math.Max(currentAddress, regionStart);
+            long clippedEnd = Math.Min(moduleEndAddress, regionEnd);
+            if (clippedEnd > clippedStart)
+            {
+                memoryInfo.BaseAddress = (void*)clippedStart;
+                memoryInfo.RegionSize = (nuint)(clippedEnd - clippedStart);
+                regions.Add(memoryInfo);
+            }
+            currentAddress = regionEnd;
         }
 
         return regions;

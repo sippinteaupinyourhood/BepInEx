@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using BepInEx.IL2CPP.RuntimeFixes;
 using BepInEx.Logging;
 using BepInEx.Preloader.Core;
@@ -55,6 +56,10 @@ public static class Preloader
             Logger.Log(LogLevel.Debug, $"Interop assembly directory: {Il2CppInteropManager.IL2CPPInteropAssemblyPath}");
             Logger.Log(LogLevel.Debug, $"BepInEx root path: {Paths.BepInExRootPath}");
 
+            var appliedEnumRepairs = RuntimeEnumRepair.ApplyPending(Il2CppInteropManager.IL2CPPInteropAssemblyPath);
+            if (appliedEnumRepairs != 0)
+                Logger.Log(LogLevel.Info, $"Applied {appliedEnumRepairs} pending runtime enum repairs");
+
             if (PlatformHelper.Is(Platform.Wine) && !Environment.Is64BitProcess)
             {
                 if (!NativeLibrary.TryGetExport(NativeLibrary.Load("ntdll"), "RtlRestoreContext", out var _))
@@ -74,27 +79,29 @@ public static class Preloader
                 decMetaPath = VRChatMetadataDecryptor.TryDecrypt(metaPath);
                 if (decMetaPath != null)
                 {
-                    Log.LogInfo("[VRCDecrypt] Encrypted VRChat metadata detected — decrypted to temp file");
                     Il2CppInteropManager.GlobalMetadataPathOverride = decMetaPath;
                 }
             }
             catch (Exception ex)
             {
-                Log.LogWarning($"[VRCDecrypt] Metadata decryption failed ({ex.GetType().Name})");
+                Log.LogWarning($"Metadata preparation failed: {ex}");
             }
 
-            Il2CppInteropManager.Initialize();
-
-            if (decMetaPath != null)
-                try { File.Delete(decMetaPath); } catch { }
+            try
+            {
+                Il2CppInteropManager.Initialize();
+            }
+            finally
+            {
+                if (decMetaPath != null)
+                    try { File.Delete(decMetaPath); } catch { }
+            }
 
             using (var assemblyPatcher = new AssemblyPatcher((data, _) => Assembly.Load(data)))
             {
                 assemblyPatcher.AddPatchersFromDirectory(Paths.PatcherPluginPath);
 
                 Log.LogInfo($"{assemblyPatcher.PatcherContext.PatcherPlugins.Count} patcher plugin{(assemblyPatcher.PatcherContext.PatcherPlugins.Count == 1 ? "" : "s")} loaded");
-
-                assemblyPatcher.LoadAssemblyDirectories(Il2CppInteropManager.IL2CPPInteropAssemblyPath);
 
                 Log.LogInfo($"{assemblyPatcher.PatcherContext.PatcherPlugins.Count} assemblies discovered");
 
@@ -139,7 +146,6 @@ public static class Preloader
             if (target == IntPtr.Zero) return;
             _freeConsoleHookDelegate = static () => true;
             _freeConsoleDetour = new NativeDetour(target, Marshal.GetFunctionPointerForDelegate(_freeConsoleHookDelegate));
-            Log.LogInfo("FreeConsole hooked — console window protected");
         }
         catch (Exception ex)
         {
@@ -163,8 +169,26 @@ internal static class VRChatMetadataDecryptor
     private const int HeaderSize   = 368;        // encrypted header size
     private const int NewHdrSize   = 304;        // standard IL2CPP header size
     private const uint EncMagic    = 0x4E4F7E5D;
-    private const uint Unity6Build1899EncryptedMagic = 0x2E1C2E3D;
+    private const uint Build1901EncryptedMagic = 0x7E7D8417;
+    private const uint Build1902EncryptedMagic = 0x2E2D0E53;
     private const int XorBase      = 0x51;
+
+    private const string Build1902NormalizedSha256 =
+        "6EB6807158ED3163A7E9D0AD654B1BF1180709D70D37BF9EF5228942321DDB78";
+
+    private const string Build1902NormalizedHeader =
+        "rxux+h0AAACIAQAAoKEGACijBgCsKB4A1MskAFRnfAAoM6EA+FgAACCMoQBo/Q0AiImvAMBOoQBI2FABjLoBANSSUgFQagYAJP1YAZQ7FgC4OG8BMEACAOx4cQGc/j0AiHevAdg8HgBgtM0BsCEDABDW0AFILgAAWATRARDPAQBo09IBGNsAAICu0wFg+AAA4KbUATwoGQAcz+0BwJcEANxm8gGYQzIAdKokAgAjAAB0zSQCADgAAHQFJQJIIgAAvCclAuwYAACoQCUCx3gcAHC5QQK4+AsAKLJNArw1AgDk508CwIwBAKR0UQIYAAAAvHRRAgQLAADAf1ECpCcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMh4HABUZ3wA7BgAAEzT0gH4WAAAmEMyABijBgCYklIBQP1YAVzYUAE0PR4A2CgeAAyyTQLAlwQAEM8BAGwE0QEwQAIAwE6hAHxnfAA4dFECgMskAOTV0AE=";
+
+    private static readonly (int SourceOffset, int Adjustment, int LengthField, int SeedField, bool SubtractSeed, int Key)[] Build1902Passes =
+    {
+        (296, 48, 308, 296, true, -76),
+        (176, -28, 184, 176, false, -76),
+        (136, -36, 48, 136, true, 8),
+        (120, -20, 372, 120, false, 8),
+        (28, 32, 220, 28, false, 60),
+        (216, 40, 84, 216, false, 68),
+        (264, 64, 108, 264, true, -92),
+    };
 
     // All field values are byte offsets into the HeaderTransform'd header buffer.
     // StdOff < 0 means section is not mapped directly (found by scan instead).
@@ -200,8 +224,11 @@ internal static class VRChatMetadataDecryptor
         if (!File.Exists(srcPath)) return null;
 
         var data = File.ReadAllBytes(srcPath);
-        if (data.Length >= 384 && BitConverter.ToUInt32(data, 0) == Unity6Build1899EncryptedMagic)
-            return DecryptUnity6Build1899(data);
+        if (data.Length >= 392 && BitConverter.ToUInt32(data, 0) == Build1902EncryptedMagic)
+            return DecryptBuild1902(srcPath, data);
+
+        if (data.Length >= 376 && BitConverter.ToUInt32(data, 0) == Build1901EncryptedMagic)
+            return DecryptBuild1901(srcPath, data);
 
         if (BitConverter.ToUInt32(data, 0) != EncMagic) return null;
 
@@ -211,83 +238,141 @@ internal static class VRChatMetadataDecryptor
         DecryptSections(output, hdr);
         RewriteHeader(output, hdr);
 
-        var tempPath = Path.Combine(Path.GetTempPath(),
-            $"bepinex-vrchat-metadata-{Environment.ProcessId}-{Guid.NewGuid():N}.dat");
+        var tempPath = srcPath + ".dec";
         File.WriteAllBytes(tempPath, output);
         return tempPath;
     }
 
-    private static string DecryptUnity6Build1899(byte[] data)
+    private static string DecryptBuild1902(string srcPath, byte[] data)
     {
         var output = (byte[])data.Clone();
-        var header = new byte[384];
+        var header = new byte[392];
         Array.Copy(data, header, header.Length);
         for (var index = 0; index < header.Length; index++)
-            header[index] ^= (byte)((0x29 + index) & 0xFF);
+            header[index] ^= (byte)(43 + index);
 
-        DecryptUnity6Build1899Section(output, header, 144, -28, 340, 340, true);
-        DecryptUnity6Build1899Section(output, header, 376, -52, 360, 360, true);
-        DecryptUnity6Build1899Section(output, header, 348, -36, 64, 64, false);
-        DecryptUnity6Build1899Section(output, header, 236, 52, 212, 212, false);
-        DecryptUnity6Build1899Section(output, header, 356, -28, 32, 32, false);
-        DecryptUnity6Build1899Section(output, header, 20, 20, 92, 92, false);
-        DecryptUnity6Build1899Section(output, header, 336, 60, 12, 12, true);
-
-        var normalized = new byte[NewHdrSize];
-        BitConverter.GetBytes(0xFAB11BAFu).CopyTo(normalized, 0);
-        BitConverter.GetBytes(31).CopyTo(normalized, 4);
-        var sections = new (int Offset, int Size)[]
+        foreach (var pass in Build1902Passes)
         {
-            (384, 441016), (441400, 2003060), (2444460, 8318916), (10763376, 23064),
-            (10786440, 950360), (11736800, 12206196), (23942996, 116136), (24059132, 422940),
-            (24482072, 460900), (24942972, 149096), (25092068, 4190292), (29282360, 2006400),
-            (31288760, 208848), (31497608, 12120), (31509728, 121088), (31630816, 57256),
-            (31688072, 64180), (31752252, 1700168), (33452420, 314632), (33767052, 3342944),
-            (37109996, 9160), (37119156, 14656), (37133812, 19816), (37153628, 6276),
-            (37159904, 1986468), (39146372, 816072), (39962444, 151420), (40113864, 106952),
-            (40220816, 0), (40220816, 0), (40220816, 16220)
-        };
-        for (var index = 0; index < sections.Length; index++)
-            SetHdr(normalized, 8 + index * 8, sections[index].Offset, sections[index].Size);
+            var offset = I32(header, pass.SourceOffset) + pass.Adjustment;
+            var length = I32(header, pass.LengthField);
+            if (offset < 0 || length < 0 || offset > output.Length - length)
+                throw new InvalidDataException("Invalid build 1902 metadata section.");
 
-        ValidateUnity6Build1899Header(normalized, output.Length);
-        Array.Copy(normalized, output, normalized.Length);
+            var seed = header[pass.SeedField];
+            for (var index = 0; index < length; index++)
+            {
+                var key = pass.SubtractSeed
+                    ? index - seed + pass.Key
+                    : seed + index + pass.Key;
+                output[offset + index] ^= (byte)key;
+            }
+        }
 
-        var tempPath = Path.Combine(Path.GetTempPath(),
-            $"bepinex-vrchat-metadata-{Environment.ProcessId}-{Guid.NewGuid():N}.dat");
-        File.WriteAllBytes(tempPath, output);
-        return tempPath;
+        var normalizedHeader = Convert.FromBase64String(Build1902NormalizedHeader);
+        Array.Copy(normalizedHeader, output, normalizedHeader.Length);
+
+        var digest = Convert.ToHexString(SHA256.HashData(output));
+        if (!string.Equals(digest, Build1902NormalizedSha256, StringComparison.Ordinal))
+            throw new InvalidDataException("Invalid build 1902 normalized metadata digest.");
+
+        var outputPath = srcPath + ".dec";
+        File.WriteAllBytes(outputPath, output);
+        return outputPath;
     }
 
-    private static void DecryptUnity6Build1899Section(byte[] output, byte[] header, int sourceField,
-                                                       int adjustment, int lengthField, int seedField,
-                                                       bool subtractSeed)
+    private static string DecryptBuild1901(string srcPath, byte[] data)
     {
-        var offset = I32(header, sourceField) + adjustment;
-        var length = I32(header, lengthField);
-        if (offset < 0 || length < 0 || offset > output.Length - length)
-            throw new InvalidDataException("Invalid encrypted metadata section.");
+        var output = (byte[])data.Clone();
 
-        var seed = header[seedField];
+        DecryptBuild1901Section(output, 2411484, 8160952, 184, 89, true);
+        DecryptBuild1901Section(output, 10595212, 916840, 104, 89, true);
+        DecryptBuild1901Section(output, 35985508, 14336, 0, -89, false);
+        DecryptBuild1901Section(output, 11512052, 10577216, 64, -89, false);
+        DecryptBuild1901Section(output, 376, 434600, 168, -89, false);
+        DecryptBuild1901Section(output, 434976, 1976508, 188, -89, false);
+        DecryptBuild1901Section(output, 28294756, 1981644, 204, 89, true);
+
+        var header = new byte[NewHdrSize];
+        BitConverter.GetBytes(0xFAB11BAFu).CopyTo(header, 0);
+        BitConverter.GetBytes(29).CopyTo(header, 4);
+        SetHdr(header, 8, 376, 434600);
+        SetHdr(header, 16, 434976, 1976508);
+        SetHdr(header, 24, 2411484, 8160952);
+        SetHdr(header, 32, 10572436, 22776);
+        SetHdr(header, 40, 10595212, 916840);
+        SetHdr(header, 48, 11512052, 10577216);
+        SetHdr(header, 56, 22089268, 114228);
+        SetHdr(header, 64, 22203496, 420420);
+        SetHdr(header, 72, 22623916, 1457084);
+        SetHdr(header, 80, 24081000, 147504);
+        SetHdr(header, 88, 24228508, 4066248);
+        SetHdr(header, 96, 28294756, 1981644);
+        SetHdr(header, 104, 30276400, 205232);
+        SetHdr(header, 112, 30481632, 11848);
+        SetHdr(header, 120, 30493480, 118544);
+        SetHdr(header, 128, 30612024, 56084);
+        SetHdr(header, 136, 30668108, 63584);
+        SetHdr(header, 144, 30731692, 1649848);
+        SetHdr(header, 152, 32381540, 300992);
+        SetHdr(header, 160, 32682532, 3294016);
+        SetHdr(header, 168, 35976548, 8960);
+        SetHdr(header, 176, 35985508, 14336);
+        SetHdr(header, 184, 35999844, 8776);
+        SetHdr(header, 192, 36008620, 6380);
+        SetHdr(header, 200, 36015000, 1865927);
+        SetHdr(header, 208, 37880928, 784568);
+        SetHdr(header, 216, 38665496, 144828);
+        SetHdr(header, 224, 38810324, 101568);
+        SetHdr(header, 232, 38911892, 24);
+        SetHdr(header, 240, 38911916, 3236);
+        SetHdr(header, 248, 38915152, 10148);
+        ValidateBuild1901Header(header, output.Length);
+        Array.Copy(header, output, header.Length);
+
+        var runtimeHeaderTail = new byte[]
+        {
+            0x4C, 0xFD, 0x4D, 0x02, 0x24, 0x19, 0x00, 0x00,
+            0x68, 0xFD, 0x0D, 0x00, 0xA8, 0xED, 0xD4, 0x01,
+            0x5C, 0xCC, 0x52, 0x01, 0x00, 0x00, 0x00, 0x00,
+            0xC0, 0x8C, 0x01, 0x00, 0x44, 0x6A, 0x06, 0x00,
+            0x3C, 0x18, 0x25, 0x02, 0xF4, 0xA2, 0x06, 0x00,
+            0xA4, 0x27, 0x00, 0x00, 0xF0, 0x32, 0x50, 0x02,
+            0x68, 0x2E, 0x00, 0x00, 0xF8, 0x58, 0x00, 0x00,
+            0xB8, 0x8B, 0x25, 0x02, 0x40, 0x23, 0x00, 0x00,
+            0xB0, 0x1C, 0xD1, 0x01, 0x70, 0xBF, 0x51, 0x02,
+        };
+        Array.Copy(runtimeHeaderTail, 0, output, NewHdrSize, runtimeHeaderTail.Length);
+
+        var outputPath = srcPath + ".dec";
+        File.WriteAllBytes(outputPath, output);
+        return outputPath;
+    }
+
+    private static void DecryptBuild1901Section(byte[] output, int offset, int length, int seed,
+                                                 int key, bool subtractSeed)
+    {
+        if (offset < 0 || length < 0 || offset > output.Length - length)
+            throw new InvalidDataException("Invalid build 1901 metadata section.");
+
         for (var index = 0; index < length; index++)
         {
-            var key = subtractSeed
-                ? (byte)((index - seed + 58) & 0xFF)
-                : (byte)((seed + index - 58) & 0xFF);
-            output[offset + index] ^= key;
+            var value = subtractSeed
+                ? (byte)((index - seed + key) & 0xFF)
+                : (byte)((seed + index + key) & 0xFF);
+            output[offset + index] ^= value;
         }
     }
 
-    private static void ValidateUnity6Build1899Header(byte[] header, int fileLength)
+    private static void ValidateBuild1901Header(byte[] header, int fileLength)
     {
         var previousEnd = header.Length;
         for (var offset = 8; offset <= 248; offset += 8)
         {
-            var sectionOffset = I32(header, offset);
-            var sectionSize = I32(header, offset + 4);
+            var sectionOffset = BitConverter.ToInt32(header, offset);
+            var sectionSize = BitConverter.ToInt32(header, offset + 4);
             if (sectionOffset < header.Length || sectionSize < 0 ||
                 sectionOffset > fileLength - sectionSize || sectionOffset < previousEnd)
-                throw new InvalidDataException("Invalid normalized metadata layout.");
+                throw new InvalidDataException("Invalid normalized build 1901 metadata layout.");
             previousEnd = sectionOffset + sectionSize;
         }
     }
