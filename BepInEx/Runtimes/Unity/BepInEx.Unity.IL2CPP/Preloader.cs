@@ -56,10 +56,6 @@ public static class Preloader
             Logger.Log(LogLevel.Debug, $"Interop assembly directory: {Il2CppInteropManager.IL2CPPInteropAssemblyPath}");
             Logger.Log(LogLevel.Debug, $"BepInEx root path: {Paths.BepInExRootPath}");
 
-            var appliedEnumRepairs = RuntimeEnumRepair.ApplyPending(Il2CppInteropManager.IL2CPPInteropAssemblyPath);
-            if (appliedEnumRepairs != 0)
-                Logger.Log(LogLevel.Info, $"Applied {appliedEnumRepairs} pending runtime enum repairs");
-
             if (PlatformHelper.Is(Platform.Wine) && !Environment.Is64BitProcess)
             {
                 if (!NativeLibrary.TryGetExport(NativeLibrary.Load("ntdll"), "RtlRestoreContext", out var _))
@@ -174,10 +170,10 @@ internal static class VRChatMetadataDecryptor
     private const int XorBase      = 0x51;
 
     private const string Build1902NormalizedSha256 =
-        "6EB6807158ED3163A7E9D0AD654B1BF1180709D70D37BF9EF5228942321DDB78";
+        "F3C08744A8BCD18D5330F3AC269A31E96A68F80B3A76757BECEED4CF22AED698";
 
     private const string Build1902NormalizedHeader =
-        "rxux+h0AAACIAQAAoKEGACijBgCsKB4A1MskAFRnfAAoM6EA+FgAACCMoQBo/Q0AiImvAMBOoQBI2FABjLoBANSSUgFQagYAJP1YAZQ7FgC4OG8BMEACAOx4cQGc/j0AiHevAdg8HgBgtM0BsCEDABDW0AFILgAAWATRARDPAQBo09IBGNsAAICu0wFg+AAA4KbUATwoGQAcz+0BwJcEANxm8gGYQzIAdKokAgAjAAB0zSQCADgAAHQFJQJIIgAAvCclAuwYAACoQCUCx3gcAHC5QQK4+AsAKLJNArw1AgDk508CwIwBAKR0UQIYAAAAvHRRAgQLAADAf1ECpCcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMh4HABUZ3wA7BgAAEzT0gH4WAAAmEMyABijBgCYklIBQP1YAVzYUAE0PR4A2CgeAAyyTQLAlwQAEM8BAGwE0QEwQAIAwE6hAHxnfAA4dFECgMskAOTV0AE=";
+        "rxux+h0AAACIAQAAoKEGACijBgCsKB4A1MskAFRnfAAoM6EA+FgAACCMoQBo/Q0AiImvAMBOoQBI2FABjLoBANSSUgFQagYAKP1YAZA7FgC4OG8BMEACAOx4cQGc/j0AiHevAdg8HgBgtM0BsCEDABDW0AFILgAAWATRARDPAQBo09IBGNsAAICu0wFg+AAA4KbUATwoGQAcz+0BwJcEANxm8gGYQzIAdKokAgAjAAB0zSQCADgAAHQFJQJIIgAAvCclAuwYAACoQCUCx3gcAHC5QQK4+AsAKLJNArw1AgDk508CwIwBAKR0UQIYAAAAvHRRAgQLAADAf1ECpCcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMh4HABUZ3wA7BgAAEzT0gH4WAAAmEMyABijBgCYklIBQP1YAVzYUAE0PR4A2CgeAAyyTQLAlwQAEM8BAGwE0QEwQAIAwE6hAHxnfAA4dFECgMskAOTV0AE=";
 
     private static readonly (int SourceOffset, int Adjustment, int LengthField, int SeedField, bool SubtractSeed, int Key)[] Build1902Passes =
     {

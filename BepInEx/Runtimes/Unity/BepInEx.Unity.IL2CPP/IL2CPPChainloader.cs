@@ -134,8 +134,6 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
     {
         try
         {
-            var repairedEnums = RuntimeEnumRepair.Repair(Il2CppInteropManager.IL2CPPInteropAssemblyPath);
-            Logger.Log(LogLevel.Info, $"Runtime enum repair staged {repairedEnums} constants");
             Il2CppInteropManager.PreloadInteropAssemblies();
             SetupUnityLogging();
             Instance.Execute();

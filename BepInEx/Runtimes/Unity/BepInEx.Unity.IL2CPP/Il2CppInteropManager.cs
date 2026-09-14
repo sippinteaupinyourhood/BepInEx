@@ -199,7 +199,7 @@ internal static partial class Il2CppInteropManager
         AppendFile(typeof(InteropAssemblyGenerator).Assembly.Location);
         AppendFile(typeof(Cpp2IlApi).Assembly.Location);
         AppendFile(typeof(LibCpp2IL.LibCpp2IlMain).Assembly.Location);
-        AppendString("protected-metadata-pipeline-v6-native-names-binary-fingerprint");
+        AppendString("protected-metadata-pipeline-v7-native-names-binary-fingerprint");
         return hash.GetHashAndReset();
     }
 
