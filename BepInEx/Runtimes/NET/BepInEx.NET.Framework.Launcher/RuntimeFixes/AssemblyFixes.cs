@@ -58,19 +58,19 @@ internal class AssemblyFixes
         return true;
     }
 
-    // This is commented out because it should be implemented alongside GetLocation, but seems to crash the runtime
-    // Might be because the target type should be System.Reflection.RuntimeAssembly
+    
+    
 
-    //[HarmonyPrefix]
-    //[HarmonyPatch(typeof(Assembly), nameof(Assembly.CodeBase), MethodType.Getter)]
-    //public static bool GetCodeBase(ref string __result, Assembly __instance)
-    //{
-    //    if (AssemblyLocations.TryGetValue(__instance.FullName, out var location))
-    //    {
-    //        __result = $"file://{location.Replace('\\', '/')}";
-    //        return false;
-    //    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
-    //    return true;
-    //}
+    
+    
 }

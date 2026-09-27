@@ -131,8 +131,8 @@ public static class StableNameGenerator
 
         if (includeMethodsForNonInterfaces || type.TypeAttributes.HasFlag(TypeAttributes.Interface))
         {
-            //Method ordering on interfaces is stable, so we can use this to generate unique names
-            //Otherwise it's controlled by a flag
+            
+            
             foreach (var methodInfoProvider in type.MethodInfoProviders)
             {
                 uniqueNameGenerator.PushInput(methodInfoProvider.MethodName);
@@ -168,15 +168,15 @@ public static class StableNameGenerator
 
     public static string GetStableNameForMethod(IMethodInfoProvider method)
     {
-        //Method_ prefix
+        
         var nameBuilder = new StringBuilder();
         nameBuilder.Append("Method_");
 
-        //Accessibility
+        
         var attribs = method.MethodAttributes;
         nameBuilder.Append(MemberAccessTypeLabels[(int)(attribs & MethodAttributes.MemberAccessMask)]);
 
-        //Any other keywords
+        
         if (attribs.HasFlag(MethodAttributes.Abstract))
             nameBuilder.Append("_Abstract");
         if (attribs.HasFlag(MethodAttributes.Virtual))
@@ -188,24 +188,24 @@ public static class StableNameGenerator
         if (attribs.HasFlag(MethodAttributes.NewSlot))
             nameBuilder.Append("_New");
 
-        //Semantics such as getter/setter or add/remove/fire event
+        
         var semantics = method.MethodSemantics;
         foreach (var (semantic, str) in SemanticsToCheck)
             if (semantics.HasFlag(semantic))
                 nameBuilder.Append(str);
 
-        //Return type
+        
         nameBuilder.Append('_');
         nameBuilder.Append(method.ReturnType.FormatTypeNameForMember());
 
-        //Params
+        
         foreach (var parameterInfoProvider in method.ParameterInfoProviders)
         {
             nameBuilder.Append('_');
             nameBuilder.Append(parameterInfoProvider.ParameterTypeInfoProvider.FormatTypeNameForMember());
         }
 
-        //TODO _PDM suffix
+        
 
         return nameBuilder.ToString();
     }
@@ -217,19 +217,19 @@ public static class StableNameGenerator
 
     public static string GetStableNameForField(IFieldInfoProvider field)
     {
-        //Field_ prefix
+        
         var nameBuilder = new StringBuilder();
         nameBuilder.Append("field_");
 
-        //Accessibility
+        
         var attribs = field.FieldAttributes;
         nameBuilder.Append(MemberAccessTypeLabels[(int)(attribs & FieldAttributes.FieldAccessMask)]);
 
-        //Any other keywords
+        
         if (attribs.HasFlag(FieldAttributes.Static))
             nameBuilder.Append("_Static");
 
-        //Type
+        
         nameBuilder.Append('_');
         nameBuilder.Append(field.FieldTypeInfoProvider.FormatTypeNameForMember());
 
@@ -243,11 +243,11 @@ public static class StableNameGenerator
 
     public static string GetStableNameForProperty(IPropertyInfoProvider property)
     {
-        //prop_ prefix
+        
         var nameBuilder = new StringBuilder();
         nameBuilder.Append("prop_");
 
-        //Type
+        
         nameBuilder.Append(property.PropertyTypeInfoProvider.FormatTypeNameForMember());
 
         return nameBuilder.ToString();
@@ -260,11 +260,11 @@ public static class StableNameGenerator
 
     public static string GetStableNameForEvent(IEventInfoProvider evt)
     {
-        //event_ prefix
+        
         var nameBuilder = new StringBuilder();
         nameBuilder.Append("event_");
 
-        //Type
+        
         nameBuilder.Append(evt.EventTypeInfoProvider.FormatTypeNameForMember());
 
         return nameBuilder.ToString();
@@ -278,7 +278,7 @@ public static class StableNameGenerator
         return s.ContainsAnyInvalidSourceCodeChars(true);
     }
 
-    //Unhollower is a little inconsistent - there are two "format type name"-like methods. This is the simpler of the two.
+    
     private static List<string> FormatTypeNameForType(this ITypeInfoProvider type)
     {
         if (type.IsGenericInstance)
@@ -301,7 +301,7 @@ public static class StableNameGenerator
         return [type.NameOrRename()];
     }
 
-    //And this is the second, which takes into account byref and ptr types, as well as arrays
+    
     private static string FormatTypeNameForMember(this ITypeInfoProvider type)
     {
         var builder = new StringBuilder();
@@ -327,7 +327,7 @@ public static class StableNameGenerator
             default:
             {
                 if (type.TypeNamespace.StartsWith("System") && type.OriginalTypeName.Contains("Array"))
-                    builder.Append("ArrayOf"); //Array of what? Who knows
+                    builder.Append("ArrayOf"); 
                 else
                     builder.Append(type.RewrittenTypeName.Replace('`', '_'));
 

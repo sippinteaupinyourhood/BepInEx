@@ -144,7 +144,7 @@ namespace Il2CppInterop.Runtime.Injection
             if (methodInfoPointerField == null)
                 throw new ArgumentException($"Couldn't find the generated method info pointer for {proxyMethod.Name}");
 
-            // Il2CppClassPointerStore calls the static constructor for the type
+            
             Il2CppClassPointerStore.GetNativeClassPointer(proxyMethod.DeclaringType);
 
             IntPtr methodInfoPointer = (IntPtr)methodInfoPointerField.GetValue(null);
@@ -156,7 +156,7 @@ namespace Il2CppInterop.Runtime.Injection
 
         private static long s_LastInjectedToken = -2;
         internal static readonly ConcurrentDictionary<long, IntPtr> s_InjectedClasses = new();
-        /// <summary> (namespace, class, image) : class </summary>
+        
         internal static readonly Dictionary<(string _namespace, string _class, IntPtr imagePtr), IntPtr> s_ClassNameLookup = new();
 
         #region Class::Init

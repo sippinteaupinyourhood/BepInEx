@@ -84,11 +84,11 @@ public class IsilDumpOutputFormat : Cpp2IlOutputFormat
 
     private static string GetFilePathForType(string outputRoot, TypeAnalysisContext type, string assemblyNameClean)
     {
-        //Get root assembly directory
+        
         var assemblyDir = Path.Combine(outputRoot, assemblyNameClean);
 
-        //If type is nested, we should use namespace of ultimate declaring type, which could be an arbitrary depth
-        //E.g. rewired has a type Rewired.Data.Mapping.HardwareJoystickMap, which contains a nested class Platform_Linux_Base, which contains MatchingCriteria, which contains ElementCount.
+        
+        
         var ultimateDeclaringType = type;
         while (ultimateDeclaringType.DeclaringType != null)
             ultimateDeclaringType = ultimateDeclaringType.DeclaringType;
@@ -99,7 +99,7 @@ public class IsilDumpOutputFormat : Cpp2IlOutputFormat
             .Select(n => MiscUtils.InvalidPathElements.Contains(n) ? $"__illegalwin32name_{n}__" : n)
             .ToArray();
 
-        //Ok so we have the namespace directory. Now we need to join all the declaring type hierarchy together for a filename.
+        
         var declaringTypeHierarchy = new List<string>();
         var declaringType = type.DeclaringType;
         while (declaringType != null)
@@ -108,25 +108,25 @@ public class IsilDumpOutputFormat : Cpp2IlOutputFormat
             declaringType = declaringType.DeclaringType;
         }
 
-        //Reverse so we have top-level type first.
+        
         declaringTypeHierarchy.Reverse();
 
-        //Join the hierarchy together with _NestedType_ separators
+        
         string filename;
         if (declaringTypeHierarchy.Count > 0)
             filename = $"{string.Join("_NestedType_", declaringTypeHierarchy)}_NestedType_{type.Name}.txt";
         else
             filename = $"{type.Name}.txt";
 
-        //Get directory from assembly root + namespace
+        
         var directory = Path.Combine(namespaceSplit.Prepend(assemblyDir).ToArray());
         if (!Directory.Exists(directory))
             Directory.CreateDirectory(directory);
 
-        //Clean up the filename
+        
         MiscUtils.InvalidPathChars.ForEach(c => filename = filename.Replace(c, '_'));
 
-        //Combine the directory and filename
+        
         return Path.Combine(directory, filename);
     }
 

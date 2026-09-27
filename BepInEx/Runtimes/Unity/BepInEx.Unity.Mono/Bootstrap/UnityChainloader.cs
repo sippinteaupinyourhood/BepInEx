@@ -18,9 +18,9 @@ using Object = UnityEngine.Object;
 
 namespace BepInEx.Unity.Mono.Bootstrap;
 
-/// <summary>
-///     The manager and loader for all plugins, and the entry point for BepInEx plugin system.
-/// </summary>
+
+
+
 public class UnityChainloader : BaseChainloader<BaseUnityPlugin>
 {
     private static readonly ConfigEntry<bool> ConfigUnityLogging = ConfigFile.CoreConfig.Bind(
@@ -37,23 +37,23 @@ public class UnityChainloader : BaseChainloader<BaseUnityPlugin>
 
     private string _consoleTitle;
 
-    // TODO: Remove once proper instance handling exists
+    
     public static UnityChainloader Instance { get; set; }
 
-    /// <summary>
-    ///     The GameObject that all plugins are attached to as components.
-    /// </summary>
+    
+    
+    
     public static GameObject ManagerObject { get; private set; }
 
     protected override string ConsoleTitle => _consoleTitle;
 
 
-    // In some rare cases calling Application.unityVersion seems to cause MissingMethodException
-    // if a preloader patch applies Harmony patch to Chainloader.Initialize.
-    // The issue could be related to BepInEx being compiled against Unity 5.6 version of UnityEngine.dll,
-    // but the issue is apparently present with both official Harmony and HarmonyX
-    // We specifically prevent inlining to prevent early resolving
-    // TODO: Figure out better version obtaining mechanism (e.g. from globalmanagers)
+    
+    
+    
+    
+    
+    
     private static string UnityVersion
     {
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -125,7 +125,7 @@ public class UnityChainloader : BaseChainloader<BaseUnityPlugin>
 
         Logger.Listeners.Add(new UnityLogListener());
 
-        // Update version info from runtime in case it wasn't set yet
+        
         var prevVersion = UnityInfo.Version;
         UnityInfo.SetRuntimeUnityVersion(UnityVersion);
         if (UnityInfo.Version != prevVersion)

@@ -1,4 +1,4 @@
-// #define VERBOSE_LOGGING
+
 
 using System;
 using System.Collections.Generic;
@@ -32,7 +32,7 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
         if (!Directory.Exists(outputRoot))
             Directory.CreateDirectory(outputRoot);
 
-        //Convert assembly definitions to PE files
+        
         var peImagesToWrite = ret
             .AsParallel()
             .WithConfiguredParallelism()
@@ -44,7 +44,7 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
         start = DateTime.Now;
         Logger.Verbose("Building and writing managed PE files to disk...", "DllOutput");
 
-        //Save them
+        
         var fileBuilder = new ManagedPEFileBuilder();
         foreach (var (image, name) in peImagesToWrite)
         {
@@ -66,7 +66,7 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
         var eventCount = context.AllTypes.SelectMany(t => t.Events).Count();
 #endif
 
-        //Build the stub assemblies
+        
         var start = DateTime.Now;
 #if VERBOSE_LOGGING
         Logger.Verbose($"Building stub assemblies ({asmCount} assemblies, {typeCount} types)...", "DllOutput");
@@ -83,7 +83,7 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
 
         Logger.VerboseNewline($"{(DateTime.Now - start).TotalMilliseconds:F1}ms", "DllOutput");
 
-        //Populate them
+        
         start = DateTime.Now;
 
 #if VERBOSE_LOGGING
@@ -97,14 +97,14 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
 
         Logger.VerboseNewline($"{(DateTime.Now - start).TotalMilliseconds:F1}ms", "DllOutput");
 
-        //Populate custom attributes
+        
         start = DateTime.Now;
         Logger.Verbose("Adding custom attributes to all of the above...", "DllOutput");
         MiscUtils.ExecuteParallel(context.Assemblies, AsmResolverAssemblyPopulator.PopulateCustomAttributes);
 
         Logger.VerboseNewline($"{(DateTime.Now - start).TotalMilliseconds:F1}ms", "DllOutput");
 
-        //Fill method bodies - this should always be done last
+        
         start = DateTime.Now;
         Logger.Verbose($"Filling method bodies (in parallel)...", "DllOutput");
         MiscUtils.ExecuteParallel(context.Assemblies, FillMethodBodies);
@@ -156,7 +156,7 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
         assemblyResolver.DummyAssemblies.Add(MostRecentCorLib.Name!, MostRecentCorLib);
 
         var ret = context.Assemblies
-            // .AsParallel()
+            
             .Where(a => a.Name != "mscorlib")
             .Select(a => BuildStubAssembly(a, MostRecentCorLib, metadataResolver))
             .ToList();
@@ -169,8 +169,8 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
 
     private static AssemblyDefinition BuildStubAssembly(AssemblyAnalysisContext assemblyContext, AssemblyDefinition? corLib, IMetadataResolver metadataResolver)
     {
-        //Get the name of the assembly (= the name of the DLL without the file extension)
-        //Build an AsmResolver assembly from this definition
+        
+        
         var ourAssembly = new AssemblyDefinition(assemblyContext.Name, assemblyContext.Version)
         {
             HashAlgorithm = (AssemblyHashAlgorithm)assemblyContext.HashAlgorithm,
@@ -179,10 +179,10 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
             PublicKey = assemblyContext.PublicKey,
         };
 
-        //Setting the corlib module allows element types in references to that assembly to be set correctly without us having to manually set them.
+        
         var moduleName = assemblyContext.CleanAssemblyName + ".dll";
 
-        //Use either ourself as corlib, if we are corlib, otherwise the provided one
+        
         var managedModule = new ModuleDefinition(moduleName, corLib is not null ? new(corLib) : null)
         {
             MetadataResolver = metadataResolver
@@ -192,17 +192,17 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
         foreach (var il2CppTypeDefinition in assemblyContext.TopLevelTypes)
         {
             if (il2CppTypeDefinition.Name != "<Module>")
-                //We skip module because I've never come across an il2cpp assembly with any top-level functions, and it's simpler to skip it as AsmResolver adds one by default.
+                
                 managedModule.TopLevelTypes.Add(BuildStubType(il2CppTypeDefinition));
         }
 
         if (corLib == null)
         {
-            //We *are* the corlib, so cache defs now
+            
             TypeDefinitionsAsmResolver.CacheNeededTypeDefinitions();
         }
 
-        //We can get issues with consumers of the API if the base type is not set correctly for value types or enums, so we set it here (as early as possible) if we can
+        
         foreach (var assemblyContextType in assemblyContext.Types)
         {
             if (assemblyContextType.Definition is not { } def || assemblyContextType.GetExtraData<TypeDefinition>("AsmResolverType") is not { } asmResolverType)
@@ -214,7 +214,7 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
                 asmResolverType.BaseType = managedModule.DefaultImporter.ImportType(TypeDefinitionsAsmResolver.Enum);
         }
 
-        //Store the managed assembly in the context so we can use it later.
+        
         assemblyContext.PutExtraData("AsmResolverAssembly", ourAssembly);
 
         return ourAssembly;
@@ -224,21 +224,21 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
     {
         var typeDef = typeContext.Definition;
 
-        //Initialize an empty type definition
+        
         var ret = new TypeDefinition(typeContext.Namespace, typeContext.Name, (TypeAttributes)typeContext.Attributes);
 
-        //Set up its layout
+        
         if (typeDef != null)
             ConfigureTypeSize(typeDef, ret);
 
-        //Create nested types
+        
         foreach (var cppNestedType in typeContext.NestedTypes)
             ret.NestedTypes.Add(BuildStubType(cppNestedType));
 
-        //Associate this asm resolve td with the type context
+        
         typeContext.PutExtraData("AsmResolverType", ret);
 
-        //Add to the lookup-by-id table used by the resolver
+        
         if (typeDef != null)
             AsmResolverUtils.TypeDefsByIndex[typeDef.TypeIndex] = ret;
 
@@ -248,7 +248,7 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
     private static void ConfigureTypeSize(Il2CppTypeDefinition il2CppDefinition, TypeDefinition asmResolverDefinition)
     {
         if (!il2CppDefinition.IsValueType || il2CppDefinition.IsEnumType)
-            return; // Only structs can have their layout changed
+            return; 
 
         ushort packingSize = 0;
         var classSize = 0U;
@@ -263,7 +263,7 @@ public abstract class AsmResolverDllOutputFormat : Cpp2IlOutputFormat
             if (il2CppDefinition.Size != -1)
                 classSize = (uint)il2CppDefinition.Size;
             else
-                classSize = 0; //Not sure what this value actually implies but it seems to work
+                classSize = 0; 
         }
 
         if (packingSize != 0 || classSize != 0)

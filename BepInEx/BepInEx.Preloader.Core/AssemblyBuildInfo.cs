@@ -72,7 +72,7 @@ namespace BepInEx.Preloader.Core
         {
             var buildInfo = new AssemblyBuildInfo();
 
-            // framework version
+            
 
             var runtime = assemblyDefinition.MainModule.Runtime;
 
@@ -88,7 +88,7 @@ namespace BepInEx.Preloader.Core
             }
             else if (runtime == TargetRuntime.Net_2_0)
             {
-                // Assume 3.5 here. The code to determine versions between 2.0 and 3.5 is not worth the amount of non-unity games that use it, if any
+                
 
                 buildInfo.NetFrameworkVersion = new Version(3, 5);
                 buildInfo.AssemblyFrameworkType = FrameworkType.NetFramework;
@@ -98,25 +98,25 @@ namespace BepInEx.Preloader.Core
                 buildInfo.SetNet4Version(assemblyDefinition);
             }
 
-            // bitness
+            
 
-            /*
-                AnyCPU 64-bit preferred
-                MainModule.Architecture: I386
-                MainModule.Attributes: ILOnly
+            
 
-                AnyCPU 32-bit preferred
-                MainModule.Architecture: I386
-                MainModule.Attributes: ILOnly, Required32Bit, Preferred32Bit
 
-                x86
-                MainModule.Architecture: I386
-                MainModule.Attributes: ILOnly, Required32Bit
 
-                x64
-                MainModule.Architecture: AMD64
-                MainModule.Attributes: ILOnly
-            */
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             var architecture = assemblyDefinition.MainModule.Architecture;
             var attributes = assemblyDefinition.MainModule.Attributes;
@@ -154,7 +154,7 @@ namespace BepInEx.Preloader.Core
             return (value & flag) == flag;
         }
 
-        /// <inheritdoc />
+        
         public override string ToString()
         {
             string frameworkType = AssemblyFrameworkType switch {

@@ -2,7 +2,7 @@ namespace LibCpp2IL.Metadata;
 
 public class Il2CppStringLiteral : ReadableClass
 {
-    [Version(Max = 34)] //Removed in v35, instead you read until next string literal or end of string literal data
+    [Version(Max = 34)] 
     public uint length;
     public int dataIndex;
 

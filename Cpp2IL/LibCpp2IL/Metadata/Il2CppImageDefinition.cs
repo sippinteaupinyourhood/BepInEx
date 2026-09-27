@@ -24,7 +24,7 @@ public class Il2CppImageDefinition : ReadableClass
     public Il2CppTypeDefinition[]? Types => LibCpp2IlMain.TheMetadata == null ? null 
         : Enumerable
             .Range(firstTypeIndex.Value, (int)typeCount)
-            .Select(Il2CppVariableWidthIndex<Il2CppTypeDefinition>.MakeTemporaryForFixedWidthUsage) // DynWidth: using Enumerable.Range, not read from file, so making temp is ok
+            .Select(Il2CppVariableWidthIndex<Il2CppTypeDefinition>.MakeTemporaryForFixedWidthUsage) 
             .Select(LibCpp2IlMain.TheMetadata.GetTypeDefinitionFromIndex)
             .ToArray();
 

@@ -28,12 +28,12 @@ public class Tests
         var binaryBytes = await client.GetByteArrayAsync(binaryUrl);
         _outputHelper.WriteLine($"Got {binaryBytes.Length / 1024 / 1024} MB binary file.");
 
-        //Configure the lib.
+        
         LibCpp2IlMain.Settings.DisableGlobalResolving = true;
         LibCpp2IlMain.Settings.DisableMethodPointerMapping = true;
         LibCpp2IlMain.Settings.AllowManualMetadataAndCodeRegInput = false;
 
-        //Clean up any previous runs
+        
         LibCpp2IlMain.TheMetadata = null;
         LibCpp2IlMain.Binary = null;
 

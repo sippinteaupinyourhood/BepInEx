@@ -43,6 +43,6 @@ internal static class RedirectStdErrFix
             if (!SetStdHandle(STD_ERROR_HANDLE, errorFile))
                 Logger.Log(LogLevel.Warning, "Failed to redirect stderr; skipping error redirection");
         }
-        // On unix, we can generally redirect stderr to a file "normally" via piping
+        
     }
 }

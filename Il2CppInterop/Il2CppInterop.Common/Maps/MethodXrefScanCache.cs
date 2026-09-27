@@ -6,7 +6,7 @@ namespace Il2CppInterop.Common.Maps;
 
 public class MethodXrefScanCache : IDisposable
 {
-    public const int Magic = 0x43584D55; // UMXC
+    public const int Magic = 0x43584D55; 
     public const int Version = 1;
     public const string FileName = "MethodXrefScanCache.db";
 
@@ -94,7 +94,7 @@ public class MethodXrefScanCache : IDisposable
         public int Version;
         public long InitMethodMetadataRva;
 
-        // data is MethodData[]
+        
     }
 
     [StructLayout(LayoutKind.Sequential)]

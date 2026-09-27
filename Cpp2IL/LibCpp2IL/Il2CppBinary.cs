@@ -30,25 +30,27 @@ public abstract class Il2CppBinary(MemoryStream input) : ClassReadingBinaryReade
     private Il2CppMetadataRegistration _metadataRegistration = null!;
     private Il2CppCodeRegistration _codeRegistration = null!;
 
+    public ulong MetadataRegistrationAddress { get; private set; }
+
     private ulong[] _methodPointers = [];
 
     private ulong[] _genericMethodPointers = [];
 
-    // private ulong[] _invokerPointers = Array.Empty<ulong>();
-    private ulong[]? _customAttributeGenerators = []; //Pre-27 only
+    
+    private ulong[]? _customAttributeGenerators = []; 
     private long[] _fieldOffsets = [];
-    private ulong[] _metadataUsages = []; //Pre-27 only
-    private ulong[][] _codeGenModuleMethodPointers = []; //24.2+
+    private ulong[] _metadataUsages = []; 
+    private ulong[][] _codeGenModuleMethodPointers = []; 
 
     private Il2CppType[] _types = [];
     private Il2CppGenericMethodFunctionsDefinitions[] _genericMethodTables = [];
     private Il2CppGenericInst[] _genericInsts = [];
     private Il2CppMethodSpec[] _methodSpecs = [];
-    private Il2CppCodeGenModule[] _codeGenModules = []; //24.2+
+    private Il2CppCodeGenModule[] _codeGenModules = []; 
     private Il2CppTokenRangePair[][] _codegenModuleRgctxRanges = [];
     private Il2CppRGCTXDefinition[][] _codegenModuleRgctxs = [];
 
-    private Dictionary<string, Il2CppCodeGenModule> _codeGenModulesByName = new(); //24.2+
+    private Dictionary<string, Il2CppCodeGenModule> _codeGenModulesByName = new(); 
     private Dictionary<Il2CppVariableWidthIndex<Il2CppMethodDefinition>, ulong> _genericMethodDictionary = new();
     private readonly Dictionary<ulong, Il2CppType> _typesByAddress = new();
 
@@ -57,9 +59,9 @@ public abstract class Il2CppBinary(MemoryStream input) : ClassReadingBinaryReade
 
     public Il2CppType[] AllTypes => _types;
 
-    /// <summary>
-    /// Can be overriden if, like the wasm format, your data has to be unpacked and you need to use a different reader
-    /// </summary>
+    
+    
+    
     public virtual ClassReadingBinaryReader Reader => this;
 
     private float? _metadataVersion;
@@ -86,6 +88,7 @@ public abstract class Il2CppBinary(MemoryStream input) : ClassReadingBinaryReade
 
         _codeRegistration = cr;
         _metadataRegistration = mr;
+        MetadataRegistrationAddress = pMetadataRegistration;
         
         InBinaryMetadataSize += GetNumBytesReadSinceLastCallAndClear();
 
@@ -111,11 +114,11 @@ public abstract class Il2CppBinary(MemoryStream input) : ClassReadingBinaryReade
 
         InBinaryMetadataSize += GetNumBytesReadSinceLastCallAndClear();
 
-        // These aren't actually used right now, and if we have a limited code reg (e.g. heavily inlined linux games) we can't read them anyway
-        // LibLogger.Verbose("\tReading invoker pointers...");
-        // start = DateTime.Now;
-        // _invokerPointers = ReadNUintArrayAtVirtualAddress(_codeRegistration.invokerPointers, (long)_codeRegistration.invokerPointersCount);
-        // LibLogger.VerboseNewline($"OK ({(DateTime.Now - start).TotalMilliseconds} ms)");
+        
+        
+        
+        
+        
 
         InBinaryMetadataSize += GetNumBytesReadSinceLastCallAndClear();
 
@@ -159,7 +162,7 @@ public abstract class Il2CppBinary(MemoryStream input) : ClassReadingBinaryReade
 
         if (_metadataRegistration.metadataUsages != 0)
         {
-            //Empty in v27
+            
             LibLogger.Verbose("\tReading metadata usages...");
             start = DateTime.Now;
             _metadataUsages = ReadNUintArrayAtVirtualAddress(_metadataRegistration.metadataUsages, (long)Math.Max((decimal)_metadataRegistration.metadataUsagesCount, _maxMetadataUsages));
@@ -290,7 +293,7 @@ public abstract class Il2CppBinary(MemoryStream input) : ClassReadingBinaryReade
     {
         Cpp2IlMethodRef? genericMethodRef;
         var methodSpec = GetMethodSpec(genericMethodIndex);
-        var methodDefIndex = Il2CppVariableWidthIndex<Il2CppMethodDefinition>.MakeTemporaryForFixedWidthUsage(methodSpec.methodDefinitionIndex); //DynWidth: method specs are in-binary, so the methodDefIndex is still the old fixed-width index, so we can make a temp here without issue.
+        var methodDefIndex = Il2CppVariableWidthIndex<Il2CppMethodDefinition>.MakeTemporaryForFixedWidthUsage(methodSpec.methodDefinitionIndex); 
         genericMethodRef = new Cpp2IlMethodRef(methodSpec);
 
         if (genericMethodPointerIndex >= 0)
@@ -399,7 +402,7 @@ public abstract class Il2CppBinary(MemoryStream input) : ClassReadingBinaryReade
                     try
                     {
                         Position = (long)offsetOffset;
-                        offset = (int)ReadPrimitive(typeof(int))!; //Read 4 bytes. We can't just use ReadInt32 because that breaks e.g. Wasm. Hoping the JIT can optimize this as it knows the type.
+                        offset = (int)ReadPrimitive(typeof(int))!; 
                     }
                     finally
                     {

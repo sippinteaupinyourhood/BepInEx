@@ -13,7 +13,7 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
         public override string TargetMethodName => "Class::FromIl2CppType";
         public override MethodDelegate GetDetour() => Hook;
 
-        /// Common version of the Il2CppType, the only thing that changed between unity version are the bitfields values that we don't use
+        
         internal readonly struct Il2CppType
         {
             public readonly void* data;

@@ -9,26 +9,26 @@ namespace LibCpp2IL.PE;
 
 public sealed class PE : Il2CppBinary
 {
-    //Initialized in constructor
-    internal readonly byte[] raw; //Internal for PlusSearch
+    
+    internal readonly byte[] raw; 
 
-    //PE-Specific Stuff
-    internal readonly SectionHeader[] peSectionHeaders; //Internal for the one use in PlusSearch
-    internal readonly ulong peImageBase; //Internal for the one use in PlusSearch
+    
+    internal readonly SectionHeader[] peSectionHeaders; 
+    internal readonly ulong peImageBase; 
     private readonly OptionalHeader64? peOptionalHeader64;
     private readonly OptionalHeader? peOptionalHeader32;
 
-    //Disable null check because this stuff is initialized post-constructor
+    
 #pragma warning disable 8618
     private uint[]? peExportedFunctionPointers;
     private uint[] peExportedFunctionNamePtrs;
     private ushort[] peExportedFunctionOrdinals;
 
-    //Il2cpp binary fields:
+    
 
-    //Top-level structs
+    
 
-    //Pointers
+    
 
     public PE(MemoryStream input) : base(input)
     {
@@ -36,22 +36,22 @@ public sealed class PE : Il2CppBinary
         LibLogger.Verbose("\tReading PE File Header...");
         var start = DateTime.Now;
 
-        if (ReadUInt16() != 0x5A4D) //Magic number
+        if (ReadUInt16() != 0x5A4D) 
             throw new FormatException("ERROR: Magic number mismatch.");
-        Position = 0x3C; //Signature position position (lol)
-        Position = ReadUInt32(); //Signature position
-        if (ReadUInt32() != 0x00004550) //Signature
+        Position = 0x3C; 
+        Position = ReadUInt32(); 
+        if (ReadUInt32() != 0x00004550) 
             throw new FormatException("ERROR: Invalid PE file signature");
 
         var fileHeader = ReadReadable<FileHeader>();
-        if (fileHeader.Machine == 0x014c) //Intel 386
+        if (fileHeader.Machine == 0x014c) 
         {
             is32Bit = true;
             InstructionSetId = DefaultInstructionSets.X86_32;
             peOptionalHeader32 = ReadReadable<OptionalHeader>();
             peImageBase = peOptionalHeader32.ImageBase;
         }
-        else if (fileHeader.Machine == 0x8664) //AMD64
+        else if (fileHeader.Machine == 0x8664) 
         {
             InstructionSetId = DefaultInstructionSets.X86_64;
             peOptionalHeader64 = ReadReadable<OptionalHeader64>();
@@ -120,7 +120,7 @@ public sealed class PE : Il2CppBinary
             if (peOptionalHeader32?.DataDirectory == null || peOptionalHeader32.DataDirectory.Length == 0)
                 throw new InvalidDataException("Could not load 32-bit optional header or data directory, or data directory was empty!");
 
-            //We assume, per microsoft guidelines, that the first datadirectory is the export table.
+            
             addrExportTable = peOptionalHeader32.DataDirectory.First().VirtualAddress;
         }
         else
@@ -128,18 +128,18 @@ public sealed class PE : Il2CppBinary
             if (peOptionalHeader64?.DataDirectory == null || peOptionalHeader64.DataDirectory.Length == 0)
                 throw new InvalidDataException("Could not load 64-bit optional header or data directory, or data directory was empty!");
 
-            //We assume, per microsoft guidelines, that the first datadirectory is the export table.
+            
             addrExportTable = peOptionalHeader64.DataDirectory.First().VirtualAddress;
         }
 
         try
         {
-            //Non-virtual addresses for these
+            
             var directoryEntryExports = ReadReadableAtVirtualAddress<PeDirectoryEntryExport>(addrExportTable + peImageBase);
 
             peExportedFunctionPointers = ReadClassArrayAtVirtualAddress<uint>(directoryEntryExports.RawAddressOfExportTable + peImageBase, directoryEntryExports.NumberOfExports);
             peExportedFunctionNamePtrs = ReadClassArrayAtVirtualAddress<uint>(directoryEntryExports.RawAddressOfExportNameTable + peImageBase, directoryEntryExports.NumberOfExportNames);
-            peExportedFunctionOrdinals = ReadClassArrayAtVirtualAddress<ushort>(directoryEntryExports.RawAddressOfExportOrdinalTable + peImageBase, directoryEntryExports.NumberOfExportNames); //This uses the name count per MSoft spec
+            peExportedFunctionOrdinals = ReadClassArrayAtVirtualAddress<ushort>(directoryEntryExports.RawAddressOfExportOrdinalTable + peImageBase, directoryEntryExports.NumberOfExportNames); 
         }
         catch (EndOfStreamException)
         {

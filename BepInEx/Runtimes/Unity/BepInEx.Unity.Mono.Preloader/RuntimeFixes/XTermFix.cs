@@ -19,18 +19,18 @@ internal static class XTermFix
             return;
 
         if (typeof(Console).Assembly.GetType("System.ConsoleDriver") == null)
-            // Mono version is too old, use our own TTY implementation instead
+            
             return;
 
         if (AccessTools.Method("System.TermInfoReader:DetermineVersion") != null)
-            // Fix has been applied officially
+            
             return;
 
-        // Apparently on older Unity versions (4.x), using Process.Start can run Console..cctor
-        // And since MonoMod's PlatformHelper (used by DetourHelper.Native) runs Process.Start to determine ARM/x86 platform,
-        // this causes a crash owing to TermInfoReader running before it can be patched and fixed
-        // Because Doorstop does not support ARM at the moment, we can get away with just forcing x86 detour platform.
-        // TODO: Figure out a way to detect ARM on Unix without running Process.Start
+        
+        
+        
+        
+        
         DetourHelper.Native = new DetourNativeX86Platform();
 
         var harmony = new Harmony("com.bepinex.xtermfix");
@@ -93,7 +93,7 @@ internal static class XTermFix
         position += 2;
         DetermineVersion(magic);
 
-        // nameSize = GetInt16(buffer, position);
+        
         position += 2;
         ___boolSize = GetInt16(buffer, position);
         position += 2;
@@ -101,7 +101,7 @@ internal static class XTermFix
         position += 2;
         ___strOffsets = GetInt16(buffer, position);
         position += 2;
-        // strSize = GetInt16(buffer, position);
+        
         position += 2;
 
         return false;
@@ -109,7 +109,7 @@ internal static class XTermFix
 
     public static IEnumerable<CodeInstruction> GetTermInfoNumbersTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        // This implementation does not seem to have changed so I will be using indexes like the lazy fuck I am
+        
 
         var list = instructions.ToList();
 
@@ -122,7 +122,7 @@ internal static class XTermFix
 
     public static IEnumerable<CodeInstruction> GetTermInfoStringsTranspiler(IEnumerable<CodeInstruction> instructions)
     {
-        // This implementation does not seem to have changed so I will be using indexes like the lazy fuck I am
+        
 
         var list = instructions.ToList();
 

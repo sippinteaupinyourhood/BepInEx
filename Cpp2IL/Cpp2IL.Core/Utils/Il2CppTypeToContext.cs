@@ -27,7 +27,7 @@ public static class Il2CppTypeToContext
             ret = context.AppContext.ResolveContextForGenericParameter(type.GetGenericParameterDef()) ?? throw new($"Could not resolve type context for type {type.GetGenericParameterDef().Name}");
 
         if (type.Byref == 1)
-            //Byref types need to be wrapped in a byref context so that we don't have incorrect method signatures.
+            
             ret = ret.MakeByReferenceType();
 
         return ret;

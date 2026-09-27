@@ -4,7 +4,7 @@ public class Il2CppCustomAttributeTypeRange : ReadableClass, IIl2CppTokenProvide
 {
     [Version(Min = 24.1f)] public uint token;
     public int start;
-    [Version(Max = 27.9f)] public int count; //Removed in v29
+    [Version(Max = 27.9f)] public int count; 
 
     public uint Token => token;
 

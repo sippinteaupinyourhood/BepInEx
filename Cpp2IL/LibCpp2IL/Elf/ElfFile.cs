@@ -61,7 +61,7 @@ public sealed class ElfFile : Il2CppBinary
         LibLogger.VerboseNewline("\tReading ELF section header table and names...");
         start = DateTime.Now;
 
-        //Non-null assertion reason: The elf header has already been checked while reading the program header.
+        
         try
         {
             _elfSectionHeaderEntries = ReadReadableArrayAtRawAddr<ElfSectionHeaderEntry>(_elfHeader!.pSectionHeader, _elfHeader.SectionHeaderEntryCount).ToList();
@@ -96,12 +96,12 @@ public sealed class ElfFile : Il2CppBinary
 
         LibLogger.VerboseNewline($"\tELF global offset is 0x{_globalOffset:X}");
 
-        //Get dynamic section.
+        
         if (GetProgramHeaderOfType(ElfProgramEntryType.PT_DYNAMIC) is { } dynamicSegment)
         {
-            // NOTE: Do not use .RawAddress here, as it is not guaranteed to point to the actual dynamic table being used.
-            // The dynamic table should be mapped by one of the preceding PT_LOAD entries.
-            // Source: phdr_table_get_dynamic_section, https://cs.android.com/android/platform/superproject/main/+/main:bionic/linker/linker_phdr.cpp
+            
+            
+            
             _dynamicSection = ReadReadableArrayAtVirtualAddress<ElfDynamicEntry>(dynamicSegment.VirtualAddress, (int)dynamicSegment.RawSize / (is32Bit ? 8 : 16)).ToList();
         }
 
@@ -131,7 +131,7 @@ public sealed class ElfFile : Il2CppBinary
     {
         _elfFileIdent = ReadReadable<ElfFileIdent>(0);
 
-        if (_elfFileIdent.Magic != 0x464c457f) //Magic number
+        if (_elfFileIdent.Magic != 0x464c457f) 
             throw new FormatException("ERROR: Magic number mismatch.");
 
         if (_elfFileIdent.Architecture == 1)
@@ -183,13 +183,13 @@ public sealed class ElfFile : Il2CppBinary
 
             var relSectionStarts = new HashSet<ulong>();
 
-            //REL tables
+            
             foreach (var section in GetSections(ElfSectionEntryType.SHT_REL))
             {
-                //Get related section pointer
+                
                 var relatedTablePointer = _elfSectionHeaderEntries[section.LinkedSectionIndex].RawAddress;
 
-                //Read rel table
+                
                 var table = ReadReadableArrayAtRawAddr<ElfRelEntry>((long)section.RawAddress, (long)(section.Size / (ulong)section.EntrySize));
 
                 LibLogger.VerboseNewline($"\t\t-Got {table.Length} from REL section {section.Name}");
@@ -197,11 +197,11 @@ public sealed class ElfFile : Il2CppBinary
                 relocationBlocks.Add((section.RawAddress, section.RawAddress + section.Size));
                 relSectionStarts.Add(section.RawAddress);
 
-                //Insert into rels list.
+                
                 rels.UnionWith(table.Select(r => new ElfRelocation(this, r, relatedTablePointer)));
             }
 
-            //RELA tables
+            
             foreach (var section in GetSections(ElfSectionEntryType.SHT_RELA))
             {
                 if (relSectionStarts.Contains(section.RawAddress))
@@ -210,10 +210,10 @@ public sealed class ElfFile : Il2CppBinary
                     continue;
                 }
 
-                //Get related section pointer
+                
                 var relatedTablePointer = _elfSectionHeaderEntries[section.LinkedSectionIndex].RawAddress;
 
-                //Read rela table
+                
                 var table = ReadReadableArrayAtRawAddr<ElfRelaEntry>((long)section.RawAddress, (long)(section.Size / (ulong)section.EntrySize));
 
                 LibLogger.VerboseNewline($"\t\t-Got {table.Length} from RELA section {section.Name} at 0x{section.RawAddress}");
@@ -221,23 +221,23 @@ public sealed class ElfFile : Il2CppBinary
                 relocationBlocks.Add((section.RawAddress, section.RawAddress + section.Size));
                 relSectionStarts.Add(section.RawAddress);
 
-                //Insert into rels list.
+                
                 rels.UnionWith(table.Select(r => new ElfRelocation(this, r, relatedTablePointer)));
             }
 
-            //Dynamic Rel Table
+            
             if (GetDynamicEntryOfType(ElfDynamicType.DT_REL) is { } dt_rel && (uint)MapVirtualAddressToRaw(dt_rel.Value) is { } dtRelStartAddr)
             {
                 if (!relSectionStarts.Contains(dtRelStartAddr))
                 {
-                    //Null-assertion reason: We must have both a RELSZ and a RELENT or this is an error.
+                    
                     var relocationSectionSize = GetDynamicEntryOfType(ElfDynamicType.DT_RELSZ)!.Value;
                     var relCount = (int)(relocationSectionSize / GetDynamicEntryOfType(ElfDynamicType.DT_RELENT)!.Value);
                     var entries = ReadReadableArrayAtRawAddr<ElfRelEntry>(dtRelStartAddr, relCount);
 
                     LibLogger.VerboseNewline($"\t\t-Got {entries.Length} from dynamic REL section at 0x{dtRelStartAddr}");
 
-                    //Null-assertion reason: We must have a DT_SYMTAB if we have a DT_REL
+                    
                     var pSymTab = GetDynamicEntryOfType(ElfDynamicType.DT_SYMTAB)!.Value;
 
                     relocationBlocks.Add((dtRelStartAddr, dtRelStartAddr + relocationSectionSize));
@@ -250,10 +250,10 @@ public sealed class ElfFile : Il2CppBinary
                 }
             }
 
-            //Dynamic Rela Table
+            
             if (GetDynamicEntryOfType(ElfDynamicType.DT_RELA) is { } dt_rela)
             {
-                //Null-assertion reason: We must have both a RELSZ and a RELENT or this is an error.
+                
                 var relocationSectionSize = GetDynamicEntryOfType(ElfDynamicType.DT_RELASZ)!.Value;
                 var relCount = (int)(relocationSectionSize / GetDynamicEntryOfType(ElfDynamicType.DT_RELAENT)!.Value);
                 var startAddr = (uint)MapVirtualAddressToRaw(dt_rela.Value);
@@ -264,7 +264,7 @@ public sealed class ElfFile : Il2CppBinary
 
                     LibLogger.VerboseNewline($"\t\t-Got {entries.Length} from dynamic RELA section at 0x{startAddr}");
 
-                    //Null-assertion reason: We must have a DT_SYMTAB if we have a DT_RELA
+                    
                     var pSymTab = GetDynamicEntryOfType(ElfDynamicType.DT_SYMTAB)!.Value;
 
                     relocationBlocks.Add((startAddr, startAddr + relocationSectionSize));
@@ -302,10 +302,10 @@ public sealed class ElfFile : Il2CppBinary
                 }
                 catch (InvalidOperationException)
                 {
-                    continue; //Ignore this rel.
+                    continue; 
                 }
 
-                //Read one word.
+                
                 ulong addend;
                 if (rel.Addend.HasValue)
                     addend = rel.Addend.Value;
@@ -315,42 +315,42 @@ public sealed class ElfFile : Il2CppBinary
                     addend = ReadUInt64();
                 }
 
-                //Adapted from Il2CppInspector. Thanks to djKaty.
+                
 
                 ulong newValue;
                 bool recognized;
                 if (InstructionSetId == DefaultInstructionSets.ARM_V7)
                     (newValue, recognized) = rel.Type switch
                     {
-                        ElfRelocationType.R_ARM_ABS32 => (symValue + addend, true), // S + A
-                        ElfRelocationType.R_ARM_REL32 => (symValue + rel.Offset - addend, true), // S - P + A
-                        ElfRelocationType.R_ARM_COPY => (symValue, true), // S
+                        ElfRelocationType.R_ARM_ABS32 => (symValue + addend, true), 
+                        ElfRelocationType.R_ARM_REL32 => (symValue + rel.Offset - addend, true), 
+                        ElfRelocationType.R_ARM_COPY => (symValue, true), 
                         _ => (0UL, false)
                     };
                 else if (InstructionSetId == DefaultInstructionSets.ARM_V8)
                     (newValue, recognized) = rel.Type switch
                     {
-                        ElfRelocationType.R_AARCH64_ABS64 => (symValue + addend, true), // S + A
-                        ElfRelocationType.R_AARCH64_PREL64 => (symValue + addend - rel.Offset, true), // S + A - P
-                        ElfRelocationType.R_AARCH64_GLOB_DAT => (symValue + addend, true), // S + A
-                        ElfRelocationType.R_AARCH64_JUMP_SLOT => (symValue + addend, true), // S + A
-                        ElfRelocationType.R_AARCH64_RELATIVE => (symValue + addend, true), // Delta(S) + A
+                        ElfRelocationType.R_AARCH64_ABS64 => (symValue + addend, true), 
+                        ElfRelocationType.R_AARCH64_PREL64 => (symValue + addend - rel.Offset, true), 
+                        ElfRelocationType.R_AARCH64_GLOB_DAT => (symValue + addend, true), 
+                        ElfRelocationType.R_AARCH64_JUMP_SLOT => (symValue + addend, true), 
+                        ElfRelocationType.R_AARCH64_RELATIVE => (symValue + addend, true), 
                         _ => (0UL, false)
                     };
                 else if (InstructionSetId == DefaultInstructionSets.X86_32)
                     (newValue, recognized) = rel.Type switch
                     {
-                        ElfRelocationType.R_386_32 => (symValue + addend, true), // S + A
-                        ElfRelocationType.R_386_PC32 => (symValue + addend - rel.Offset, true), // S + A - P
-                        ElfRelocationType.R_386_GLOB_DAT => (symValue, true), // S
-                        ElfRelocationType.R_386_JMP_SLOT => (symValue, true), // S
+                        ElfRelocationType.R_386_32 => (symValue + addend, true), 
+                        ElfRelocationType.R_386_PC32 => (symValue + addend - rel.Offset, true), 
+                        ElfRelocationType.R_386_GLOB_DAT => (symValue, true), 
+                        ElfRelocationType.R_386_JMP_SLOT => (symValue, true), 
                         _ => (0UL, false)
                     };
                 else if (InstructionSetId == DefaultInstructionSets.X86_64)
                     (newValue, recognized) = rel.Type switch
                     {
-                        ElfRelocationType.R_AMD64_64 => (symValue + addend, true), // S + A
-                        ElfRelocationType.R_AMD64_RELATIVE => (addend, true), //Base address + A
+                        ElfRelocationType.R_AMD64_64 => (symValue + addend, true), 
+                        ElfRelocationType.R_AMD64_RELATIVE => (addend, true), 
 
                         _ => (0UL, false)
                     };
@@ -374,17 +374,17 @@ public sealed class ElfFile : Il2CppBinary
     {
         var symbolTables = new List<(ulong offset, ulong count, ulong strings)>();
 
-        //Look for .strtab
+        
         if (GetSingleSection(ElfSectionEntryType.SHT_STRTAB) is { } strTab)
         {
-            //Look for .symtab
+            
             if (GetSingleSection(ElfSectionEntryType.SHT_SYMTAB) is { } symtab)
             {
                 LibLogger.VerboseNewline($"\t\t-Found .symtab at 0x{symtab.RawAddress:X}");
                 symbolTables.Add((symtab.RawAddress, symtab.Size / (ulong)symtab.EntrySize, strTab.RawAddress));
             }
 
-            //Look for .dynsym
+            
             if (GetSingleSection(ElfSectionEntryType.SHT_DYNSYM) is { } dynsym)
             {
                 LibLogger.VerboseNewline($"\t\t-Found .dynsym at 0x{dynsym.RawAddress:X}");
@@ -392,7 +392,7 @@ public sealed class ElfFile : Il2CppBinary
             }
         }
 
-        //Look for Dynamic String table
+        
         if (GetDynamicEntryOfType(ElfDynamicType.DT_STRTAB) is { } dynamicStrTab)
         {
             if (GetDynamicEntryOfType(ElfDynamicType.DT_SYMTAB) is { } dynamicSymTab)
@@ -416,7 +416,7 @@ public sealed class ElfFile : Il2CppBinary
         _exportNameTable.Clear();
         _exportAddressTable.Clear();
 
-        //Unify symbol tables
+        
         foreach (var (offset, count, stringTable) in symbolTables)
         {
             var symbols = is32Bit
@@ -434,7 +434,7 @@ public sealed class ElfFile : Il2CppBinary
                 }
                 catch (ArgumentOutOfRangeException)
                 {
-                    // Stripped
+                    
                     continue;
                 }
 
@@ -478,7 +478,7 @@ public sealed class ElfFile : Il2CppBinary
 
     public override (ulong pCodeRegistration, ulong pMetadataRegistration) FindCodeAndMetadataReg(Il2CppMetadata metadata)
     {
-        //Let's just try and be cheap here and find them in the symbol table.
+        
 
         LibLogger.Verbose("\tChecking ELF Symbol Table for code and/or meta reg...");
         ulong codeReg = 0;
@@ -497,7 +497,7 @@ public sealed class ElfFile : Il2CppBinary
 
         LibLogger.VerboseNewline("Didn't find them, scanning binary...");
 
-        //Well, that didn't work. Look for the specific initializer function which calls into Il2CppCodegenRegistration.
+        
         if (InstructionSetId == DefaultInstructionSets.ARM_V7 && metadata.MetadataVersion < 24.2f)
         {
             var ret = FindCodeAndMetadataRegArm32();
@@ -517,75 +517,75 @@ public sealed class ElfFile : Il2CppBinary
 
     private (ulong codeReg, ulong metaReg) FindCodeAndMetadataRegArm32()
     {
-        //This is a little complicated, so:
-        //All ARM instructions are four bytes.
-        //We need to check for two out of a specific 6 instructions, so 24 (0x18) bytes.
-        //And we need to do this for all initializer functions.
+        
+        
+        
+        
 
-        //Specifically, we're looking for:
-        //ADD r0, pc, r0 (00 00 8f e0)
-        //ADD r1, pc, r1 (01 10 8f e0)
+        
+        
+        
         var addSearchBytes = new byte[] { 0x00, 0x00, 0x8F, 0xE0, 0x01, 0x10, 0x8F, 0xE0 };
 
-        //Also, the third instruction should be LDR R1, #x. But we don't know what x is, but it contains the pointer to the CodegenRegistration function.
-        //So search for the bytes that *don't* specify what x is. There are three.
+        
+        
         var ldrSearchBytes = new byte[] { 0x10, 0x9F, 0xE5 };
 
         LibLogger.VerboseNewline($"\tARM-32 MODE: Checking {_initializerPointers!.Count} initializer pointers...");
-        foreach (var initializerPointer in _initializerPointers!) //Not-null asserted because it's initialized in the constructor.
+        foreach (var initializerPointer in _initializerPointers!) 
         {
-            //So, read 0x18 bytes.
+            
             var instructionBytes = ReadByteArrayAtRawAddress(initializerPointer, 0x18);
 
-            //We only want the last two instructions, so skip the first 16 bytes.
+            
             if (!addSearchBytes.SequenceEqual(instructionBytes.Skip(0x10)))
                 continue;
 
-            //Check last three bytes of third instruction (so skip 9 bytes, read 3)
+            
             if (!ldrSearchBytes.SequenceEqual(instructionBytes.Skip(9).Take(3)))
                 continue;
 
-            //Take the 8th byte, which contains our 'x' value, which specifies where the codereg function is.
-            //Add the current PC value. ARM is weird in that the PC points to two instructions *after* the currently executing one.
-            //This instruction is offset 0x8, each instruction is 4 bytes, so two instructions below is 0x10 into the function.
-            //So add 0x10, to the function address, to the value in byte 8.
+            
+            
+            
+            
             var pointerToPointerToCodegenRegFunction = instructionBytes[8] + initializerPointer + 0x10;
 
-            //Now we know where the function pointer is. Or, the important part of it.
-            //Read 4 bytes there.
+            
+            
             Position = pointerToPointerToCodegenRegFunction;
             var pointerToCodegenRegFunction = ReadUInt32();
 
-            //Pointer is relative, so add on address of function + offset of pointer table (?) in function (0x1C).
+            
             pointerToCodegenRegFunction += (uint)initializerPointer + 0x1C;
 
-            //Read 7 instructions + 3 pointers which should hopefully make up Il2CppCodegenRegistration.
-            //functionBody[0] through [6] are instructions, [7] through [9] are pointers.
+            
+            
             var functionBody = ReadClassArrayAtRawAddr<uint>(pointerToCodegenRegFunction, 10);
 
-            //Check the last instruction is an unconditional branch
+            
             if (functionBody[6].Bits(24, 8) != 0b_1110_1010)
                 continue;
 
-            //Read the three register-value pairs for the first 3 LDRs in the function.
+            
             var registerOffsets = new uint[3];
 
             var fail = false;
             for (var i = 0u; i <= 2u && !fail; i++)
             {
                 var (registerNum, immediate) = ArmUtils.GetOperandsForLiteralLdr(functionBody[i]);
-                if (registerNum > 2 || immediate == 0) //Immediate = 0 is a fail, register > 2 indicates wrong function.
+                if (registerNum > 2 || immediate == 0) 
                     fail = true;
                 else
-                    registerOffsets[registerNum] = immediate + i * 4 + 8; //PC is +8, i*4 is 4 bytes per instruction.
+                    registerOffsets[registerNum] = immediate + i * 4 + 8; 
             }
 
             if (fail)
                 continue;
 
-            //Instructions 3-5 (4, 5, 6) load the actual data values. They can be LDR or ADD, where:
-            //LDR indicates we have a pointer-to-pointer and have to read the struct pointer from elsewhere in the binary.
-            //ADD indicates we have a relative pointer to the data and just resolve that to the struct pointer.
+            
+            
+            
 
             var pointers = new uint[3];
 
@@ -595,14 +595,14 @@ public sealed class ElfFile : Il2CppBinary
                 var (ldrFirstReg, ldrSecondReg, ldrThirdReg) = ArmUtils.GetOperandsForRegisterLdr(functionBody[i]);
 
                 if (addSecondReg == ArmUtils.PC_REG && addFirstReg == addThirdReg && addFirstReg <= 2)
-                    //Valid ADD
+                    
                     pointers[addFirstReg] = pointerToCodegenRegFunction + i * 4 + functionBody[registerOffsets[addFirstReg] / 4] + 8;
                 else if (ldrSecondReg == ArmUtils.PC_REG && ldrFirstReg == ldrThirdReg && ldrFirstReg <= 2)
                 {
-                    //Valid LDR.
+                    
                     var p = pointerToCodegenRegFunction + i * 4 + functionBody[registerOffsets[ldrFirstReg] / 4] + 8;
-                    //VIRTUAL address
-                    //We're a 32-bit binary if we're here, so we can just read the pointer as a 32-bit value.
+                    
+                    
                     pointers[ldrFirstReg] = (uint)ReadPointerAtVirtualAddress(p);
                 }
                 else
@@ -628,21 +628,21 @@ public sealed class ElfFile : Il2CppBinary
         LibLogger.VerboseNewline($"\tARM-64 MODE: Checking {_initializerPointers!.Count} initializer pointers...");
         foreach (var initializerPointer in _initializerPointers)
         {
-            //In most cases we don't need more than the first 7 instructions
+            
             var func = MiniArm64Decompiler.ReadFunctionAtRawAddress(this, (uint)initializerPointer, 7);
 
-            //Don't accept anything longer than 7 instructions
-            //I.e. if it doesn't end with a jump we don't want it
+            
+            
             if (!MiniArm64Decompiler.IsB(func[^1]))
                 continue;
 
             var registers = MiniArm64Decompiler.GetAddressesLoadedIntoRegisters(func, (ulong)(_globalOffset + initializerPointer), this);
 
-            //Did we find the initializer defined in Il2CppCodeRegistration.cpp?
-            //It will have only x0 and x1 set.
+            
+            
             if (registers.Count == 2 && registers.ContainsKey(0) && registers.TryGetValue(1, out var x1))
             {
-                //Load the function whose address is in X1
+                
                 var secondFunc = MiniArm64Decompiler.ReadFunctionAtRawAddress(this, (uint)MapVirtualAddressToRaw(x1), 7);
 
                 if (!MiniArm64Decompiler.IsB(secondFunc[^1]))
@@ -651,16 +651,16 @@ public sealed class ElfFile : Il2CppBinary
                 registers = MiniArm64Decompiler.GetAddressesLoadedIntoRegisters(secondFunc, x1, this);
             }
 
-            //Do we have Il2CppCodegenRegistration?
-            //In v21 and later - which is the only range we support - we have X0 through X2 and only those.
-            //We want what's in x0 and x1. x2 is irrelevant.
+            
+            
+            
             if (registers.Count == 3 && registers.TryGetValue(0, out var x0) && registers.TryGetValue(1, out x1) && registers.ContainsKey(2))
             {
                 LibLogger.VerboseNewline($"\t\tFound valid sequence of bytes for il2cpp initializer function at 0x{initializerPointer:X}.");
                 return (x0, x1);
             }
 
-            //Fail, move on.
+            
 
             LibLogger.VerboseNewline($"\t\tInitializer function at 0x{initializerPointer:X} is probably NOT the il2cpp initializer - got {registers.Count} register values with keys {string.Join(", ", registers.Keys)}.");
         }

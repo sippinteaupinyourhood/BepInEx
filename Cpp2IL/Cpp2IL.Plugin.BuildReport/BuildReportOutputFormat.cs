@@ -16,32 +16,32 @@ public class BuildReportOutputFormat : Cpp2IlOutputFormat
 
     public override void OnOutputFormatSelected()
     {
-        //We want readable information for metadata sizes in the build report
+        
         ClassReadingBinaryReader.EnableReadableSizeInformation = true;
     }
 
     public override void DoOutput(ApplicationAnalysisContext context, string outputRoot)
     {
-        //This output format serves as a way to see what's taking up space (and thus, presumably, build time) in your game
-        //This is one of the few output formats that is targeted not at reverse-engineers, but rather at the game developer
-        //It's probably useless to any players or modders.
+        
+        
+        
 
-        //Things that can be logged
-        // - Binary
-        //      - size of il2cpp section, resources, etc
-        //      - generic variants, most varied types, etc
-        //      - approximate amount of code contained within each managed assembly/type, etc.
-        // - Metadata
-        //      - number of types, methods, etc
-        //      - sizes of various metadata streams (string literals etc)
+        
+        
+        
+        
+        
+        
+        
+        
 
 
-        //Data analysis
+        
 
         var binarySize = context.Binary.RawLength;
         var metadataInBinarySize = context.Binary.InBinaryMetadataSize;
 
-        //Number of variants per generic base type
+        
         var genericMethodDataByBaseMd = new Dictionary<Il2CppMethodDefinition, GenericMethodData>();
 
         foreach (var mSpec in context.Binary.AllGenericMethodSpecs)
@@ -50,7 +50,7 @@ public class BuildReportOutputFormat : Cpp2IlOutputFormat
 
             if (!genericMethodDataByBaseMd.TryGetValue(md, out var gmd))
             {
-                gmd = genericMethodDataByBaseMd[md] = new(context, md); //This populates generic method instruction size and variant pointers
+                gmd = genericMethodDataByBaseMd[md] = new(context, md); 
             }
 
             gmd.NumVariants++;
@@ -95,10 +95,10 @@ public class BuildReportOutputFormat : Cpp2IlOutputFormat
         {
             spaceUsedPerAssembly[assemblyAnalysisContext] = 0;
 
-            //Methods
+            
             spaceUsedPerAssembly[assemblyAnalysisContext] += assemblyAnalysisContext.Types.SelectMany(t => t.Methods).Sum(m => methodsBySize.GetOrDefault(m, 0));
 
-            //Generics
+            
             var asmDef = assemblyAnalysisContext.Definition?.Image;
             if (asmDef == null)
                 continue;
@@ -115,7 +115,7 @@ public class BuildReportOutputFormat : Cpp2IlOutputFormat
 
         var unclassifiedSize = binarySize - sizeOfAllGenerics - sizeOfAllNonGenerics - sizeOfAllCaGenerators - metadataInBinarySize;
 
-        //Generate build report
+        
 
         var ret = new StringBuilder();
 
@@ -175,13 +175,13 @@ public class BuildReportOutputFormat : Cpp2IlOutputFormat
             if (kvp.Value >= 0)
                 ret.AppendLine($"        {kvp.Key?.Name ?? "Unspecified"}: {kvp.Value} bytes ({kvp.Value / 1024f / 1024:f2}MB)");
 
-        //Save output
+        
         var outputPath = Path.Combine(outputRoot, "buildreport.txt");
         File.WriteAllText(outputPath, ret.ToString());
 
         Logger.InfoNewline($"Wrote human-readable build report to {outputPath}", "BuildReportOutputFormat");
 
-        //Save JSON output
+        
         var jsonOutputPath = Path.Combine(outputRoot, "buildreport.json");
 
         var outputData = new OutputData();
@@ -224,7 +224,7 @@ public class BuildReportOutputFormat : Cpp2IlOutputFormat
                 OutputMethodData.Add(outputMethod);
 
                 if (!context.ConcreteGenericMethodsByRef.TryGetValue(cpp2IlMethodRef, out var concreteAnalysisContext))
-                    continue; //Eliminated by generic sharing
+                    continue; 
 
                 outputMethod.IsRemovedByGenericSharing = false;
                 outputMethod.MachineCodeSizeBytes = concreteAnalysisContext.RawBytes.Length;

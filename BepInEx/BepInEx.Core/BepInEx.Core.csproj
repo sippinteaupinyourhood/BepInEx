@@ -3,7 +3,7 @@
         <Description>BepInEx Core library</Description>
         <TargetFrameworks>net35;netstandard2.0</TargetFrameworks>
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-        <!-- Force nuget assembly output on netstandard2.0 -->
+        
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
     <ItemGroup>
@@ -16,9 +16,9 @@
         <Compile Remove="Contract\IPlugin.cs"/>
     </ItemGroup>
 
-    <!-- CopyLocalLockFileAssemblies causes to also output shared assemblies: https://github.com/NuGet/Home/issues/4837#issuecomment-354536302 -->
-    <!-- Since all core assemblies usually follow naming of System.*, we just delete them for now -->
-    <!-- Also delete deps.json as they are not used by mono -->
+    
+    
+    
     <Target Name="DeleteSys" AfterTargets="Build">
         <ItemGroup>
             <FilesToDelete Include="$(OutputPath)System.*.dll"/>

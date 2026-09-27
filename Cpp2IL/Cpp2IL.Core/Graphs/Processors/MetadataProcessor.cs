@@ -12,7 +12,7 @@ internal class MetadataProcessor : IBlockProcessor
     {
         foreach (var instruction in block.isilInstructions)
         {
-            // TODO: Check if it shows up in any other
+            
             if (instruction.OpCode != InstructionSetIndependentOpCode.Move)
             {
                 continue;
@@ -29,7 +29,7 @@ internal class MetadataProcessor : IBlockProcessor
                 var val = LibCpp2IlMain.GetLiteralByAddress((ulong)memoryOp.Addend);
                 if (val == null)
                 {
-                    // Try instead check if its type metadata usage
+                    
                     var metadataUsage = LibCpp2IlMain.GetTypeGlobalByAddress((ulong)memoryOp.Addend);
                     if (metadataUsage != null && methodAnalysisContext.DeclaringType is not null)
                     {

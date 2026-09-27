@@ -65,7 +65,7 @@ static class DownloadTasks
 
         foreach (var entry in zip.Entries)
         {
-            // Use Path.Combine to ensure the trailing slash is preserved.
+            
             var fullPath = Path.Combine(destination.FullPath, entry.FullName);
             var fileName = Path.GetFileName(fullPath);
             if (string.IsNullOrEmpty(fileName))

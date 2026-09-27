@@ -19,7 +19,7 @@ public class OrbisPkgPlugin : Cpp2IlPlugin
 
     public override void OnLoad()
     {
-        //No-op
+        
     }
 
     public override bool HandleGamePath(string gamePath, ref Cpp2IlRuntimeArgs args)
@@ -32,7 +32,7 @@ public class OrbisPkgPlugin : Cpp2IlPlugin
             return false;
         }
 
-        //Check header
+        
         using var mmf = MemoryMappedFile.CreateFromFile(gamePath);
 
         var header = new byte[4];
@@ -74,7 +74,7 @@ public class OrbisPkgPlugin : Cpp2IlPlugin
 
         Logger.VerboseNewline("PKG loaded successfully. Checking PFS header...");
 
-        //What we want is in the PFS.
+        
         PfsHeader pfsHeader;
 
         try
@@ -141,7 +141,7 @@ public class OrbisPkgPlugin : Cpp2IlPlugin
             {
                 Logger.Verbose("Found ggm file - extracting unity version...");
 
-                //Read first ~0x40 bytes
+                
                 var ggmStream = file.GetView();
                 var count = (int)Math.Min(0x40, file.size);
                 var ggmBytes = ArrayPool<byte>.Shared.Rent(count);

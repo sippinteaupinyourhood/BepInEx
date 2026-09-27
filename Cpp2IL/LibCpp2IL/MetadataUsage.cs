@@ -57,7 +57,7 @@ public class MetadataUsage(MetadataUsageType type, ulong offset, uint value)
                 case MetadataUsageType.TypeInfo:
                     try
                     {
-                        _cachedType = LibCpp2IlMain.Binary!.GetType(Il2CppVariableWidthIndex<Il2CppType>.MakeTemporaryForFixedWidthUsage((int) value)); //DynWidth: value is always masked out of 32-bits, ok for temp usage
+                        _cachedType = LibCpp2IlMain.Binary!.GetType(Il2CppVariableWidthIndex<Il2CppType>.MakeTemporaryForFixedWidthUsage((int) value)); 
                         _cachedTypeReflectionData = LibCpp2ILUtils.GetTypeReflectionData(_cachedType);
                         _cachedName = _cachedTypeReflectionData?.ToString();
                     }
@@ -82,7 +82,7 @@ public class MetadataUsage(MetadataUsageType type, ulong offset, uint value)
             switch (Type)
             {
                 case MetadataUsageType.MethodDef:
-                    _cachedMethod = LibCpp2IlMain.TheMetadata!.GetMethodDefinitionFromIndex(Il2CppVariableWidthIndex<Il2CppMethodDefinition>.MakeTemporaryForFixedWidthUsage((int)value)); //DynWidth: value is always masked out of 32-bits, ok for temp usage
+                    _cachedMethod = LibCpp2IlMain.TheMetadata!.GetMethodDefinitionFromIndex(Il2CppVariableWidthIndex<Il2CppMethodDefinition>.MakeTemporaryForFixedWidthUsage((int)value)); 
                     _cachedName = _cachedMethod.GlobalKey;
                     break;
                 default:

@@ -48,9 +48,9 @@ public static class Pass80UnstripFields
                 foreach (var unityField in unityType.Fields)
                 {
                     if (unityField.IsStatic && !unityField.HasConstant())
-                        continue;// Non-constant static fields might require initialization, which we can't do.
+                        continue;
                     if (unityField.IsInstance() && (processedType.OriginalType is not null || processedType.NewType.IsReferenceType()))
-                        continue;// Instance fields are only supported on newly created value types.
+                        continue;
 
                     var processedField = processedType.TryGetFieldByUnityAssemblyField(unityField);
                     if (processedField != null) continue;

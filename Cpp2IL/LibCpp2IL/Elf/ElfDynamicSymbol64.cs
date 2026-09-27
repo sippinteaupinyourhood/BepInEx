@@ -4,7 +4,7 @@ public class ElfDynamicSymbol64 : ReadableClass, IElfDynamicSymbol
 {
     public const int StructSize = 24;
 
-    //Slightly reorganized for alignment reasons.
+    
     private uint _internalNameIndex;
     private byte _internalInfo;
     private byte _internalOther;

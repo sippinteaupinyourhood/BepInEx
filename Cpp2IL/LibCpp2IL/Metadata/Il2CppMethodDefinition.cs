@@ -58,7 +58,7 @@ public class Il2CppMethodDefinition : ReadableClass
                     return 0;
                 }
 
-                var asmIdx = 0; //Not needed pre-24.2
+                var asmIdx = 0; 
                 if (LibCpp2IlMain.MetadataVersion >= 27)
                 {
                     asmIdx = LibCpp2IlMain.Binary.GetCodegenModuleIndexByName(DeclaringType!.DeclaringAssembly!.Name!);
@@ -121,7 +121,7 @@ public class Il2CppMethodDefinition : ReadableClass
                         var paramType = LibCpp2IlMain.Binary!.GetType(paramDef.typeIndex);
                         var paramFlags = (ParameterAttributes)paramType.Attrs;
                         var paramDefaultData = (paramFlags & ParameterAttributes.HasDefault) != 0 
-                            ? LibCpp2IlMain.TheMetadata!.GetParameterDefaultValueFromIndex(Il2CppVariableWidthIndex<Il2CppParameterDefinition>.MakeTemporaryForFixedWidthUsage(parameterStart.Value + idx)) //DynamicWidth: value is computed so temp usage is ok
+                            ? LibCpp2IlMain.TheMetadata!.GetParameterDefaultValueFromIndex(Il2CppVariableWidthIndex<Il2CppParameterDefinition>.MakeTemporaryForFixedWidthUsage(parameterStart.Value + idx)) 
                             : null;
                         return new Il2CppParameterReflectionData
                         {
@@ -157,7 +157,7 @@ public class Il2CppMethodDefinition : ReadableClass
     {
         nameIndex = reader.ReadInt32();
 
-        //Cache name now
+        
         var pos = reader.Position;
         Name = ((Il2CppMetadata)reader).ReadStringFromIndexNoReadLock(nameIndex);
         reader.Position = pos;

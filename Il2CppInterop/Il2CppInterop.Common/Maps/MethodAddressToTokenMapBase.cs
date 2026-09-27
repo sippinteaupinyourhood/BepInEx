@@ -9,7 +9,7 @@ namespace Il2CppInterop.Common.Maps;
 
 public abstract class MethodAddressToTokenMapBase<TAssembly, TMethod> : IDisposable, IEnumerable<(long, TMethod?)>
 {
-    public const int Magic = 0x4D544D55; // UMTM
+    public const int Magic = 0x4D544D55; 
     public const int Version = 1;
     public const string FileName = "MethodAddressToToken.db";
     private readonly MemoryMappedViewAccessor? myAccessor;
@@ -193,5 +193,5 @@ public struct MethodAddressToTokenMapFileHeader
     public int NumMethods;
     public int DataOffset;
 
-    // data is long[NumMethods] pointers, (int, int)[NumMethods] (tokens, assemblyIds)
+    
 }

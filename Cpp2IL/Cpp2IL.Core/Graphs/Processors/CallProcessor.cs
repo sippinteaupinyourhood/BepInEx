@@ -33,7 +33,7 @@ internal class CallProcessor : IBlockProcessor
             return;
         }
 
-        //Non-key function call. Try to find a single match
+        
         if (!methodAnalysisContext.AppContext.MethodsByAddress.TryGetValue(target, out var targetMethods))
             return;
 
@@ -45,7 +45,7 @@ internal class CallProcessor : IBlockProcessor
 
     private void HandleKeyFunction(ApplicationAnalysisContext appContext, InstructionSetIndependentInstruction instruction, ulong target, BaseKeyFunctionAddresses kFA)
     {
-        // TODO: Handle labelling functions calls that match these in a more graceful manner
+        
         var method = "";
         if (target == kFA.il2cpp_codegen_initialize_method || target == kFA.il2cpp_codegen_initialize_runtime_metadata)
         {

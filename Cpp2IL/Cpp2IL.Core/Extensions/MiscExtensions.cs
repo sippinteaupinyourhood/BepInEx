@@ -20,7 +20,7 @@ public static class MiscExtensions
     public static bool IsJump(this Mnemonic mnemonic) => mnemonic is Mnemonic.Call or >= Mnemonic.Ja and <= Mnemonic.Js;
     public static bool IsConditionalJump(this Mnemonic mnemonic) => mnemonic.IsJump() && mnemonic != Mnemonic.Jmp && mnemonic != Mnemonic.Call;
 
-    //Arm Extensions
+    
     public static ArmRegister? RegisterSafe(this ArmOperand operand) => operand.Type != ArmOperandType.Register ? null : operand.Register;
     public static bool IsImmediate(this ArmOperand operand) => operand.Type is ArmOperandType.CImmediate or ArmOperandType.Immediate or ArmOperandType.PImmediate;
     public static int ImmediateSafe(this ArmOperand operand) => operand.IsImmediate() ? operand.Immediate : 0;
@@ -30,7 +30,7 @@ public static class MiscExtensions
     public static ArmRegister? MemoryIndex(this ArmInstruction instruction) => MemoryOperand(instruction)?.Memory.Index;
     public static int MemoryOffset(this ArmInstruction instruction) => MemoryOperand(instruction)?.Memory.Displacement ?? 0;
 
-    //Arm64 Extensions
+    
     public static Arm64Register? RegisterSafe(this Arm64Operand operand) => operand.Type != Arm64OperandType.Register ? null : operand.Register;
     public static bool IsImmediate(this Arm64Operand operand) => operand.Type is Arm64OperandType.CImmediate or Arm64OperandType.Immediate;
     public static long ImmediateSafe(this Arm64Operand operand) => operand.IsImmediate() ? operand.Immediate : 0;

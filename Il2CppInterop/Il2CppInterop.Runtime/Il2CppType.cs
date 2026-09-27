@@ -30,7 +30,8 @@ public static class Il2CppType
             return null;
         }
 
-        return Type.internal_from_handle(il2CppType);
+        var result = Type.internal_from_handle(il2CppType);
+        return result;
     }
 
     public static Type From(System.Type type)

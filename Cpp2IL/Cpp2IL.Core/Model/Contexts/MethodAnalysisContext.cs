@@ -14,50 +14,50 @@ using StableNameDotNet.Providers;
 
 namespace Cpp2IL.Core.Model.Contexts;
 
-/// <summary>
-/// Represents one method within the application. Can be analyzed to attempt to reconstruct the function body.
-/// </summary>
+
+
+
 public class MethodAnalysisContext : HasGenericParameters, IMethodInfoProvider
 {
-    /// <summary>
-    /// The underlying metadata for the method.
-    ///
-    /// Nullable iff this is a subclass.
-    /// </summary>
+    
+    
+    
+    
+    
     public readonly Il2CppMethodDefinition? Definition;
 
-    /// <summary>
-    /// The analysis context for the declaring type of this method.
-    /// </summary>
+    
+    
+    
     public readonly TypeAnalysisContext? DeclaringType;
 
-    /// <summary>
-    /// The address of this method as defined in the underlying metadata.
-    /// </summary>
+    
+    
+    
     public virtual ulong UnderlyingPointer => Definition?.MethodPointer ?? throw new("Subclasses of MethodAnalysisContext should override UnderlyingPointer");
 
     public ulong Rva => UnderlyingPointer == 0 || LibCpp2IlMain.Binary == null ? 0 : LibCpp2IlMain.Binary.GetRva(UnderlyingPointer);
 
-    /// <summary>
-    /// The raw method body as machine code in the active instruction set.
-    /// </summary>
+    
+    
+    
     public Memory<byte> RawBytes => rawMethodBody ??= InitRawBytes();
 
-    /// <summary>
-    /// The first-stage-analyzed Instruction-Set-Independent Language Instructions.
-    /// </summary>
+    
+    
+    
     public List<InstructionSetIndependentInstruction>? ConvertedIsil;
 
-    /// <summary>
-    /// The control flow graph for this method, if one is built.
-    /// </summary>
+    
+    
+    
     public ISILControlFlowGraph? ControlFlowGraph;
 
     public List<ParameterAnalysisContext> Parameters = [];
 
-    /// <summary>
-    /// Does this method return void?
-    /// </summary>
+    
+    
+    
     public bool IsVoid => ReturnType == AppContext.SystemTypes.SystemVoidType;
 
     public bool IsStatic => (Attributes & MethodAttributes.Static) != 0;
@@ -115,7 +115,7 @@ public class MethodAnalysisContext : HasGenericParameters, IMethodInfoProvider
     {
         get
         {
-            // Lazy load the generic parameters
+            
             _genericParameters ??= Definition?.GenericContainer?.GenericParameters.Select(p => new GenericParameterTypeAnalysisContext(p, this)).ToList() ?? [];
             return _genericParameters;
         }
@@ -127,7 +127,7 @@ public class MethodAnalysisContext : HasGenericParameters, IMethodInfoProvider
 
     public TypeAnalysisContext? OverrideReturnType { get; set; }
 
-    //TODO Support custom attributes on return types (v31 feature)
+    
     public TypeAnalysisContext ReturnType
     {
         get => OverrideReturnType ?? DefaultReturnType;
@@ -169,14 +169,14 @@ public class MethodAnalysisContext : HasGenericParameters, IMethodInfoProvider
 
     private List<MethodAnalysisContext>? _overrides;
 
-    /// <summary>
-    /// The set of interface methods which this method explicitly overrides.
-    /// </summary>
+    
+    
+    
     public List<MethodAnalysisContext> Overrides
     {
         get
         {
-            // Lazy load the overrides
+            
             return _overrides ??= GetOverrides().ToList();
         }
     }
@@ -207,7 +207,7 @@ public class MethodAnalysisContext : HasGenericParameters, IMethodInfoProvider
                 if (vtableEntry.AsMethod() != Definition)
                     continue;
 
-                // Interface inheritance
+                
                 foreach (var interfaceOffset in declaringTypeDefinition.InterfaceOffsets)
                 {
                     if (i >= interfaceOffset.offset)
@@ -281,8 +281,8 @@ public class MethodAnalysisContext : HasGenericParameters, IMethodInfoProvider
 
     private Memory<byte> InitRawBytes()
     {
-        //Some abstract methods (on interfaces, no less) apparently have a body? Unity doesn't support default interface methods so idk what's going on here.
-        //E.g. UnityEngine.Purchasing.AppleCore.dll: UnityEngine.Purchasing.INativeAppleStore::SetUnityPurchasingCallback on among us (itch.io build)
+        
+        
         if (Definition != null && Definition.MethodPointer != 0 && !Definition.Attributes.HasFlag(MethodAttributes.Abstract))
         {
             var ret = AppContext.InstructionSet.GetRawBytesForMethod(this, false);
@@ -318,12 +318,12 @@ public class MethodAnalysisContext : HasGenericParameters, IMethodInfoProvider
         ConvertedIsil = AppContext.InstructionSet.GetIsilFromMethod(this);
 
         if (ConvertedIsil.Count == 0)
-            return; //Nothing to do, empty function
+            return; 
 
         ControlFlowGraph = new ISILControlFlowGraph();
         ControlFlowGraph.Build(ConvertedIsil);
 
-        // Post step to convert metadata usage. Ldstr Opcodes etc.
+        
         foreach (var block in ControlFlowGraph.Blocks)
         {
             foreach (var converter in blockProcessors)
@@ -384,7 +384,7 @@ public class MethodAnalysisContext : HasGenericParameters, IMethodInfoProvider
         {
             if (DeclaringType != null)
             {
-                //This one is a bit trickier, as il2cpp doesn't use semantics.
+                
                 foreach (var prop in DeclaringType.Properties)
                 {
                     if (prop.Getter == this)

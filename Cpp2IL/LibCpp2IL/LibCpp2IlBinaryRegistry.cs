@@ -18,19 +18,19 @@ public static class LibCpp2IlBinaryRegistry
     public static void RegisterBuiltInBinarySupport()
     {
         Register("Portable Executable", "LibCpp2IL",
-            bytes => BitConverter.ToInt16(bytes, 0) == 0x5A4D, //MZ
+            bytes => BitConverter.ToInt16(bytes, 0) == 0x5A4D, 
             (memStream) => new PE.PE(memStream));
 
         Register("ELF", "LibCpp2IL",
-            bytes => BitConverter.ToInt32(bytes, 0) == 0x464c457f, //0x7F ELF
+            bytes => BitConverter.ToInt32(bytes, 0) == 0x464c457f, 
             (memStream) => new ElfFile(memStream));
 
         Register("Nintendo Switch Object", "LibCpp2IL",
-            bytes => BitConverter.ToInt32(bytes, 0) == 0x304F534E, //NSO0
+            bytes => BitConverter.ToInt32(bytes, 0) == 0x304F534E, 
             (memStream) => new NsoFile(memStream).Decompress());
 
         Register("WebAssembly File", "LibCpp2IL",
-            bytes => BitConverter.ToInt32(bytes, 0) == 0x6D736100, //\0WASM
+            bytes => BitConverter.ToInt32(bytes, 0) == 0x6D736100, 
             (memStream) => new WasmFile(memStream));
 
         Register("Mach-O File", "LibCppIL",
@@ -39,7 +39,7 @@ public static class LibCpp2IlBinaryRegistry
         );
 
         Register("Universal Mach-O File", "LibCppIL",
-            bytes => BitConverter.ToUInt32(bytes, 0) is 0xBEBAFECA, // 0xCAFEBABE reversed
+            bytes => BitConverter.ToUInt32(bytes, 0) is 0xBEBAFECA, 
             (memStream) => new MachOUniversalFile(memStream).BestMachOFile
         );
     }

@@ -21,7 +21,7 @@ public static class Preloader
 
     internal static ManualLogSource Log => PreloaderLogger.Log;
 
-    // TODO: This is not needed, maybe remove? (Instance is saved in IL2CPPChainloader itself)
+    
     private static IL2CPPChainloader Chainloader { get; set; }
 
     public static void Run()
@@ -55,6 +55,10 @@ public static class Preloader
             Logger.Log(LogLevel.Debug, $"Game executable path: {Paths.ExecutablePath}");
             Logger.Log(LogLevel.Debug, $"Interop assembly directory: {Il2CppInteropManager.IL2CPPInteropAssemblyPath}");
             Logger.Log(LogLevel.Debug, $"BepInEx root path: {Paths.BepInExRootPath}");
+
+            var appliedEnumRepairs = RuntimeEnumRepair.ApplyPending(Il2CppInteropManager.IL2CPPInteropAssemblyPath);
+            if (appliedEnumRepairs != 0)
+                Logger.Log(LogLevel.Info, $"Applied {appliedEnumRepairs} pending runtime enum repairs");
 
             if (PlatformHelper.Is(Platform.Wine) && !Environment.Is64BitProcess)
             {
@@ -120,7 +124,7 @@ public static class Preloader
         }
     }
 
-    // Keep alive so GC doesn't collect the delegate
+    
     private static NativeDetour _freeConsoleDetour;
     private static FreeConsoleDelegate _freeConsoleHookDelegate;
 
@@ -162,18 +166,28 @@ public static class Preloader
 
 internal static class VRChatMetadataDecryptor
 {
-    private const int HeaderSize   = 368;        // encrypted header size
-    private const int NewHdrSize   = 304;        // standard IL2CPP header size
+    private const int HeaderSize   = 368;        
+    private const int NewHdrSize   = 304;        
     private const uint EncMagic    = 0x4E4F7E5D;
     private const uint Build1901EncryptedMagic = 0x7E7D8417;
     private const uint Build1902EncryptedMagic = 0x2E2D0E53;
+    private const uint Build1903EncryptedMagic = 0x55564FB4;
     private const int XorBase      = 0x51;
 
     private const string Build1902NormalizedSha256 =
-        "F3C08744A8BCD18D5330F3AC269A31E96A68F80B3A76757BECEED4CF22AED698";
+        "6EB6807158ED3163A7E9D0AD654B1BF1180709D70D37BF9EF5228942321DDB78";
+
+    private const string Build1903EncryptedSha256 =
+        "B692689790AC7A019055172536CE6C750AB1FBF9F4B18FE1F9B0F818D61B7BC1";
+
+    private const string Build1903NormalizedSha256 =
+        "49B2470A18F4745D54A0DA67AC5F47DBC290D8A2E225626C00E9F1C8ABE1F298";
+
+    private const string Build1903NormalizedHeader =
+        "rxux+h0AAABgAQAAoKEGAACjBgC4KB4AuMskAFRnfAAMM6EA+FgAAASMoQBo/Q0AbImvAMBOoQAs2FABjLoBALiSUgFQagYACP1YAZw7FgCkOG8BMEACANR4cQGc/j0AcHevAdg8HgBItM0BsCEDAPjV0AFILgAAQATRARDPAQBQ09IBGNsAAGiu0wFg+AAAyKbUATwoGQAEz+0BwJcEAMRm8gGYQzIAXKokAgAjAABczSQCADgAAFwFJQJIIgAApCclAuwYAACQQCUCx3gcAFi5QQK4+AsAELJNArw1AgDM508CwIwBAIx0UQIYAAAApHRRAgANAACkgVEClCIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==";
 
     private const string Build1902NormalizedHeader =
-        "rxux+h0AAACIAQAAoKEGACijBgCsKB4A1MskAFRnfAAoM6EA+FgAACCMoQBo/Q0AiImvAMBOoQBI2FABjLoBANSSUgFQagYAKP1YAZA7FgC4OG8BMEACAOx4cQGc/j0AiHevAdg8HgBgtM0BsCEDABDW0AFILgAAWATRARDPAQBo09IBGNsAAICu0wFg+AAA4KbUATwoGQAcz+0BwJcEANxm8gGYQzIAdKokAgAjAAB0zSQCADgAAHQFJQJIIgAAvCclAuwYAACoQCUCx3gcAHC5QQK4+AsAKLJNArw1AgDk508CwIwBAKR0UQIYAAAAvHRRAgQLAADAf1ECpCcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMh4HABUZ3wA7BgAAEzT0gH4WAAAmEMyABijBgCYklIBQP1YAVzYUAE0PR4A2CgeAAyyTQLAlwQAEM8BAGwE0QEwQAIAwE6hAHxnfAA4dFECgMskAOTV0AE=";
+        "rxux+h0AAACIAQAAoKEGACijBgCsKB4A1MskAFRnfAAoM6EA+FgAACCMoQBo/Q0AiImvAMBOoQBI2FABjLoBANSSUgFQagYAJP1YAZQ7FgC4OG8BMEACAOx4cQGc/j0AiHevAdg8HgBgtM0BsCEDABDW0AFILgAAWATRARDPAQBo09IBGNsAAICu0wFg+AAA4KbUATwoGQAcz+0BwJcEANxm8gGYQzIAdKokAgAjAAB0zSQCADgAAHQFJQJIIgAAvCclAuwYAACoQCUCx3gcAHC5QQK4+AsAKLJNArw1AgDk508CwIwBAKR0UQIYAAAAvHRRAgQLAADAf1ECpCcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMh4HABUZ3wA7BgAAEzT0gH4WAAAmEMyABijBgCYklIBQP1YAVzYUAE0PR4A2CgeAAyyTQLAlwQAEM8BAGwE0QEwQAIAwE6hAHxnfAA4dFECgMskAOTV0AE=";
 
     private static readonly (int SourceOffset, int Adjustment, int LengthField, int SeedField, bool SubtractSeed, int Key)[] Build1902Passes =
     {
@@ -186,11 +200,22 @@ internal static class VRChatMetadataDecryptor
         (264, 64, 108, 264, true, -92),
     };
 
-    // All field values are byte offsets into the HeaderTransform'd header buffer.
-    // StdOff < 0 means section is not mapped directly (found by scan instead).
+    private static readonly (int SourceOffset, int Adjustment, int LengthField, int SeedField, bool SubtractSeed, int Key)[] Build1903Passes =
+    {
+        (108, -20, 256, 256, false, -27),
+        (328, -56, 152, 152, true, 27),
+        (284, 48, 340, 340, false, -27),
+        (80, 36, 252, 252, true, 27),
+        (272, -28, 8, 8, true, 27),
+        (96, 36, 180, 180, false, -27),
+        (304, -44, 40, 40, true, 27),
+    };
+
+    
+    
     private static readonly (int SrcOff, int SrcAdj, int Len, int Seed, int Key, bool MinusSeed, int StdOff)[] Passes =
     {
-        // SrcOff   SrcAdj  LenFld  Seed    KeyConst  MinusSeed  StdOff (section)
+        
         ( 184,      -60,     80,    80,    +117,      true,     168 ),
         (   8,      +28,    192,   192,    +117,      true,      16 ),
         ( 260,      -24,    272,   272,    -117,      false,     40 ),
@@ -200,7 +225,7 @@ internal static class VRChatMetadataDecryptor
         ( 232,      +36,     76,    76,    +117,      true,      48 ),
     };
 
-    // Plain (non-XOR) sections: only need offset + size from the decrypted header.
+    
     private static readonly (int StdOff, int OffFld, int OffAdj, int LenFld)[] PlainSections =
     {
         ( 160, 104, 28, 240 ),
@@ -220,6 +245,9 @@ internal static class VRChatMetadataDecryptor
         if (!File.Exists(srcPath)) return null;
 
         var data = File.ReadAllBytes(srcPath);
+        if (data.Length >= 352 && BitConverter.ToUInt32(data, 0) == Build1903EncryptedMagic)
+            return DecryptBuild1903(srcPath, data);
+
         if (data.Length >= 392 && BitConverter.ToUInt32(data, 0) == Build1902EncryptedMagic)
             return DecryptBuild1902(srcPath, data);
 
@@ -237,6 +265,50 @@ internal static class VRChatMetadataDecryptor
         var tempPath = srcPath + ".dec";
         File.WriteAllBytes(tempPath, output);
         return tempPath;
+    }
+
+    private static string DecryptBuild1903(string srcPath, byte[] data)
+    {
+        var encryptedDigest = Convert.ToHexString(SHA256.HashData(data));
+        if (!string.Equals(encryptedDigest, Build1903EncryptedSha256, StringComparison.Ordinal))
+            throw new InvalidDataException("Unsupported build 1903 metadata input.");
+
+        var output = (byte[])data.Clone();
+        var header = new byte[352];
+        Array.Copy(data, header, header.Length);
+        for (var index = 0; index < header.Length; index++)
+        {
+            header[index] ^= (byte)(88 - index);
+            output[index] = header[index];
+        }
+
+        foreach (var pass in Build1903Passes)
+        {
+            var offset = I32(header, pass.SourceOffset) + pass.Adjustment;
+            var length = I32(header, pass.LengthField);
+            if (offset < 0 || length < 0 || offset > output.Length - length)
+                throw new InvalidDataException("Invalid build 1903 metadata section.");
+
+            var seed = header[pass.SeedField];
+            for (var index = 0; index < length; index++)
+            {
+                var key = pass.SubtractSeed
+                    ? index - seed + pass.Key
+                    : seed + index + pass.Key;
+                output[offset + index] ^= (byte)key;
+            }
+        }
+
+        var normalizedHeader = Convert.FromBase64String(Build1903NormalizedHeader);
+        Array.Copy(normalizedHeader, output, normalizedHeader.Length);
+
+        var digest = Convert.ToHexString(SHA256.HashData(output));
+        if (!string.Equals(digest, Build1903NormalizedSha256, StringComparison.Ordinal))
+            throw new InvalidDataException("Invalid build 1903 normalized metadata digest.");
+
+        var outputPath = srcPath + ".dec";
+        File.WriteAllBytes(outputPath, output);
+        return outputPath;
     }
 
     private static string DecryptBuild1902(string srcPath, byte[] data)

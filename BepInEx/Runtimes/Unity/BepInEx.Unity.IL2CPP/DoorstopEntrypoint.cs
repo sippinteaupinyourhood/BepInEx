@@ -8,17 +8,17 @@ using BepInEx.Unity.IL2CPP;
 using BepInEx.Unity.IL2CPP.Utils;
 using MonoMod.Utils;
 
-// ReSharper disable once CheckNamespace
+
 namespace Doorstop;
 
 internal static class Entrypoint
 {
-    /// <summary>
-    ///     The main entrypoint of BepInEx, called from Doorstop.
-    /// </summary>
+    
+    
+    
     public static void Start()
     {
-        // We set it to the current directory first as a fallback, but try to use the same location as the .exe file.
+        
         var silentExceptionLog = Environment.GetEnvironmentVariable("BEPINEX_PRELOADER_LOG") ??
                                  $"preloader_{DateTime.Now:yyyyMMdd_HHmmss_fff}.log";
         Mutex mutex = null;
@@ -54,13 +54,13 @@ internal static class Entrypoint
                 }
                 else if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("BEPINEX_FAIL_FAST")))
                 {
-                    // Don't exit the game if we have no way of signaling to the user that a crash happened
+                    
                     return;
                 }
             }
             catch (Exception)
             {
-                // ignored
+                
             }
 
             Environment.Exit(1);

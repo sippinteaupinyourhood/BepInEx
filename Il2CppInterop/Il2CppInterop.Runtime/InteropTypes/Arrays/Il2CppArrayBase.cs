@@ -12,10 +12,10 @@ public abstract class Il2CppArrayBase : Il2CppObjectBase, IEnumerable
     {
     }
 
-    /// <summary>
-    /// The pointer to the first element in the array.
-    /// </summary>
-    private protected unsafe IntPtr ArrayStartPointer => IntPtr.Add(Pointer, sizeof(Il2CppObject) /* base */ + sizeof(void*) /* bounds */ + sizeof(nuint) /* max_length */);
+    
+    
+    
+    private protected unsafe IntPtr ArrayStartPointer => IntPtr.Add(Pointer, sizeof(Il2CppObject)  + sizeof(void*)  + sizeof(nuint) );
 
     public int Length => (int)IL2CPP.il2cpp_array_length(Pointer);
 
@@ -76,7 +76,7 @@ public abstract class Il2CppArrayBase<T> : Il2CppArrayBase, IList<T>, IReadOnlyL
         return ThrowImmutableLength();
     }
 
-    public new int Length => base.Length;// For binary compatibility
+    public new int Length => base.Length;
     public int Count => Length;
     bool ICollection<T>.IsReadOnly => false;
 
@@ -135,7 +135,7 @@ public abstract class Il2CppArrayBase<T> : Il2CppArrayBase, IList<T>, IReadOnlyL
 
         if (typeof(T) == typeof(string))
             return new Il2CppStringArray(pointer) as Il2CppArrayBase<T>;
-        if (typeof(T).IsValueType) // can't construct required types here directly because of unfulfilled generic constraint
+        if (typeof(T).IsValueType) 
             return Activator.CreateInstance(typeof(Il2CppStructArray<>).MakeGenericType(typeof(T)), pointer) as
                 Il2CppArrayBase<T>;
         if (typeof(Il2CppObjectBase).IsAssignableFrom(typeof(T)))

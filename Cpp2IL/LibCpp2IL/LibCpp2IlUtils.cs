@@ -171,7 +171,7 @@ public static class LibCpp2ILUtils
         var theDll = LibCpp2IlMain.Binary!;
 
         if (dataIndex.IsNull)
-            return null; //Literally null.
+            return null; 
 
         var pointer = metadata.GetDefaultValueFromIndex(dataIndex);
         if (pointer <= 0) return null;
@@ -286,23 +286,23 @@ public static class LibCpp2ILUtils
                 return WrapType(LibCpp2IlReflection.GetType("TypedReference", "System")!);
             case Il2CppTypeEnum.IL2CPP_TYPE_CLASS:
             case Il2CppTypeEnum.IL2CPP_TYPE_VALUETYPE:
-                //"normal" type
+                
                 return new Il2CppTypeReflectionData
                 {
                     baseType = forWhat.AsClass(), genericParams = [], isType = true, isGenericType = false,
                 };
             case Il2CppTypeEnum.IL2CPP_TYPE_GENERICINST:
             {
-                //Generic type
+                
                 var genericClass = LibCpp2IlMain.Binary.ReadReadableAtVirtualAddress<Il2CppGenericClass>(forWhat.Data.GenericClass);
 
-                //CHANGED IN v27: typeDefinitionIndex is a ptr to the type in the file.
+                
                 var typeDefinition = genericClass.TypeDefinition;
 
                 var genericInst = genericClass.Context.ClassInst;
 
                 var genericParams = genericInst.Types
-                    .Select(GetTypeReflectionData) //Recursive call here
+                    .Select(GetTypeReflectionData) 
                     .ToList();
 
                 return new()

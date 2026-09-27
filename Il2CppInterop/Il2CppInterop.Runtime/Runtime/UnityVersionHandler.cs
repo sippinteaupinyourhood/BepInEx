@@ -79,7 +79,7 @@ public static class UnityVersionHandler
     public static bool HasShimForGetMethod { get; private set; }
     public static bool IsMetadataV29OrHigher { get; private set; }
 
-    // Version since which extra_arg is set to invoke_multicast, necessitating constructor calls
+    
     public static bool MustUseDelegateConstructor => IsMetadataV29OrHigher;
 
     internal static void RecalculateHandlers()
@@ -129,7 +129,7 @@ public static class UnityVersionHandler
         return typeof(UnityVersionHandler).Assembly.GetTypesSafe();
     }
 
-    //Assemblies
+    
     public static INativeAssemblyStruct NewAssembly()
     {
         return assemblyStructHandler.CreateNewStruct();
@@ -145,7 +145,7 @@ public static class UnityVersionHandler
         return assemblyStructHandler.Size();
     }
 
-    //Assembly Names
+    
     public static INativeAssemblyNameStruct NewAssemblyName()
     {
         return assemblyNameStructHandler.CreateNewStruct();
@@ -161,7 +161,7 @@ public static class UnityVersionHandler
         return assemblyNameStructHandler.Size();
     }
 
-    //Classes
+    
     public static INativeClassStruct NewClass(int vTableSlots)
     {
         return classStructHandler.CreateNewStruct(vTableSlots);
@@ -177,7 +177,7 @@ public static class UnityVersionHandler
         return classStructHandler.Size();
     }
 
-    //Events
+    
     public static INativeEventInfoStruct NewEvent()
     {
         return eventInfoStructHandler.CreateNewStruct();
@@ -193,7 +193,7 @@ public static class UnityVersionHandler
         return eventInfoStructHandler.Size();
     }
 
-    //Exceptions
+    
     public static INativeExceptionStruct NewException()
     {
         return exceptionStructHandler.CreateNewStruct();
@@ -209,7 +209,7 @@ public static class UnityVersionHandler
         return exceptionStructHandler.Size();
     }
 
-    //Fields
+    
     public static INativeFieldInfoStruct NewField()
     {
         return fieldInfoStructHandler.CreateNewStruct();
@@ -226,7 +226,7 @@ public static class UnityVersionHandler
     }
 
 
-    //Images
+    
     public static INativeImageStruct NewImage()
     {
         return imageStructHandler.CreateNewStruct();
@@ -242,7 +242,7 @@ public static class UnityVersionHandler
         return imageStructHandler.Size();
     }
 
-    //Methods
+    
     public static INativeMethodInfoStruct NewMethod()
     {
         return methodInfoStructHandler.CreateNewStruct();
@@ -258,7 +258,7 @@ public static class UnityVersionHandler
         return methodInfoStructHandler.Size();
     }
 
-    //Parameters
+    
     public static unsafe Il2CppParameterInfo*[] NewMethodParameterArray(int count)
     {
         return parameterInfoStructHandler.CreateNewParameterInfoArray(count);
@@ -280,7 +280,7 @@ public static class UnityVersionHandler
     }
 
 
-    //Properties
+    
     public static INativePropertyInfoStruct NewProperty()
     {
         return propertyInfoStructHandler.CreateNewStruct();
@@ -296,7 +296,7 @@ public static class UnityVersionHandler
         return parameterInfoStructHandler.Size();
     }
 
-    //Types
+    
     public static INativeTypeStruct NewType()
     {
         return typeStructHandler.CreateNewStruct();

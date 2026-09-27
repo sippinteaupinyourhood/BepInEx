@@ -7,12 +7,12 @@ using BepInEx.Logging;
 
 namespace BepInEx.Configuration;
 
-/// <summary>
-///     Serializer/deserializer used by the config system.
-/// </summary>
+
+
+
 public static class TomlTypeConverter
 {
-    // Don't put anything from UnityEngine here or it will break preloader, use LazyTomlConverterLoader instead
+    
     private static Dictionary<Type, TypeConverter> TypeConverters { get; } = new()
     {
         [typeof(string)] = new TypeConverter
@@ -20,7 +20,7 @@ public static class TomlTypeConverter
             ConvertToString = (obj, type) => Escape((string) obj),
             ConvertToObject = (str, type) =>
             {
-                // Check if the string is a file path with unescaped \ path separators (e.g. D:\test and not D:\\test)
+                
                 if (Regex.IsMatch(str, @"^""?\w:\\(?!\\)(?!.+\\\\)"))
                     return str;
                 return Unescape(str);
@@ -32,7 +32,7 @@ public static class TomlTypeConverter
             ConvertToObject = (str, type) => bool.Parse(str)
         },
 
-        //integral types
+        
 
         [typeof(sbyte)] = new TypeConverter
         {
@@ -75,7 +75,7 @@ public static class TomlTypeConverter
             ConvertToObject = (str, type) => ulong.Parse(str)
         },
 
-        //floating point types
+        
 
         [typeof(float)] = new TypeConverter
         {
@@ -93,7 +93,7 @@ public static class TomlTypeConverter
             ConvertToObject = (str, type) => decimal.Parse(str, NumberFormatInfo.InvariantInfo)
         },
 
-        //enums are special
+        
 
         [typeof(Enum)] = new TypeConverter
         {
@@ -102,9 +102,9 @@ public static class TomlTypeConverter
         }
     };
 
-    /// <summary>
-    ///     Convert object of a given type to a string using available converters.
-    /// </summary>
+    
+    
+    
     public static string ConvertToString(object value, Type valueType)
     {
         var conv = GetConverter(valueType);
@@ -114,14 +114,14 @@ public static class TomlTypeConverter
         return conv.ConvertToString(value, valueType);
     }
 
-    /// <summary>
-    ///     Convert string to an object of a given type using available converters.
-    /// </summary>
+    
+    
+    
     public static T ConvertToValue<T>(string value) => (T) ConvertToValue(value, typeof(T));
 
-    /// <summary>
-    ///     Convert string to an object of a given type using available converters.
-    /// </summary>
+    
+    
+    
     public static object ConvertToValue(string value, Type valueType)
     {
         var conv = GetConverter(valueType);
@@ -131,9 +131,9 @@ public static class TomlTypeConverter
         return conv.ConvertToObject(value, valueType);
     }
 
-    /// <summary>
-    ///     Get a converter for a given type if there is any.
-    /// </summary>
+    
+    
+    
     public static TypeConverter GetConverter(Type valueType)
     {
         if (valueType == null)
@@ -147,10 +147,10 @@ public static class TomlTypeConverter
         return result;
     }
 
-    /// <summary>
-    ///     Add a new type converter for a given type.
-    ///     If a different converter is already added, this call is ignored and false is returned.
-    /// </summary>
+    
+    
+    
+    
     public static bool AddConverter(Type type, TypeConverter converter)
     {
         if (type == null) throw new ArgumentNullException(nameof(type));
@@ -166,14 +166,14 @@ public static class TomlTypeConverter
         return true;
     }
 
-    /// <summary>
-    ///     Check if a given type can be converted to and from string.
-    /// </summary>
+    
+    
+    
     public static bool CanConvert(Type type) => GetConverter(type) != null;
 
-    /// <summary>
-    ///     Give a list of types with registered converters.
-    /// </summary>
+    
+    
+    
     public static IEnumerable<Type> GetSupportedTypes() => TypeConverters.Keys;
 
     private static string Escape(this string txt)

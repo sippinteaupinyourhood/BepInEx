@@ -161,12 +161,12 @@ public class RewriteGlobalContext : IDisposable
                     var newConstraintType = constraint.Constraint != null ? resolve(constraint.Constraint.ToTypeSignature())?.ToTypeDefOrRef() : null;
                     var newConstraint = new GenericParameterConstraint(newConstraintType);
 
-                    // We don't need to copy custom attributes on constraints for generic parameters because Il2Cpp doesn't support them.
+                    
 
                     newGenericParameter.Constraints.Add(newConstraint);
                 }
 
-                // Similarly, custom attributes on generic parameters are also stripped by Il2Cpp, so we don't need to copy them.
+                
 
                 paramsMethod.GenericParameters.Add(newGenericParameter);
             }

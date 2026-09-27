@@ -238,7 +238,7 @@ internal class DeobfuscationMapGeneratorRunner : IRunner
                 continue;
 
             var baseDepthDifference = Math.Abs(actualBaseDepth - inheritanceDepthOfOriginal);
-            if (baseDepthDifference > 1) continue; // heuristic optimization
+            if (baseDepthDifference > 1) continue; 
             currentPenalty -= baseDepthDifference * 50;
 
             currentPenalty -=
@@ -297,8 +297,8 @@ internal class DeobfuscationMapGeneratorRunner : IRunner
             }
         }
 
-        // if (bestPenalty < -100)
-        // bestMatch = null;
+        
+        
 
         return (bestMatch, bestPenalty);
     }

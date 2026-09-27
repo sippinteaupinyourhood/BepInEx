@@ -2,10 +2,10 @@ using LibCpp2IL.BinaryStructures;
 
 namespace Cpp2IL.Core.Model.Contexts;
 
-/// <summary>
-/// Represents any type which is just a wrapper with additional info around an element type.
-/// For example, pointers, byref types, arrays.
-/// </summary>
+
+
+
+
 public abstract class WrappedTypeAnalysisContext(
     TypeAnalysisContext elementType,
     AssemblyAnalysisContext referencedFrom) : ReferencedTypeAnalysisContext(referencedFrom)

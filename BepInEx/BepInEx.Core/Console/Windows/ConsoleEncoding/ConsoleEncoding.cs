@@ -1,20 +1,20 @@
-﻿// --------------------------------------------------
-// UnityInjector - ConsoleEncoding.cs
-// Copyright (c) Usagirei 2015 - 2015
-// --------------------------------------------------
+﻿
+
+
+
 
 using System;
 using System.Text;
 
 namespace UnityInjector.ConsoleUtil;
 
-// --------------------------------------------------
-// Code ported from
-// https://gist.github.com/asm256/9bfb88336a1433e2328a
-// Which in turn was seemingly ported from
-// http://jonskeet.uk/csharp/ebcdic/
-// using only safe (managed) code
-// --------------------------------------------------
+
+
+
+
+
+
+
 internal partial class ConsoleEncoding : Encoding
 {
     private readonly uint _codePage;
@@ -75,7 +75,7 @@ internal partial class ConsoleEncoding : Encoding
         return readCount;
     }
 
-    // Account for some exotic UTF-8 characters
+    
     public override int GetMaxByteCount(int charCount) => charCount * 4;
     public override int GetMaxCharCount(int byteCount) => byteCount;
 }

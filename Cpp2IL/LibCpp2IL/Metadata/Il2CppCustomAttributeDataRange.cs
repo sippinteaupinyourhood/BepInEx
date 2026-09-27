@@ -2,7 +2,7 @@
 
 public class Il2CppCustomAttributeDataRange : ReadableClass, IIl2CppTokenProvider
 {
-    //Since v29
+    
     public uint token;
     public uint startOffset;
 

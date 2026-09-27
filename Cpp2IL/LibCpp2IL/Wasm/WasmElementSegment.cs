@@ -21,15 +21,15 @@ public class WasmElementSegment
     {
         Flags = file.ReadByte();
         if ((Flags & 3) == 2)
-            //Active segment with explicit table index
+            
             TableIdx = file.BaseStream.ReadLEB128Unsigned();
         else
-            //Default
+            
             TableIdx = 0;
 
         if ((Flags & 1) == 0)
         {
-            //Active segment
+            
             Mode = ElementSegmentMode.Active;
             Offset = new(file);
         }
@@ -40,13 +40,13 @@ public class WasmElementSegment
 
         if ((Flags & 3) == 0)
         {
-            //Implicit element type
+            
             ElemKind = 0;
             ElemType = WasmTypeEnum.funcRef;
         }
         else
         {
-            //Explicit element type
+            
             var typeCode = file.ReadByte();
             if ((Flags & 4) == 0)
                 ElemKind = typeCode;
@@ -58,7 +58,7 @@ public class WasmElementSegment
 
         if ((Flags & 4) == 0)
         {
-            //List of function ids
+            
             FunctionIndices = [];
             for (var i = 0UL; i < Count; i++)
             {
@@ -67,7 +67,7 @@ public class WasmElementSegment
         }
         else
         {
-            //List of expressions
+            
             ConstantExpressions = [];
             for (var i = 0UL; i < Count; i++)
             {

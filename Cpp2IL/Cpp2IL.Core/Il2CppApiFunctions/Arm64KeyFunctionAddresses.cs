@@ -40,10 +40,10 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
             {
                 Logger.VerboseNewline($"\tLast attribute generator function is at address 0x{attributeGeneratorList[^1]:X}. Skipping everything before that.");
 
-                //Optimisation: We can skip all bytes up to and including the last attribute restoration function
-                //However we don't know how long the last restoration function is, so just skip up to it, we'd only be saving a further 100 instructions or so
-                //These come at the beginning of the .text section usually and the only thing that comes before them is unmanaged finalizers and initializers.
-                //This may not be correct on v29 which uses the Bee compiler, which may do things differently
+                
+                
+                
+                
                 var oldLength = primaryExecutableSection.Length;
 
                 var toRemove = (int)(attributeGeneratorList[^1] - primaryExecutableSectionVa);
@@ -53,9 +53,9 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
 
                 Logger.VerboseNewline($"\tBy trimming out attribute generator functions, reduced decompilation work by {toRemove} of {oldLength} bytes (a {toRemove * 100 / (float)oldLength:f1}% saving)");
 
-                //Some games (e.g. Muse Dash APK) contain the il2cpp-ified methods in the .text section instead of their own dedicated one.
-                //That makes this very slow
-                //Try and detect the first function
+                
+                
+                
                 var methodAddresses = new List<ulong>();
                 methodAddresses.SortByExtractedKey(a => a);
 
@@ -69,10 +69,10 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
                     Logger.VerboseNewline($"\tDetected that the il2cpp-ified managed methods are in the .text section and api functions are available. Attempting to trim out managed methods for KFA scanning - the first managed method is at 0x{methodAddresses[0]:X} and the last at 0x{methodAddresses[^1]:X}, " +
                                           $"the first export function is at 0x{firstExport:X} and the last at 0x{lastExport:X}");
 
-                    //I am assuming, arbitrarily, that the exports are always towards the end of the managed methods, in this case.
+                    
                     var startFrom = Math.Min(firstExport, methodAddresses[^1]);
 
-                    //Just in case we didn't get the first export, let's subtract a little
+                    
                     if (startFrom > 0x100_0000)
                         startFrom -= 0x10_0000;
 
@@ -92,7 +92,7 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
 
                     var startFrom = methodAddresses[^1];
 
-                    //Just in case the exports are mixed in with the end of the managed methods, let's subtract a little
+                    
                     if (startFrom > 0x100_0000)
                         startFrom -= 0x10_0000;
 
@@ -109,8 +109,8 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
             }
             else
             {
-                //For now we skip everything after the last attribute generator. Not sure this is always reliable but in test binaries it works.
-                //We choose last not first to include all the generators, so that we hopefully have some context for api function detection.
+                
+                
                 Logger.VerboseNewline($"\tNSO: Last attribute generator function is at address 0x{attributeGeneratorList[^1]:X}. Skipping everything after that.");
 
                 var oldLength = primaryExecutableSection.Length;
@@ -118,8 +118,8 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
                 var toKeep = (int)(attributeGeneratorList[^1] - primaryExecutableSectionVa);
                 primaryExecutableSection = primaryExecutableSection.SubArray(..toKeep);
 
-                //This doesn't change, we've trimmed the end, not the beginning
-                // primaryExecutableSectionVa = primaryExecutableSectionVa;
+                
+                
 
                 Logger.VerboseNewline($"\tBy trimming out everything after and including attribute generator functions, reduced decompilation work by {oldLength - toKeep} of {oldLength} bytes (a {(oldLength - toKeep) * 100L / (float)oldLength:f1}% saving)");
             }
@@ -144,9 +144,9 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
 
             do
             {
-                //About the only way we have of checking for a thunk is if there is an all-zero instruction or another unconditional branch just before this
-                //Or a ret, but that's less reliable.
-                //if so, this is probably a thunk.
+                
+                
+                
                 if (idx - backtrack > 0)
                 {
                     var prevInstruction = _allInstructions[idx - backtrack - 1];
@@ -159,33 +159,33 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
 
                     if (prevInstruction.IsSkippedData && prevInstruction.Bytes.All(b => b == 0))
                     {
-                        //All-zero instructions are a match
+                        
                         yield return (ulong)potentialBranch.Address - (ulong)(backtrack * 4);
                         break;
                     }
 
                     if (prevInstruction.Mnemonic is "adrp" or "str")
                     {
-                        //ADRP instructions are a deal breaker - this means we're loading something from memory, so it's not a simple thunk
+                        
                         break;
                     }
 
                     if (prevInstruction.Mnemonic is "b" or "bl")
                     {
-                        //Previous branches are a match
+                        
                         yield return (ulong)potentialBranch.Address - (ulong)(backtrack * 4);
                         break;
                     }
 
                     if (prevInstruction.Mnemonic is "ret")
                     {
-                        //Previous rets are a match
+                        
                         yield return (ulong)potentialBranch.Address - (ulong)(backtrack * 4);
                         break;
                     }
                 }
 
-                //We're working in the .text section here so we have few symbols, so there's no point looking for the previous one.
+                
 
                 backtrack++;
             } while (backtrack * 4 < maxBytesBack);
@@ -202,10 +202,10 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
             return 0;
         }
 
-        //IsInstanceOfType is a very simple ICall, that looks like this:
-        //  Il2CppClass* klass = vm::Class::FromIl2CppType(type->type.type);
-        //  return il2cpp::vm::Object::IsInst(obj, klass) != NULL;
-        //The last call is to Object::IsInst
+        
+        
+        
+        
 
         Logger.Verbose($"IsInstanceOfType found at 0x{typeIsInstanceOfType.MethodPointer:X}...");
         var instructions = Arm64Utils.GetArm64MethodBodyAtVirtualAddress(typeIsInstanceOfType.MethodPointer, false);
@@ -229,11 +229,11 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
         if (idx < 0)
             return 0;
 
-        //Easy case, we have an unconditional jump at that address, just return what it points at
+        
         if (_allInstructions[idx].Mnemonic is "b" or "bl")
             return (ulong)_allInstructions[idx].Details.Operands[0].Immediate;
 
-        //Max number of instructions to check is 12. I use this because we check 50 bytes in x86 and 4 * 12 is 48.
+        
 
         for (var i = 0; i <= 12; i++)
         {
@@ -260,7 +260,7 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
                     var ptr = methodDef.MethodPointer;
                     var body = Arm64Utils.GetArm64MethodBodyAtVirtualAddress(ptr);
 
-                    //Looking for adrp, ldr, ldr, bl. Probably more than one - the first will be initializing the method, second will be the constructor call
+                    
                     var probableResult = 0L;
                     var numSeen = 0;
                     for (var i = 0; i < body.Count - 4; i++)
@@ -268,7 +268,7 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
                         if (body[i].Mnemonic != "adrp" || body[i + 1].Mnemonic != "ldr" || body[i + 2].Mnemonic != "ldr" || body[i + 3].Mnemonic != "bl")
                             continue;
 
-                        if (numSeen++ < 2) //Only store first one or second one
+                        if (numSeen++ < 2) 
                             probableResult = body[i + 3].Details.Operands[0].Immediate;
                     }
 
@@ -276,22 +276,22 @@ public class Arm64KeyFunctionAddresses : BaseKeyFunctionAddresses
                     {
                         Logger.Verbose($"Probably found at 0x{probableResult:X}...");
 
-                        //This is *codegen*_object_new. Probably. Check it
+                        
                         var thunk = FindFunctionThisIsAThunkOf((ulong)probableResult);
                         long addrVmObjectNew;
                         if (thunk > 0)
-                            //We've found codegen_object_new, map to vm::Object::New, then try and get back to object_new
+                            
                             addrVmObjectNew = (long)thunk;
                         else
-                            //Looks like we've been inlined and this is just vm::Object::New.
+                            
                             addrVmObjectNew = probableResult;
 
                         var allThunks = FindAllThunkFunctions((ulong)addrVmObjectNew, 16, (ulong)probableResult).ToList();
 
-                        allThunks.SortByExtractedKey(GetCallerCount); //Sort in ascending order by caller count
-                        allThunks.Reverse(); //Reverse to be in descending order
+                        allThunks.SortByExtractedKey(GetCallerCount); 
+                        allThunks.Reverse(); 
 
-                        il2cpp_object_new = allThunks.FirstOrDefault(); //Take first (i.e. most called)
+                        il2cpp_object_new = allThunks.FirstOrDefault(); 
 
                         Logger.VerboseNewline($"Leaving il2cpp_object_new at 0x{il2cpp_object_new:X}");
                     }

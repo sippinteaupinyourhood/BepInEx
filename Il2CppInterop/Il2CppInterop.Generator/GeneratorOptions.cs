@@ -43,19 +43,19 @@ public class GeneratorOptions
     public List<string> DeobfuscationGenerationAssemblies { get; } = new();
     public string? DeobfuscationNewAssembliesPath { get; set; }
 
-    /// <summary>
-    ///     Reads a rename map from the specified name into the specified instance of options
-    /// </summary>
+    
+    
+    
     public void ReadRenameMap(string fileName)
     {
         using var fileStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
         ReadRenameMap(fileStream, fileName.EndsWith(".gz"));
     }
 
-    /// <summary>
-    ///     Reads a rename map from the specified name into the specified instance of options.
-    ///     The stream is not closed by this method.
-    /// </summary>
+    
+    
+    
+    
     public void ReadRenameMap(Stream fileStream, bool isGzip)
     {
         if (isGzip)
@@ -78,13 +78,13 @@ public class GeneratorOptions
 
     public enum PrefixMode
     {
-        /// <summary>
-        ///     Only specified namespaces and assemblies will be renamed.
-        /// </summary>
+        
+        
+        
         OptIn,
-        /// <summary>
-        ///     Only specified namespaces and assemblies will not be renamed.
-        /// </summary>
+        
+        
+        
         OptOut
     }
 }

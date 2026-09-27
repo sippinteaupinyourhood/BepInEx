@@ -54,7 +54,7 @@ public static class LibCpp2IlMain
         if (MetadataVersion >= 27f)
             return LibCpp2IlGlobalMapper.CheckForPost27GlobalAt(address);
 
-        //Pre-27
+        
         var glob = GetLiteralGlobalByAddress(address);
         glob ??= GetMethodGlobalByAddress(address);
         glob ??= GetRawFieldGlobalByAddress(address);
@@ -136,15 +136,15 @@ public static class LibCpp2IlMain
         return global?.AsMethod();
     }
 
-    /// <summary>
-    /// Initialize the metadata and PE from a pair of byte arrays.
-    /// </summary>
-    /// <param name="binaryBytes">The content of the GameAssembly.dll file.</param>
-    /// <param name="metadataBytes">The content of the global-metadata.dat file</param>
-    /// <param name="unityVersion">The unity version</param>
-    /// <returns>True if the initialize succeeded, else false</returns>
-    /// <throws><see cref="System.FormatException"/> if the metadata is invalid (bad magic number, bad version), or if the PE is invalid (bad header signature, bad magic number)<br/></throws>
-    /// <throws><see cref="System.NotSupportedException"/> if the PE file specifies it is neither for AMD64 or i386 architecture</throws>
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public static bool Initialize(byte[] binaryBytes, byte[] metadataBytes, UnityVersion unityVersion)
     {
         LibCpp2IlReflection.ResetCaches();
@@ -191,15 +191,15 @@ public static class LibCpp2IlMain
         return true;
     }
 
-    /// <summary>
-    /// Initialize the metadata and PE from their respective file locations.
-    /// </summary>
-    /// <param name="pePath">The path to the GameAssembly.dll file</param>
-    /// <param name="metadataPath">The path to the global-metadata.dat file</param>
-    /// <param name="unityVersion">The unity version, split on periods, with the patch version (e.g. f1) stripped out. For example, [2018, 2, 0]</param>
-    /// <returns>True if the initialize succeeded, else false</returns>
-    /// <throws><see cref="System.FormatException"/> if the metadata is invalid (bad magic number, bad version), or if the PE is invalid (bad header signature, bad magic number)<br/></throws>
-    /// <throws><see cref="System.NotSupportedException"/> if the PE file specifies it is neither for AMD64 or i386 architecture</throws>
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public static bool LoadFromFile(string pePath, string metadataPath, UnityVersion unityVersion)
     {
         var metadataBytes = File.ReadAllBytes(metadataPath);
@@ -225,21 +225,21 @@ public static class LibCpp2IlMain
         return Initialize(peBytes, metadataBytes, unityVersion);
     }
 
-    /// <summary>
-    /// Attempts to determine the Unity version from the given binary path and game data path
-    /// </summary>
-    /// <param name="unityPlayerPath">The path to the unity player executable - either the executable itself or [lib]unityplayer[.dll]</param>
-    /// <param name="gameDataPath">The path to the GameName_Data folder, from which assets files can be read.</param>
-    /// <returns>A valid unity version if one can be read, else 0.0.0a0</returns>
+    
+    
+    
+    
+    
+    
     public static UnityVersion DetermineUnityVersion(string? unityPlayerPath, string? gameDataPath)
     {
-        //We prefer pulling from assets because it gives a full version number (i.e. including what is usually an f1 at the end)
-        //But we can fall back to the unity player if we have to (and are on windows)
+        
+        
         if (!string.IsNullOrEmpty(gameDataPath))
         {
             LibLogger.VerboseNewline($"DetermineUnityVersion: Have game data path {gameDataPath}, trying to pull version from globalgamemanagers or data.unity3d");
 
-            //Globalgamemanagers
+            
             var globalgamemanagersPath = Path.Combine(gameDataPath, "globalgamemanagers");
             if (File.Exists(globalgamemanagersPath))
             {
@@ -249,7 +249,7 @@ public static class LibCpp2IlMain
                 return GetVersionFromGlobalGameManagers(ggmBytes);
             }
 
-            //Data.unity3d
+            
             var dataPath = Path.Combine(gameDataPath, "data.unity3d");
             if (File.Exists(dataPath))
             {
@@ -278,11 +278,11 @@ public static class LibCpp2IlMain
         return default;
     }
 
-    /// <summary>
-    /// Attempts to determine the Unity version from the given globalgamemanagers file
-    /// </summary>
-    /// <param name="ggmBytes">The bytes making up the globalgamemanagers asset file</param>
-    /// <returns>A valid unity version if one can be read, else 0.0.0a0</returns>
+    
+    
+    
+    
+    
     public static UnityVersion GetVersionFromGlobalGameManagers(byte[] ggmBytes)
     {
         var verString = new StringBuilder();
@@ -311,17 +311,17 @@ public static class LibCpp2IlMain
         return UnityVersion.Parse(unityVer);
     }
 
-    /// <summary>
-    /// Attempts to determine the Unity version from the given data.unity3d file
-    /// </summary>
-    /// <param name="fileStream">A stream referencing the data.unity3d file. A stream is used instead of a byte array because these files can be very large. Only the first 30-or-so bytes are used.</param>
-    /// <returns>A valid unity version if one can be read, else 0.0.0a0</returns>
+    
+    
+    
+    
+    
     public static UnityVersion GetVersionFromDataUnity3D(Stream fileStream)
     {
-        //data.unity3d is a bundle file and it's used on later unity versions.
-        //These files are usually really large and we only want the first couple bytes, so it's done via a stream.
-        //e.g.: Secret Neighbour
-        //Fake unity version at 0xC, real one at 0x12
+        
+        
+        
+        
 
         var verString = new StringBuilder();
 
@@ -338,7 +338,7 @@ public static class LibCpp2IlMain
             var read = fileStream.ReadByte();
             if (read == 0)
             {
-                //I'm using a while true..break for this, shoot me.
+                
                 break;
             }
 

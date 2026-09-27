@@ -7,7 +7,7 @@ public class WasmFunctionDefinition
     public ulong Pointer;
     public WasmFunctionBody? AssociatedFunctionBody;
     private ulong TypeIndex;
-    public int FunctionTableIndex; //Only valid for non-imported functions
+    public int FunctionTableIndex; 
 
     public WasmFunctionDefinition(WasmImportEntry entry)
     {

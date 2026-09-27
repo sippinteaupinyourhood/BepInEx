@@ -18,7 +18,7 @@ public static class XrefScannerLowLevel
             myDecoder.Decode(out var instruction);
             if (myDecoder.LastError == DecoderError.NoMoreBytes) yield break;
 
-            // 0xcc - padding after most functions
+            
             if (instruction.Mnemonic == Mnemonic.Int3)
                 yield break;
 
@@ -28,7 +28,7 @@ public static class XrefScannerLowLevel
             if (instruction.FlowControl == FlowControl.UnconditionalBranch ||
                 instruction.FlowControl == FlowControl.Call)
             {
-                // We hope and pray that the compiler didn't use short jumps for any function calls
+                
                 if (!instruction.IsJmpShort)
                 {
                     yield return (IntPtr)ExtractTargetAddress(in instruction);

@@ -20,9 +20,9 @@ public readonly struct IsilVectorRegisterElementOperand(
 
     public enum VectorElementWidth
     {
-        B, //Byte
-        H, //Half
-        S, //Single
-        D, //Double
+        B, 
+        H, 
+        S, 
+        D, 
     }
 }

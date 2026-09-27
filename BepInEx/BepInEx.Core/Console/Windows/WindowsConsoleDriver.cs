@@ -12,10 +12,10 @@ namespace BepInEx;
 
 internal class WindowsConsoleDriver : IConsoleDriver
 {
-    // Apparently on some versions of Unity (e.g. 2018.4) using old mono causes crashes on game close if
-    // IntPtr overload is used for file streams (check #139).
-    // On the other hand, not all Unity games come with SafeFileHandle overload for FileStream
-    // As such, we're trying to use SafeFileHandle when it's available and go back to IntPtr overload if not available
+    
+    
+    
+    
     private static readonly ConstructorInfo FileStreamCtor = new[]
     {
         AccessTools.Constructor(typeof(FileStream), new[] { typeof(SafeFileHandle), typeof(FileAccess) }),
@@ -75,7 +75,7 @@ internal class WindowsConsoleDriver : IConsoleDriver
 
         if (ConsoleActive)
         {
-            // We're in a .NET framework / XNA environment; console *is* stdout
+            
             ConsoleOut = Console.Out;
             StandardOut = new StreamWriter(Console.OpenStandardOutput());
         }
@@ -89,15 +89,15 @@ internal class WindowsConsoleDriver : IConsoleDriver
     {
         ConsoleWindow.Attach();
 
-        // Make sure of ConsoleEncoding helper class because on some Monos
-        // Encoding.GetEncoding throws NotImplementedException on most codepages
-        // NOTE: We don't set Console.OutputEncoding because it resets any existing Console.Out writers
-        // Always set the console output codepage so the Windows console interprets bytes correctly,
-        // regardless of whether we use a managed encoder or ConsoleEncoding to produce those bytes.
+        
+        
+        
+        
+        
         ConsoleEncoding.ConsoleCodePage = codepage;
 
-        // If stdout exists, write to it, otherwise make it the same as console out
-        // Not sure if this is needed? Does the original Console.Out still work?
+        
+        
         var stdout = GetOutHandle();
         if (stdout == IntPtr.Zero)
         {
@@ -113,7 +113,7 @@ internal class WindowsConsoleDriver : IConsoleDriver
         };
 
         var consoleOutStream = OpenFileStream(ConsoleWindow.ConsoleOutHandle);
-        // Can't use Console.OutputEncoding because it can be null (i.e. not preference by user)
+        
         ConsoleOut = new StreamWriter(consoleOutStream,
                                       useManagedEncoder ? Utility.UTF8NoBom : ConsoleEncoding.OutputEncoding)
         {

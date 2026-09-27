@@ -12,9 +12,9 @@ namespace LibCpp2IL;
 
 public abstract class ClassReadingBinaryReader : EndianAwareBinaryReader
 {
-    /// <summary>
-    /// Set this to true to enable storing of amount of bytes read of each readable structure.
-    /// </summary>
+    
+    
+    
     public static bool EnableReadableSizeInformation = false;
 
     private SpinLock PositionShiftLock;
@@ -109,20 +109,20 @@ public abstract class ClassReadingBinaryReader : EndianAwareBinaryReader
         if (offset >= 0)
             Position = offset;
 
-        //Ref Unity.IL2CPP.dll, Unity.IL2CPP.Metadata.MetadataUtils::WriteCompressedUInt32
-        //Read first byte
+        
+        
         var b = ReadByte();
         bytesRead = 1;
         if (b < 128)
             return b;
         if (b == 240)
         {
-            //Full Uint
+            
             bytesRead = 5;
             return ReadUInt32();
         }
 
-        //Special constant values
+        
         if (b == byte.MaxValue)
             return uint.MaxValue;
         if (b == 254)
@@ -130,14 +130,14 @@ public abstract class ClassReadingBinaryReader : EndianAwareBinaryReader
 
         if ((b & 192) == 192)
         {
-            //3 more to read
+            
             bytesRead = 4;
             return (b & ~192U) << 24 | (uint)(ReadByte() << 16) | (uint)(ReadByte() << 8) | ReadByte();
         }
 
         if ((b & 128) == 128)
         {
-            //1 more to read
+            
             bytesRead = 2;
             return (b & ~128U) << 8 | ReadByte();
         }
@@ -151,7 +151,7 @@ public abstract class ClassReadingBinaryReader : EndianAwareBinaryReader
 
     protected internal int ReadUnityCompressedIntAtRawAddr(long position, bool doLock, out int bytesRead)
     {
-        //Ref libil2cpp, il2cpp\utils\ReadCompressedInt32
+        
         uint unsigned;
         if (doLock)
             unsigned = ReadUnityCompressedUIntAtRawAddr(position, out bytesRead);
@@ -213,7 +213,7 @@ public abstract class ClassReadingBinaryReader : EndianAwareBinaryReader
     {
         var value = ReadPrimitive(type, overrideArchCheck);
 
-        //32-bit fixes...
+        
         if (value is uint && type == typeof(ulong))
             value = Convert.ToUInt64(value);
         if (value is int && type == typeof(long))
@@ -412,21 +412,21 @@ public abstract class ClassReadingBinaryReader : EndianAwareBinaryReader
     }
 
 
-    /// <summary>
-    /// Read a native-sized integer (i.e. 32 or 64 bit, depending on platform) at the current position
-    /// </summary>
+    
+    
+    
     public virtual long ReadNInt() => is32Bit ? ReadInt32() : ReadInt64();
 
-    /// <summary>
-    /// Read a native-sized unsigned integer (i.e. 32 or 64 bit, depending on platform) at the current position
-    /// </summary>
+    
+    
+    
     public virtual ulong ReadNUint() => is32Bit ? ReadUInt32() : ReadUInt64();
 
     protected void WriteWord(int position, ulong word) => WriteWord(position, (long)word);
 
-    /// <summary>
-    /// Used for ELF Relocations.
-    /// </summary>
+    
+    
+    
     protected void WriteWord(int position, long word)
     {
         if (_memoryStream == null)
@@ -512,7 +512,7 @@ public abstract class ClassReadingBinaryReader : EndianAwareBinaryReader
 
         try
         {
-            //This handles the actual reading into the array, and tracking read counts, for us.
+            
             FillReadableArrayHereNoLock(t);
         }
         finally

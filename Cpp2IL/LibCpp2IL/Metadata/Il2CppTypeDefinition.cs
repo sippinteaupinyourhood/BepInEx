@@ -13,14 +13,14 @@ public class Il2CppTypeDefinition : ReadableClass
     [Version(Max = 24)] public int CustomAttributeIndex;
     public Il2CppVariableWidthIndex<Il2CppType> ByvalTypeIndex;
 
-    [Version(Max = 24.5f)] //Removed in v27 
+    [Version(Max = 24.5f)] 
     public int ByrefTypeIndex;
 
     public Il2CppVariableWidthIndex<Il2CppType> DeclaringTypeIndex;
     public Il2CppVariableWidthIndex<Il2CppType> ParentIndex;
     
-    [Version(Max = 34f)] //Removed in v35
-    public int ElementTypeIndex; // we can probably remove this one. Only used for enums
+    [Version(Max = 34f)] 
+    public int ElementTypeIndex; 
 
     [Version(Max = 24.15f)] public int RgctxStartIndex;
     [Version(Max = 24.15f)] public int RgctxCount;
@@ -47,19 +47,19 @@ public class Il2CppTypeDefinition : ReadableClass
     public ushort InterfacesCount;
     public ushort InterfaceOffsetsCount;
 
-    // bitfield to portably encode boolean values as single bits
-    // 01 - valuetype;
-    // 02 - enumtype;
-    // 03 - has_finalize;
-    // 04 - has_cctor;
-    // 05 - is_blittable;
-    // 06 - is_import_or_windows_runtime;
-    // 07-10 - One of nine possible PackingSize values (0, 1, 2, 4, 8, 16, 32, 64, or 128)
-    // 11 - PackingSize is default
-    // 12 - ClassSize is default
-    // 13-16 - One of nine possible PackingSize values (0, 1, 2, 4, 8, 16, 32, 64, or 128) - the specified packing size (even for explicit layouts)
-    // 17 - is_byref_like
-    // 18 - has_inline_array
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public uint Bitfield;
     public uint Token;
 
@@ -74,7 +74,7 @@ public class Il2CppTypeDefinition : ReadableClass
     public bool ClassSizeIsDefault => (Bitfield >> 11 & 0x1) == 1;
     public uint SpecifiedPackingSize => ((Il2CppPackingSizeEnum)(Bitfield >> 12 & 0xF)).NumericalValue();
     public bool IsByRefLike => (Bitfield >> 16 & 0x1) == 1;
-    public bool HasInlineArray => (Bitfield >> 17 & 0x1) == 1; //technically v104 and above but we don't use this anywhere yet.
+    public bool HasInlineArray => (Bitfield >> 17 & 0x1) == 1; 
 
     public TypeAttributes Attributes => (TypeAttributes)Flags;
 
@@ -143,7 +143,7 @@ public class Il2CppTypeDefinition : ReadableClass
         {
             if (LibCpp2IlMain.MetadataVersion < 24.2f)
             {
-                //No codegen modules here.
+                
                 return LibCpp2IlMain.TheMetadata!.RgctxDefinitions!.Skip(RgctxStartIndex).Take(RgctxCount).ToArray();
             }
 
@@ -330,7 +330,7 @@ public class Il2CppTypeDefinition : ReadableClass
     public Il2CppTypeDefinition[]? NestedTypes => LibCpp2IlMain.TheMetadata == null 
         ? null 
         : LibCpp2IlMain.TheMetadata.GetNestedTypeIndicesFromIndexAndCount(NestedTypesStart, NestedTypeCount)
-            .Select(Il2CppVariableWidthIndex<Il2CppTypeDefinition>.MakeTemporaryForFixedWidthUsage) //DynWidth: nestedTypeIndices is always int, so making temp is ok
+            .Select(Il2CppVariableWidthIndex<Il2CppTypeDefinition>.MakeTemporaryForFixedWidthUsage) 
             .Select(LibCpp2IlMain.TheMetadata.GetTypeDefinitionFromIndex)
             .ToArray();
 
@@ -350,7 +350,7 @@ public class Il2CppTypeDefinition : ReadableClass
 
     public Il2CppTypeDefinition? ElementType => LibCpp2IlMain.TheMetadata == null || LibCpp2IlMain.Binary == null || ElementTypeIndex < 0 
         ? null 
-        : LibCpp2IlMain.Binary.GetType(Il2CppVariableWidthIndex<Il2CppType>.MakeTemporaryForFixedWidthUsage(ElementTypeIndex)).CoerceToUnderlyingTypeDefinition(); //DynWidth: ElementTypeIndex was removed in v35, so it's never dynamic
+        : LibCpp2IlMain.Binary.GetType(Il2CppVariableWidthIndex<Il2CppType>.MakeTemporaryForFixedWidthUsage(ElementTypeIndex)).CoerceToUnderlyingTypeDefinition(); 
 
     public Il2CppGenericContainer? GenericContainer => GenericContainerIndex.IsNull ? null : LibCpp2IlMain.TheMetadata?.GetGenericContainerFromIndex(GenericContainerIndex);
 
@@ -362,10 +362,10 @@ public class Il2CppTypeDefinition : ReadableClass
                 throw new InvalidOperationException("Cannot get the underlying type of a non-enum type.");
 
             if (IsAtLeast(35f))
-                //v35: ElementTypeIndex removed, enum base type is just normal base type
+                
                 return RawBaseType!;
             
-            //pre-v35: ElementTypeIndex is used for enums to store the underlying type, so we need to get the type from there instead of the parent index (which is just System.Enum)
+            
             return LibCpp2IlMain.Binary!.GetType(Il2CppVariableWidthIndex<Il2CppType>.MakeTemporaryForFixedWidthUsage(ElementTypeIndex));
         }
     }

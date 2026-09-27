@@ -34,21 +34,21 @@ internal static class PlatformUtils
 
     private static bool Is(this Platform current, Platform expected) => (current & expected) == expected;
 
-    /// <summary>
-    ///     Recreation of MonoMod's PlatformHelper.DeterminePlatform method, but with libc calls instead of creating processes.
-    /// </summary>
+    
+    
+    
     public static void SetPlatform()
     {
         var current = Platform.Unknown;
 
-        // For old Mono, get from a private property to accurately get the platform.
-        // static extern PlatformID Platform
+        
+        
         var p_Platform = typeof(Environment).GetProperty("Platform", BindingFlags.NonPublic | BindingFlags.Static);
         string platID;
         if (p_Platform != null)
             platID = p_Platform.GetValue(null, new object[0]).ToString();
         else
-            // For .NET and newer Mono, use the usual value.
+            
             platID = Environment.OSVersion.Platform.ToString();
         platID = platID.ToLowerInvariant();
 
@@ -80,18 +80,18 @@ internal static class PlatformUtils
                 if (wineGetVersion != IntPtr.Zero)
                 {
                     current |= Platform.Wine;
-                    // It's not safe to use the AsDelegate() extension method here because:
-                    //  - It comes from the MonoMod.Utils.DynDll class, defined in MonoMod.Common.
-                    //  - The DynDll class has a static constructor that reads PlatformHelper.Current.
-                    //  - Reading from that property freezes it: subsequent writes will throw an exception.
-                    //  - This method only sets PlatformHelper.Current at the very end.
+                    
+                    
+                    
+                    
+                    
                     var getVersion = Marshal.GetDelegateForFunctionPointer(wineGetVersion, typeof(GetWineVersionDelegate)) as GetWineVersionDelegate;
                     WineVersion = getVersion();
                 }
             }
         }
 
-        // Is64BitOperatingSystem has been added in .NET Framework 4.0
+        
         var m_get_Is64BitOperatingSystem =
             typeof(Environment).GetProperty("Is64BitOperatingSystem")?.GetGetMethod();
         if (m_get_Is64BitOperatingSystem != null)
@@ -112,7 +112,7 @@ internal static class PlatformUtils
             }
             else
             {
-                // Linux
+                
                 var utsname_linux = new utsname_linux();
                 result = uname_linux(ref utsname_linux);
                 arch = utsname_linux.machine;
@@ -126,9 +126,9 @@ internal static class PlatformUtils
         }
         else
         {
-            // Detect ARM based on PE info or uname.
+            
             typeof(object).Module.GetPEKind(out var peKind, out var machine);
-            if (machine == (ImageFileMachine) 0x01C4 /* ARM, .NET Framework 4.5 */)
+            if (machine == (ImageFileMachine) 0x01C4 )
                 current |= Platform.ARM;
         }
 

@@ -35,44 +35,44 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
 
         private static readonly MemoryUtils.SignatureDefinition[] s_Signatures =
         {
-            // Test Game - Unity 2021.3.4 (x64)
+            
             new MemoryUtils.SignatureDefinition
             {
                 pattern = "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x20\x48\x8B\x79\x10\x48\x8B\xD9\x48\x8B\xF2\x48\x2B\x9F",
                 mask = "xxxxxxxxxxxxxx?xxxxxxxxxxxxx",
                 xref = false
             },
-            // V Rising - Unity 2022.3.23 (x64)
+            
             new MemoryUtils.SignatureDefinition
             {
                 pattern = "\x48\x89\x5C\x24\x08\x48\x89\x74\x24\x10\x57\x48\x83\xEC\x40\x48\x8B\x41\x10",
                 mask = "xxxxxxxxxxxxxxxxxxx",
                 xref = false
             },
-            // GTFO - Unity 2019.4.21 (x64)
-            // DigitalCraft Dolce 3.1.2 - Unity 2022.3.55 (x64)
+            
+            
             new MemoryUtils.SignatureDefinition
             {
                 pattern = "\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x48\x8B\x41\x10\x48\x8B\xD9\x48\x8B",
-                // mask the stack allocation length
+                
                 mask = "xxxxxxxxx?xxxxxxxxx",
                 xref = false
             },
-            // Idle Slayer - Unity 2021.3.17 (x64)
+            
             new MemoryUtils.SignatureDefinition
             {
                 pattern = "\x40\x53\x48\x83\xEC\x20\x48\x8B\xDA\xE8\x00\x00\x00\x00\x4C\x8B\xC8\x48\x85\xC0",
                 mask = "xxxxxxxxxx????xxxxxx",
                 xref = false
             },
-            // Evony - Unity 2018.4.0 (x86)
+            
             new MemoryUtils.SignatureDefinition
             {
                 pattern = "\x55\x8B\xEC\x56\xFF\x75\x08\xE8\x00\x00\x00\x00\x8B\xF0\x83\xC4\x04\x85\xF6",
                 mask = "xxxxxxxx????xxxxxxx",
                 xref = false
             },
-            // Idle Slayer - Unity 2021.3.23 (x64)
+            
             new MemoryUtils.SignatureDefinition
             {
                 pattern = "\x40\x53\x48\x83\xEC\x20\x48\x8B\xDA\xE8\xCC\xCC\xCC\xCC\x4C",
@@ -86,7 +86,7 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
             nint classGetDefaultFieldValue = 0;
             if (forceICallMethod)
             {
-                // MonoField isn't present on 2021.2.0+
+                
                 var monoFieldType = InjectorHelpers.Il2CppMscorlib.GetTypesSafe().SingleOrDefault((x) => x.Name is "MonoField");
                 if (monoFieldType == null)
                     throw new Exception($"Unity {Il2CppInteropRuntime.Instance.UnityVersion} is not supported at the moment: MonoField isn't present in Il2Cppmscorlib.dll for unity version, unable to fetch icall");
@@ -97,7 +97,7 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
                 var monoFieldGetValueInternal = XrefScannerLowLevel.JumpTargets(monoFieldGetValueInternalThunk).Single();
                 Logger.Instance.LogTrace("Il2CppSystem.Reflection.MonoField::GetValueInternal: 0x{MonoFieldGetValueInternalAddress}", monoFieldGetValueInternal.ToInt64().ToString("X2"));
 
-                // Field::GetValueObject could be inlined with Field::GetValueObjectForThread
+                
                 var fieldGetValueObject = XrefScannerLowLevel.JumpTargets(monoFieldGetValueInternal).Single();
                 Logger.Instance.LogTrace("Field::GetValueObject: 0x{FieldGetValueObjectAddress}", fieldGetValueObject.ToInt64().ToString("X2"));
 
@@ -116,10 +116,10 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
 
                 var getStaticFieldValueTargets = XrefScannerLowLevel.JumpTargets(getStaticFieldValue).ToList();
 
-                // Sometimes the compiler can do an optimization and omit 'retn' instruction,
-                // which then causes code following to grab wrong function pointer. A correct match should not contain more than 4 jumps
-                // This optimization also causes Field::StaticGetValueInternal method to be located right under Field::StaticGetValue method
-                // Example: https://discord.com/channels/623153565053222947/754333645199900723/1104817647171932283
+                
+                
+                
+                
                 if (getStaticFieldValueTargets.Count > 4)
                     return getStaticFieldValueTargets[^2];
 

@@ -44,7 +44,7 @@ internal class NativeParameterInfoStructHandler_27_3 : INativeParameterInfoStruc
     public string GetName() => "NativeParameterInfoStructHandler_27_3";
 #endif
 
-    //Doesn't actually exist; just using this for type pointer storage in MethodInfo 27_3 +
+    
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct Il2CppParameterInfo_27_3
     {

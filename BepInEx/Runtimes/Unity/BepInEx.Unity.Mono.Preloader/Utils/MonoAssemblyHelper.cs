@@ -13,8 +13,8 @@ internal static class MonoAssemblyHelper
 {
     static MonoAssemblyHelper()
     {
-        // We can't use mono's __Internal because on Windows it will use GetModuleHandleW(NULL) that will
-        // in turn return the module to the EXE and not mono.dll (at least on Unity versions < 5).
+        
+        
         typeof(MonoAssemblyHelper).ResolveDynDllImports(new()
         {
             ["mono"] = new()

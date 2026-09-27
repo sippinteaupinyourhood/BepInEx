@@ -34,7 +34,7 @@ internal class Il2CppTypeGenerator : VersionSpecificGenerator
     {
         new BitfieldAccessor("ByRef", "byref"),
         new BitfieldAccessor("Pinned", "pinned"),
-        // maybe throw if not exist
+        
         new BitfieldAccessor("ValueType", "valuetype", defaultGetter: "false")
     };
 }

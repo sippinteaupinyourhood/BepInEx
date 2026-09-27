@@ -8,9 +8,9 @@ public class MachOSymtabEntry
     public byte Type;
     public byte Section;
     public ushort Description;
-    public ulong Value; // Architecture sized
+    public ulong Value; 
 
-    public string Name = null!; //Null-suppressed because: Initialized in Read
+    public string Name = null!; 
 
     public bool IsExternal => (Type & 0b1) == 0b1;
     public bool IsSymbolicDebugging => (Type & 0b1110_0000) != 0;

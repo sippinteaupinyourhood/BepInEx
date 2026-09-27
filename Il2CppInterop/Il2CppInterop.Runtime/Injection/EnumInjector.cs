@@ -16,7 +16,7 @@ namespace Il2CppInterop.Runtime.Injection;
 
 public static unsafe class EnumInjector
 {
-    // fieldInfo : defaultValueBlob
+    
     private static readonly ConcurrentDictionary<IntPtr, IntPtr> s_DefaultValueOverrides = new();
 
     private static readonly IntPtr value__Cached = Marshal.StringToCoTaskMemUTF8("value__");
@@ -63,7 +63,7 @@ public static unsafe class EnumInjector
             newField.Parent = oldField.Parent;
             newField.Offset = oldField.Offset;
 
-            // Move the default value blob from the old field to the new one
+            
             if (s_DefaultValueOverrides.TryRemove((IntPtr)oldField.FieldInfoPointer, out var blob))
                 s_DefaultValueOverrides[(IntPtr)newField.FieldInfoPointer] = blob;
         }
@@ -89,7 +89,7 @@ public static unsafe class EnumInjector
 
         var runtimeEnumType = Il2CppType.TypeFromPointer(enumPtr).TryCast<RuntimeType>();
         if (runtimeEnumType != null)
-            // The mono runtime caches the enum names and values the first time they are requested, so we reset this cache
+            
             runtimeEnumType.GenericCache = null;
     }
 
@@ -228,7 +228,7 @@ public static unsafe class EnumInjector
 
         il2cppEnum.ThisArg.Data = il2cppEnum.ByValArg.Data = InjectorHelpers.CreateClassIdentity(il2cppEnum.Pointer);
 
-        // Has to be IL2CPP_TYPE_VALUETYPE because IL2CPP_TYPE_ENUM isn't used
+        
         il2cppEnum.ThisArg.Type = il2cppEnum.ByValArg.Type = Il2CppTypeEnum.IL2CPP_TYPE_VALUETYPE;
 
         il2cppEnum.Flags = (Il2CppClassAttributes)type.Attributes;
@@ -241,7 +241,7 @@ public static unsafe class EnumInjector
 
         var enumValues = Enum.GetValues(type);
         var enumNames = Enum.GetNames(type);
-        il2cppEnum.FieldCount = (ushort)(enumValues.Length + 1); // value__
+        il2cppEnum.FieldCount = (ushort)(enumValues.Length + 1); 
 
         var il2cppFields =
             (Il2CppFieldInfo*)Marshal.AllocHGlobal(il2cppEnum.FieldCount * UnityVersionHandler.FieldInfoSize());

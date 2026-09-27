@@ -13,64 +13,64 @@ using LibCpp2IL.Metadata;
 
 namespace Cpp2IL.Core.Model.Contexts;
 
-/// <summary>
-/// A base class to represent any type which has, or can have, custom attributes.
-/// </summary>
+
+
+
 public abstract class HasCustomAttributes(uint token, ApplicationAnalysisContext appContext)
     : HasToken(token, appContext)
 {
     private bool _hasAnalyzedCustomAttributeData;
     private bool _hasInitCustomAttributeData;
 
-    /// <summary>
-    /// On V29, stores the custom attribute blob. Pre-29, stores the bytes for the custom attribute generator function.
-    /// </summary>
+    
+    
+    
     public Memory<byte> RawIl2CppCustomAttributeData = Memory<byte>.Empty;
 
-    /// <summary>
-    /// Stores the analyzed custom attribute data once analysis has actually run.
-    /// </summary>
+    
+    
+    
     public List<AnalyzedCustomAttribute>? CustomAttributes;
 
-    /// <summary>
-    /// Stores the attribute type range for this member, which references which custom attributes are present.
-    ///
-    /// Null on v29+, nonnull prior to that
-    /// </summary>
+    
+    
+    
+    
+    
     public Il2CppCustomAttributeTypeRange? AttributeTypeRange;
 
-    /// <summary>
-    /// Stores the raw types of the custom attributes on this member.
-    ///
-    /// Null on v29+ (constructors are in the blob), nonnull prior to that
-    /// </summary>
+    
+    
+    
+    
+    
     public List<Il2CppType>? AttributeTypes;
 
-    /// <summary>
-    /// Prior to v29, stores the analysis context for custom attribute cache generator function.
-    ///
-    /// On v29, is null because there is no method, the attribute blob is stored instead, in the metadata file.
-    /// </summary>
+    
+    
+    
+    
+    
     public AttributeGeneratorMethodAnalysisContext? CaCacheGeneratorAnalysis;
 
-    /// <summary>
-    /// Returns this member's custom attribute index, or -1 if it has no custom attributes.
-    /// </summary>
+    
+    
+    
     protected abstract int CustomAttributeIndex { get; }
 
-    /// <summary>
-    /// Returns this member's assembly context for use in custom attribute reconstruction.
-    /// </summary>
+    
+    
+    
     public abstract AssemblyAnalysisContext CustomAttributeAssembly { get; }
 
-    /// <summary>
-    /// Returns true if this member is injected by Cpp2IL (and thus should not be analyzed for custom attributes).
-    /// </summary>
+    
+    
+    
     protected virtual bool IsInjected => false;
 
-    /// <summary>
-    /// Pre-v29, stores the index of the custom attribute range for this member. Post-v29, always -1.
-    /// </summary>
+    
+    
+    
     private int Pre29RangeIndex = -1;
 
     public bool IsCompilerGeneratedBasedOnCustomAttributes => HasCustomAttributeWithFullName("System.Runtime.CompilerServices.CompilerGeneratedAttribute");
@@ -83,7 +83,7 @@ public abstract class HasCustomAttributes(uint token, ApplicationAnalysisContext
     }
 
 
-#pragma warning disable CS8618 //Non-null member is not initialized.
+#pragma warning disable CS8618 
 #pragma warning restore CS8618
 
     protected void InitCustomAttributeData()
@@ -114,11 +114,11 @@ public abstract class HasCustomAttributes(uint token, ApplicationAnalysisContext
         {
             RawIl2CppCustomAttributeData = Array.Empty<byte>();
             AttributeTypes = [];
-            return; //No attributes
+            return; 
         }
 
         AttributeTypes = Enumerable.Range(AttributeTypeRange.start, AttributeTypeRange.count)
-            .Select(attrIdx => AppContext.Metadata!.attributeTypes![attrIdx]) //Not null because we've checked we're not on v29
+            .Select(attrIdx => AppContext.Metadata!.attributeTypes![attrIdx]) 
             .Select(typeIdx => AppContext.Binary!.GetType(Il2CppVariableWidthIndex<Il2CppType>.MakeTemporaryForFixedWidthUsage(typeIdx)))
             .ToList();
     }
@@ -210,9 +210,9 @@ public abstract class HasCustomAttributes(uint token, ApplicationAnalysisContext
         RawIl2CppCustomAttributeData = CaCacheGeneratorAnalysis.RawBytes;
     }
 
-    /// <summary>
-    /// Attempt to parse the Il2CppCustomAttributeData blob into custom attributes.
-    /// </summary>
+    
+    
+    
     public void AnalyzeCustomAttributeData(bool allowAnalysis = true)
     {
         if (_hasAnalyzedCustomAttributeData)
@@ -252,9 +252,9 @@ public abstract class HasCustomAttributes(uint token, ApplicationAnalysisContext
             }
         }
 
-        //Basically, extract actions from the analysis, and compare with the type list we have to resolve parameters and populate the CustomAttributes list.
+        
 
-        foreach (var il2CppType in AttributeTypes ?? []) //Can be null for injected objects
+        foreach (var il2CppType in AttributeTypes ?? []) 
         {
             var typeDef = il2CppType.AsClass();
             var attributeTypeContext = AppContext.ResolveContextForType(typeDef) ?? throw new("Unable to find type " + typeDef.FullName);
@@ -266,21 +266,21 @@ public abstract class HasCustomAttributes(uint token, ApplicationAnalysisContext
             }
             else if (attributeTypeContext.Methods.FirstOrDefault(c => c.Name == ".ctor") is { } anyConstructor)
             {
-                //TODO change this to actual constructor w/ params once anaylsis is available
+                
                 attribute = new(anyConstructor);
             }
             else
-                //No constructor - shouldn't happen?
+                
                 continue;
 
-            //Add the attribute, even if we don't have constructor params, so it can be read regardless
+            
             CustomAttributes.Add(attribute);
         }
     }
 
-    /// <summary>
-    /// Parses the Il2CppCustomAttributeData blob as a v29 metadata attribute blob into custom attributes.
-    /// </summary>
+    
+    
+    
     private void AnalyzeCustomAttributeDataV29()
     {
         if (RawIl2CppCustomAttributeData.Length == 0)
@@ -290,7 +290,7 @@ public abstract class HasCustomAttributes(uint token, ApplicationAnalysisContext
         var attributeCount = blobStream.ReadUnityCompressedUint();
         var constructors = V29AttributeUtils.ReadConstructors(blobStream, attributeCount, AppContext);
 
-        //Diagnostic data
+        
         var startOfData = blobStream.Position;
         var perAttributeStartOffsets = new Dictionary<Il2CppMethodDefinition, long>();
 

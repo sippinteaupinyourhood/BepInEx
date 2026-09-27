@@ -4,8 +4,8 @@ namespace LibCpp2IL.MachO;
 
 public class MachOSection : ReadableClass
 {
-    public string SectionName = "INVALID"; // 16 bytes
-    public string ContainingSegmentName = "INVALID"; // 16 bytes
+    public string SectionName = "INVALID"; 
+    public string ContainingSegmentName = "INVALID"; 
 
     public ulong Address;
     public ulong Size;
@@ -19,7 +19,7 @@ public class MachOSection : ReadableClass
     public uint Reserved1;
     public uint Reserved2;
 
-    public uint Reserved3; //64-bit only
+    public uint Reserved3; 
 
     public override void Read(ClassReadingBinaryReader reader)
     {

@@ -13,7 +13,7 @@ public class Il2CppMethodSpec : ReadableClass
     public int methodIndexIndex;
 
     public Il2CppMethodDefinition? MethodDefinition 
-        => LibCpp2IlMain.TheMetadata?.GetMethodDefinitionFromIndex(Il2CppVariableWidthIndex<Il2CppMethodDefinition>.MakeTemporaryForFixedWidthUsage(methodDefinitionIndex)); //DynWidth: Il2CppMethodSpec is in-binary, dynamic widths weren't applied here.
+        => LibCpp2IlMain.TheMetadata?.GetMethodDefinitionFromIndex(Il2CppVariableWidthIndex<Il2CppMethodDefinition>.MakeTemporaryForFixedWidthUsage(methodDefinitionIndex)); 
 
     public Il2CppGenericInst? GenericClassInst => LibCpp2IlMain.Binary?.GetGenericInst(classIndexIndex);
 

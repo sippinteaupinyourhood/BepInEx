@@ -8,7 +8,7 @@ namespace BepInEx.Unity.IL2CPP.Utils;
 
 internal static class Il2CppUtils
 {
-    // TODO: Check if we can safely initialize this in Chainloader instead
+    
     private static GameObject managerGo;
 
     public static Il2CppObjectBase AddComponent(Type t)

@@ -32,7 +32,7 @@ public static class Pass80UnstripMethods
                     var isICall = (unityMethod.ImplAttributes & MethodImplAttributes.InternalCall) != 0;
                     if (unityMethod.IsConstructor) continue;
                     if (unityMethod.IsAbstract) continue;
-                    if (!unityMethod.HasMethodBody && !isICall) continue; // CoreCLR chokes on no-body methods
+                    if (!unityMethod.HasMethodBody && !isICall) continue; 
 
                     var processedMethod = processedType.TryGetMethodByUnityAssemblyMethod(unityMethod);
                     if (processedMethod != null) continue;
@@ -246,13 +246,13 @@ public static class Pass80UnstripMethods
         }
 
         if (unityType is BoxedTypeSignature)
-            return null; // Boxed types are not yet supported
+            return null; 
 
         if (unityType is FunctionPointerTypeSignature)
-            return null; // Function pointers are not yet supported
+            return null; 
 
         if (unityType is SentinelTypeSignature)
-            return unityType; // SentinelTypeSignature has no state and be reused.
+            return unityType; 
 
         if (unityType.DeclaringType != null)
         {

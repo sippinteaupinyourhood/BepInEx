@@ -11,12 +11,12 @@ namespace BepInEx.Unity.Mono.Preloader;
 
 internal static class UnityPreloaderRunner
 {
-    // This is a list of important assemblies in BepInEx core folder that should be force-loaded
-    // Some games can ship these assemblies in Managed folder, in which case assembly resolving bypasses our LocalResolve
-    // On the other hand, renaming these assemblies is not viable because 3rd party assemblies
-    // that we don't build (e.g. MonoMod, Harmony, many plugins) depend on them
-    // As such, we load them early so that the game uses our version instead
-    // These assemblies should be known to be rarely edited and are known to be shipped as-is with Unity assets
+    
+    
+    
+    
+    
+    
     private static readonly string[] CriticalAssemblies =
     {
         "Mono.Cecil.dll",
@@ -37,8 +37,8 @@ internal static class UnityPreloaderRunner
             }
             catch (Exception)
             {
-                // Suppress error for now
-                // TODO: Should we crash here if load fails? Can't use logging at this point
+                
+                
             }
     }
 
@@ -75,8 +75,8 @@ internal static class UnityPreloaderRunner
         if (!Utility.TryParseAssemblyName(args.Name, out var assemblyName))
             return null;
 
-        // Use parse assembly name on managed side because native GetName() can fail on some locales
-        // if the game path has "exotic" characters
+        
+        
 
         var validAssemblies = AppDomain.CurrentDomain
                                        .GetAssemblies()
@@ -91,8 +91,8 @@ internal static class UnityPreloaderRunner
                                        .OrderByDescending(a => a.name.Version)
                                        .ToList();
 
-        // First try to match by version, then just pick the best match (generally highest)
-        // This should mainly affect cases where the game itself loads some assembly (like Mono.Cecil) 
+        
+        
         var foundMatch = validAssemblies.FirstOrDefault(a => a.name.Version == assemblyName.Version) ??
                          validAssemblies.FirstOrDefault();
         var foundAssembly = foundMatch?.assembly;

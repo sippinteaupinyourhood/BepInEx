@@ -48,13 +48,13 @@ public class ConstantExpression
 
     public enum ConstantInstruction : byte
     {
-        I32_CONST = 0x41, /* i32.const n: value is LEB128 */
-        I64_CONST = 0x42, /* i64.const n: value is LEB128 */
-        F32_CONST = 0x43, /* f32.const z: value is byte[4] */
-        F64_CONST = 0x44, /* f64.const z: value is byte[8] */
-        REF_NULL_FUNCREF = 0xD0, /* ref.null funcref: value is null */
-        REF_NULL_EXTERNREF = 0xD1, /* ref.null externref: value is null */
-        REF_FUNC = 0xD2, /* ref.func x: value is LEB128 funcidx */
-        GLOBAL_GET = 0x23, /* global.get x: value is LEB128 globalidx */
+        I32_CONST = 0x41, 
+        I64_CONST = 0x42, 
+        F32_CONST = 0x43, 
+        F64_CONST = 0x44, 
+        REF_NULL_FUNCREF = 0xD0, 
+        REF_NULL_EXTERNREF = 0xD1, 
+        REF_FUNC = 0xD2, 
+        GLOBAL_GET = 0x23, 
     }
 }

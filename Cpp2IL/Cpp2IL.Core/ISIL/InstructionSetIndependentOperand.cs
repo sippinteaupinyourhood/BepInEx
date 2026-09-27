@@ -27,7 +27,7 @@ public readonly struct InstructionSetIndependentOperand
     public override string? ToString()
     {
         if (Data is InstructionSetIndependentInstruction instruction)
-            return $"{{{instruction.InstructionIndex.ToString()}}}"; //Special case for instructions, we want to show the index in braces. Otherwise we print the entire instruction and it looks weird.
+            return $"{{{instruction.InstructionIndex.ToString()}}}"; 
 
         return Data.ToString();
     }

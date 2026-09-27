@@ -19,15 +19,15 @@ internal class StartupHook
 
         try
         {
-//#if DEBUG
-//          filename =
-//              Path.Combine(Directory.GetCurrentDirectory(),
-//                           Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
-//          ResolveDirectories.Add(Path.GetDirectoryName(filename));
 
-//          // for debugging within VS
-//          ResolveDirectories.Add(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
-//#else
+
+
+
+
+
+
+
+
             
             var executableFilename = Process.GetCurrentProcess().MainModule.FileName;
             
@@ -53,7 +53,7 @@ internal class StartupHook
             silentExceptionLog = Path.Combine(gameDirectory, silentExceptionLog);
             
             ResolveDirectories.Add(bepinexCoreDirectory);
-//#endif
+
 
             AppDomain.CurrentDomain.AssemblyResolve += SharedEntrypoint.RemoteResolve(ResolveDirectories);
 
@@ -89,7 +89,7 @@ internal class StartupHook
     {
         if (Path.GetFileNameWithoutExtension(executableFilename) == "dotnet")
         {
-            // We're in a special setup that uses dotnet directly to start a .dll, instead of a .exe that launches dotnet implicitly
+            
 
             var args = Environment.GetCommandLineArgs();
 
@@ -128,12 +128,12 @@ internal class StartupHook
         string coreFolderPath = Path.GetDirectoryName(assemblyLocation);
 
         if (coreFolderPath == null)
-            return null; // throw new Exception("Could not find a valid path to the BepInEx directory");
+            return null; 
 
         string gameDirectory = Path.GetDirectoryName(Path.GetDirectoryName(coreFolderPath));
 
         if (gameDirectory == null)
-            return null; // throw new Exception("Could not find a valid path to the game directory");
+            return null; 
 
         return Path.Combine(gameDirectory, DoesNotExistPath);
     }

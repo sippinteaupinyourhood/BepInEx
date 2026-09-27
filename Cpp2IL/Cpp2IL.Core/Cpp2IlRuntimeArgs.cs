@@ -6,10 +6,10 @@ namespace Cpp2IL.Core;
 
 public class Cpp2IlRuntimeArgs
 {
-    //To determine easily if this struct is the default one or not.
+    
     public bool Valid;
 
-    //Core variables
+    
     public UnityVersion UnityVersion;
     public string PathToAssembly = null!;
     public string PathToMetadata = null!;

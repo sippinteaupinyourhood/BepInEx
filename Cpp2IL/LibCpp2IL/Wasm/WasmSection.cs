@@ -22,7 +22,7 @@ public class WasmSection
         var size = file.BaseStream.ReadLEB128Unsigned();
         LibLogger.VerboseNewline($"\t\tFound section of type {id} at 0x{pos:X} with length 0x{size:X}");
 
-        size += (ulong)(file.Position - pos); //id and size are not included in the size
+        size += (ulong)(file.Position - pos); 
 
         return id switch
         {

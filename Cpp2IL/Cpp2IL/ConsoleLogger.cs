@@ -58,12 +58,12 @@ internal static class ConsoleLogger
 
     public static void CheckColorSupport()
     {
-        // if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-        // {
-        //     DisableColor = true;
-        //     WarnNewline("Looks like you're running on a non-windows platform. Disabling ANSI color codes.");
-        // }
-        /*else*/
+        
+        
+        
+        
+        
+        
         if (Directory.Exists(@"Z:\usr\"))
         {
             DisableColor = true;
@@ -71,12 +71,12 @@ internal static class ConsoleLogger
         }
         else if (Environment.GetEnvironmentVariable("NO_COLOR") != null)
         {
-            DisableColor = true; //Just manually set this, even though Pastel respects the environment variable
+            DisableColor = true; 
             Logger.WarnNewline("NO_COLOR set, disabling ANSI color codes as you requested.");
         }
         else
         {
-            //Ensure we run the cctor for Pastel now.
+            
             ConsoleExtensions.Enable();
         }
     }

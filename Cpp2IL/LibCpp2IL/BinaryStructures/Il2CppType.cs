@@ -9,7 +9,7 @@ public class Il2CppType : ReadableClass
 {
     public ulong Datapoint;
     public uint Bits;
-    public Union Data { get; set; } = null!; //Late-bound
+    public Union Data { get; set; } = null!; 
     public uint Attrs { get; set; }
     public Il2CppTypeEnum Type { get; set; }
     public uint NumMods { get; set; }
@@ -19,15 +19,15 @@ public class Il2CppType : ReadableClass
 
     private void InitUnionAndFlags()
     {
-        Attrs = Bits & 0b1111_1111_1111_1111; //Lowest 16 bits
-        Type = (Il2CppTypeEnum)((Bits >> 16) & 0b1111_1111); //Bits 16-23
+        Attrs = Bits & 0b1111_1111_1111_1111; 
+        Type = (Il2CppTypeEnum)((Bits >> 16) & 0b1111_1111); 
         Data = new Union { Dummy = Datapoint };
 
         if (LibCpp2IlMain.Il2CppTypeHasNumMods5Bits)
         {
-            //Unity 2021 (v27.2) changed num_mods to be 5 bits not 6
-            //Which shifts byref and pinned left one
-            //And adds a new bit 31 which is valuetype
+            
+            
+            
             NumMods = (Bits >> 24) & 0b1_1111;
             Byref = (Bits >> 29) & 1;
             Pinned = (Bits >> 30) & 1;
@@ -46,11 +46,11 @@ public class Il2CppType : ReadableClass
     {
         public ulong Dummy;
         
-        //DynamicWidth: Dummy is always nint, not dynamic, so temp usage is ok
+        
         public Il2CppVariableWidthIndex<Il2CppTypeDefinition> ClassIndex => Il2CppVariableWidthIndex<Il2CppTypeDefinition>.MakeTemporaryForFixedWidthUsage((int) Dummy);
         public ulong Type => Dummy;
         public ulong Array => Dummy;
-        //DynamicWidth: Dummy is always nint, not dynamic, so temp usage is ok
+        
         public Il2CppVariableWidthIndex<Il2CppGenericParameter> GenericParameterIndex => Il2CppVariableWidthIndex<Il2CppGenericParameter>.MakeTemporaryForFixedWidthUsage((int) Dummy);
         public ulong GenericClass => Dummy;
     }

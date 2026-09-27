@@ -17,7 +17,7 @@ internal static class ConversionUtils
 
     private static readonly Dictionary<string, string> STypeConversions = new()
     {
-        // Not stubbed
+        
         ["Il2CppArray"] = "void",
         ["Il2CppGenericClass"] = "void",
         ["Il2CppTypeDefinition"] = "void",
@@ -93,7 +93,7 @@ internal static class ConversionUtils
         }
 
         if (type is CppClass fieldType && fieldType.ClassKind == CppClassKind.Union) return "void*";
-        // Forgive me for my sins
+        
         var oldTypeName = type.GetDisplayName().Replace("const ", string.Empty);
         var ptrCount = oldTypeName.Count(x => x == '*');
         if (ptrCount == 0 && Config.ClassToGenerator.ContainsKey(oldTypeName))

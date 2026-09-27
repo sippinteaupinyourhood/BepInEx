@@ -37,9 +37,16 @@ public static class Pass20GenerateStaticConstructors
 
         if (newType.IsNested)
         {
+            var nestedOrdinal = 0;
+            foreach (var nestedType in oldType.DeclaringType!.NestedTypes)
+            {
+                if (ReferenceEquals(nestedType, oldType))
+                    break;
+                nestedOrdinal++;
+            }
             ctorBuilder.Add(OpCodes.Ldsfld,
                 assemblyContext.GlobalContext.GetNewTypeForOriginal(oldType.DeclaringType!).ClassPointerFieldRef);
-            ctorBuilder.Add(OpCodes.Ldstr, typeContext.NativeName.Name);
+            ctorBuilder.Add(OpCodes.Ldstr, $"#ordinal:{nestedOrdinal}");
             ctorBuilder.Add(OpCodes.Call, assemblyContext.Imports.IL2CPP_GetIl2CppNestedType.Value);
         }
         else
@@ -129,40 +136,25 @@ public static class Pass20GenerateStaticConstructors
         foreach (var method in typeContext.Methods)
         {
             ctorBuilder.Add(OpCodes.Ldsfld, typeContext.ClassPointerFieldRef);
-
-            var token = method.OriginalMethod.ExtractToken();
-            if (token == 0)
+            var methodIndex = oldType.Methods.IndexOf(method.OriginalMethod);
+            if (method.OriginalMethod.GenericParameters.Count > 0)
             {
-                ourTokenlessMethods++;
-
-                ctorBuilder.Add(
-                    method.OriginalMethod.GenericParameters.Count > 0 ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
-                var methodKey = GeneratorOptions.NativeMemberKey(assemblyName, oldType.FullName, method.OriginalMethod.Name!);
-                ctorBuilder.Add(OpCodes.Ldstr, options.NativeMethodNames.TryGetValue(methodKey, out var nativeMethodName)
-                    ? nativeMethodName
-                    : method.OriginalMethod.Name!);
-                ctorBuilder.EmitLoadTypeNameString(assemblyContext.Imports, method.OriginalMethod,
-                    method.OriginalMethod.Signature!.ReturnType, method.NewMethod.Signature!.ReturnType);
-                ctorBuilder.Add(OpCodes.Ldc_I4, method.OriginalMethod.Parameters.Count);
-                ctorBuilder.Add(OpCodes.Newarr, assemblyContext.Imports.Module.String().ToTypeDefOrRef());
-
-                for (var i = 0; i < method.OriginalMethod.Parameters.Count; i++)
+                var genericOrdinal = 0;
+                for (var i = 0; i < methodIndex; i++)
                 {
-                    ctorBuilder.Add(OpCodes.Dup);
-                    ctorBuilder.Add(OpCodes.Ldc_I4, i);
-                    ctorBuilder.EmitLoadTypeNameString(assemblyContext.Imports, method.OriginalMethod,
-                        method.OriginalMethod.Parameters[i].ParameterType,
-                        method.NewMethod.Parameters[i].ParameterType);
-                    ctorBuilder.Add(OpCodes.Stelem_Ref);
+                    var candidate = oldType.Methods[i];
+                    if (candidate.GenericParameters.Count > 0
+                        && candidate.Parameters.Count == method.OriginalMethod.Parameters.Count)
+                        genericOrdinal++;
                 }
 
-                ctorBuilder.Add(OpCodes.Call, assemblyContext.Imports.IL2CPP_GetIl2CppMethod.Value);
+                methodIndex = int.MinValue
+                    | (method.OriginalMethod.Parameters.Count << 16)
+                    | genericOrdinal;
             }
-            else
-            {
-                ctorBuilder.Add(OpCodes.Ldc_I4, (int)token);
-                ctorBuilder.Add(OpCodes.Call, assemblyContext.Imports.IL2CPP_GetIl2CppMethodByToken.Value);
-            }
+
+            ctorBuilder.Add(OpCodes.Ldc_I4, methodIndex);
+            ctorBuilder.Add(OpCodes.Call, assemblyContext.Imports.IL2CPP_GetIl2CppMethodByToken.Value);
 
             ctorBuilder.Add(OpCodes.Stsfld, method.NonGenericMethodInfoPointerField);
         }
@@ -182,8 +174,10 @@ public static class Pass20GenerateStaticConstructors
             ctorBuilder.Add(newTypeReference is ByReferenceTypeSignature ? OpCodes.Ldc_I4_1 : OpCodes.Ldc_I4_0);
             ctorBuilder.Add(OpCodes.Call,
                 imports.Module.DefaultImporter.ImportMethod(
-                    imports.IL2CPP_RenderTypeName.Value
-                        .MakeGenericInstanceMethod(newTypeReference is ByReferenceTypeSignature ? newTypeReference.GetElementType() : newTypeReference)));
+                    imports.IL2CPP_RenderTypeName.Value.MakeGenericInstanceMethod(
+                        newTypeReference is ByReferenceTypeSignature
+                            ? newTypeReference.GetElementType()
+                            : newTypeReference)));
         }
     }
 }

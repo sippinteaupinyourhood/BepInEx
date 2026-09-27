@@ -15,7 +15,7 @@
   <ItemGroup>
     <PackageReference Include="AsmResolver.DotNet" Version="6.0.0-beta.5" />
     <PackageReference Include="MonoMod.Backports" Version="1.1.2">
-      <Aliases>MonoModBackports</Aliases><!-- Transitive dependency from AsmResolver. Extern alias prevents it from affecting us. -->
+      <Aliases>MonoModBackports</Aliases>
     </PackageReference>
     <PackageReference Include="PolySharp" Version="1.14.1">
       <PrivateAssets>all</PrivateAssets>

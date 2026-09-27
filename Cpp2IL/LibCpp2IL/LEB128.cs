@@ -1,16 +1,16 @@
-﻿// This software is released under the BSD License.
-// See LICENSE file for details.
-// From https://github.com/rzubek/mini-leb128
+﻿
+
+
 
 using System;
 using System.IO;
 
 namespace LibCpp2IL;
 
-/// <summary>
-/// Single-file utility to read and write integers in the LEB128 (7-bit little endian base-128) format.
-/// See https://en.wikipedia.org/wiki/LEB128 for details.
-/// </summary>
+
+
+
+
 public static class LEB128
 {
     private const long SIGN_EXTEND_MASK = -1L;
@@ -25,12 +25,12 @@ public static class LEB128
 
         while (more)
         {
-            byte chunk = (byte)(value & 0x7fL); // extract a 7-bit chunk
+            byte chunk = (byte)(value & 0x7fL); 
             value >>= 7;
 
-            bool signBitSet = (chunk & 0x40) != 0; // sign bit is the msb of a 7-bit byte, so 0x40
+            bool signBitSet = (chunk & 0x40) != 0; 
             more = !((value == 0 && !signBitSet) || (value == -1 && signBitSet));
-            if (more) { chunk |= 0x80; } // set msb marker that more bytes are coming
+            if (more) { chunk |= 0x80; } 
 
             stream.WriteByte(chunk);
             bytes += 1;
@@ -48,11 +48,11 @@ public static class LEB128
 
         while (more)
         {
-            byte chunk = (byte)(value & 0x7fUL); // extract a 7-bit chunk
+            byte chunk = (byte)(value & 0x7fUL); 
             value >>= 7;
 
             more = value != 0;
-            if (more) { chunk |= 0x80; } // set msb marker that more bytes are coming
+            if (more) { chunk |= 0x80; } 
 
             stream.WriteByte(chunk);
             bytes += 1;
@@ -79,17 +79,17 @@ public static class LEB128
             byte b = (byte)next;
             bytes += 1;
 
-            more = (b & 0x80) != 0; // extract msb
-            signBitSet = (b & 0x40) != 0; // sign bit is the msb of a 7-bit byte, so 0x40
+            more = (b & 0x80) != 0; 
+            signBitSet = (b & 0x40) != 0; 
 
-            long chunk = b & 0x7fL; // extract lower 7 bits
+            long chunk = b & 0x7fL; 
             value |= chunk << shift;
             shift += 7;
         }
 
         ;
 
-        // extend the sign of shorter negative numbers
+        
         if (shift < INT64_BITSIZE && signBitSet) { value |= SIGN_EXTEND_MASK << shift; }
 
         return value;
@@ -113,8 +113,8 @@ public static class LEB128
             byte b = (byte)next;
             bytes += 1;
 
-            more = (b & 0x80) != 0; // extract msb
-            ulong chunk = b & 0x7fUL; // extract lower 7 bits
+            more = (b & 0x80) != 0; 
+            ulong chunk = b & 0x7fUL; 
             value |= chunk << shift;
             shift += 7;
         }

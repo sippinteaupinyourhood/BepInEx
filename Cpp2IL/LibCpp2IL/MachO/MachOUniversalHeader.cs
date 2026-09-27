@@ -2,8 +2,8 @@ namespace LibCpp2IL.MachO;
 
 public class MachOUniversalHeader : ReadableClass
 {
-    public uint Magic; //0xCAFEBABE
-    public uint NumberFileEntries; // Number of file entries in the container
+    public uint Magic; 
+    public uint NumberFileEntries; 
 
     public override void Read(ClassReadingBinaryReader reader)
     {

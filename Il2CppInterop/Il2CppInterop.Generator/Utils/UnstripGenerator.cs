@@ -26,7 +26,7 @@ public static class UnstripGenerator
 
         var invokeMethod = new MethodDefinition("Invoke",
             MethodAttributes.HideBySig | MethodAttributes.Virtual | MethodAttributes.NewSlot | MethodAttributes.Public,
-            MethodSignature.CreateInstance(imports.Module.Void())); // todo
+            MethodSignature.CreateInstance(imports.Module.Void())); 
         invokeMethod.ImplAttributes = MethodImplAttributes.CodeTypeMask;
         delegateType.Methods.Add(invokeMethod);
 
@@ -104,7 +104,7 @@ public static class UnstripGenerator
 
         var bodyProcessor = staticCtor.CilMethodBody!.Instructions;
 
-        bodyProcessor.Remove(staticCtor.CilMethodBody.Instructions.Last()); // remove ret
+        bodyProcessor.Remove(staticCtor.CilMethodBody.Instructions.Last()); 
 
         bodyProcessor.Add(OpCodes.Ldstr, GetICallSignature(unityMethod));
 
@@ -112,7 +112,7 @@ public static class UnstripGenerator
         bodyProcessor.Add(OpCodes.Call, enclosingType.DeclaringModule!.DefaultImporter.ImportMethod(methodRef));
         bodyProcessor.Add(OpCodes.Stsfld, delegateField);
 
-        bodyProcessor.Add(OpCodes.Ret); // restore ret
+        bodyProcessor.Add(OpCodes.Ret); 
 
         return delegateField;
     }

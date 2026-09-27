@@ -18,10 +18,10 @@ internal static class UnityPreloaderRunner
         Paths.SetExecutablePath(EnvVars.DOORSTOP_PROCESS_PATH, bepinPath, EnvVars.DOORSTOP_MANAGED_FOLDER_DIR, false,
                                 EnvVars.DOORSTOP_DLL_SEARCH_DIRS);
 
-        // Cecil 0.11 requires one to manually set up list of trusted assemblies for assembly resolving
-        // The main BCL path
+        
+        
         AppDomain.CurrentDomain.AddCecilPlatformAssemblies(Paths.ManagedPath);
-        // The parent path -> .NET has some extra managed DLLs in there
+        
         AppDomain.CurrentDomain.AddCecilPlatformAssemblies(Path.GetDirectoryName(Paths.ManagedPath));
 
         AppDomain.CurrentDomain.AssemblyResolve += LocalResolve;

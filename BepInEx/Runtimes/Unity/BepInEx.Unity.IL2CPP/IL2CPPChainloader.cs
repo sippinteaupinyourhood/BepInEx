@@ -22,6 +22,7 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
 {
     private static RuntimeInvokeDetourDelegate originalInvoke;
     private static int startupGate;
+    private static long hookInstalledAt;
 
     private static readonly ConfigEntry<bool> ConfigUnityLogging = ConfigFile.CoreConfig.Bind(
      "Logging", "UnityLogListening",
@@ -38,23 +39,23 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
 
     public static IL2CPPChainloader Instance { get; set; }
 
-    /// <summary>
-    ///     Register and add a Unity Component (for example MonoBehaviour) into BepInEx global manager.
-    ///     Automatically registers the type with Il2Cpp type system if it isn't initialised already.
-    /// </summary>
-    /// <typeparam name="T">Type of the component to add.</typeparam>
+    
+    
+    
+    
+    
     public static T AddUnityComponent<T>() where T : Il2CppObjectBase => AddUnityComponent(typeof(T)).Cast<T>();
 
-    /// <summary>
-    ///     Register and add a Unity Component (for example MonoBehaviour) into BepInEx global manager.
-    ///     Automatically registers the type with Il2Cpp type system if it isn't initialised already.
-    /// </summary>
-    /// <param name="t">Type of the component to add</param>
+    
+    
+    
+    
+    
     public static Il2CppObjectBase AddUnityComponent(Type t) => Il2CppUtils.AddComponent(t);
 
-    /// <summary>
-    ///     Occurs after a plugin is instantiated and just before <see cref="BasePlugin.Load"/> is called.
-    /// </summary>
+    
+    
+    
     public event Action<PluginInfo, Assembly, BasePlugin> PluginLoad;
 
     public override void Initialize(string gameExePath = null)
@@ -74,6 +75,7 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
         RuntimeInvokeDetourDelegate invokeMethodDetour = OnInvokeMethod;
         RuntimeInvokeDetour =
             INativeDetour.CreateAndApply(directInvokePtr, invokeMethodDetour, out originalInvoke);
+        hookInstalledAt = Environment.TickCount64;
     }
 
     private static IntPtr ResolveRuntimeInvoke(IntPtr il2CppHandle)
@@ -96,7 +98,8 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
             NativeLibrary.TryGetExport(il2CppHandle, alias, out address))
             return address;
 
-        if (NativeLibrary.TryGetExport(il2CppHandle, "bXpRzmesLff", out address) ||
+        if (NativeLibrary.TryGetExport(il2CppHandle, "BkPyAyKoENa", out address) ||
+            NativeLibrary.TryGetExport(il2CppHandle, "bXpRzmesLff", out address) ||
             NativeLibrary.TryGetExport(il2CppHandle, "QUnIxupvmev", out address) ||
             NativeLibrary.TryGetExport(il2CppHandle, "oBGsYjJdmzU", out address))
             return address;
@@ -134,8 +137,11 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
     {
         try
         {
+            Logger.Log(LogLevel.Info, "Starting interop preload");
             Il2CppInteropManager.PreloadInteropAssemblies();
+            Logger.Log(LogLevel.Info, "Starting Unity logging setup");
             SetupUnityLogging();
+            Logger.Log(LogLevel.Info, "Starting plugin execution");
             Instance.Execute();
         }
         catch (Exception ex)
@@ -153,7 +159,7 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
         var unhook = false;
         try
         {
-            unhook = IsChainloaderTrigger(method);
+            unhook = method != IntPtr.Zero && Environment.TickCount64 - hookInstalledAt >= 10_000;
         }
         finally
         {
@@ -174,7 +180,7 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
         return result;
     }
 
-    // JIT-compiled only when called here, so OnInvokeMethod needs no interop assemblies present to JIT.
+    
     private static void SetupUnityLogging()
     {
         if (!ConfigUnityLogging.Value)
@@ -198,12 +204,17 @@ public class IL2CPPChainloader : BaseChainloader<BasePlugin>
 
     public override BasePlugin LoadPlugin(PluginInfo pluginInfo, Assembly pluginAssembly)
     {
+        Logger.Log(LogLevel.Info, $"Resolving plugin type {pluginInfo.TypeName}");
         var type = pluginAssembly.GetType(pluginInfo.TypeName);
 
+        Logger.Log(LogLevel.Info, $"Constructing plugin {pluginInfo.Metadata.Name}");
         var pluginInstance = (BasePlugin) Activator.CreateInstance(type);
 
+        Logger.Log(LogLevel.Info, $"Invoking plugin-load handlers for {pluginInfo.Metadata.Name}");
         PluginLoad?.Invoke(pluginInfo, pluginAssembly, pluginInstance);
+        Logger.Log(LogLevel.Info, $"Entering Load() for {pluginInfo.Metadata.Name}");
         pluginInstance.Load();
+        Logger.Log(LogLevel.Info, $"Load() returned for {pluginInfo.Metadata.Name}");
 
         return pluginInstance;
     }

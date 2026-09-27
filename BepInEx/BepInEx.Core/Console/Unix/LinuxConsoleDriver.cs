@@ -43,12 +43,12 @@ internal class LinuxConsoleDriver : IConsoleDriver
 
     public void PreventClose()
     {
-        // Not supported by all distros
+        
     }
 
     public void Initialize(bool alreadyActive, bool useManagedEncoder)
     {
-        // Console is always considered active on Unix
+        
         ConsoleActive = true;
 
         StdoutRedirected = UnixStreamHelper.isatty(1) != 1;
@@ -57,7 +57,7 @@ internal class LinuxConsoleDriver : IConsoleDriver
 
         if (UseMonoTtyDriver && !StdoutRedirected)
         {
-            // Mono implementation handles xterm for us
+            
 
             var writer = ConsoleWriter.CreateConsoleStreamWriter(duplicateStream, Console.Out.Encoding, true);
 
@@ -68,7 +68,7 @@ internal class LinuxConsoleDriver : IConsoleDriver
         }
         else
         {
-            // Handle TTY ourselves
+            
 
             var writer = new StreamWriter(duplicateStream, Console.Out.Encoding);
 
@@ -94,7 +94,7 @@ internal class LinuxConsoleDriver : IConsoleDriver
             return;
 
         if (UseMonoTtyDriver)
-            // Use mono's inbuilt terminfo driver to set the foreground color for us
+            
             SafeConsole.ForegroundColor = color;
         else
             ConsoleOut.Write(TtyInfo.GetAnsiCode(color));

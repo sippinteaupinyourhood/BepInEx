@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace BepInEx.Unity.Mono;
 
-/// <summary>
-///     Config types that are unity specific
-/// </summary>
+
+
+
 internal static class UnityTomlTypeConverters
 {
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -46,7 +46,7 @@ internal static class UnityTomlTypeConverters
 
     private static object StringToRect(string s, Type type)
     {
-        // JsonUtility doesn't work with Rect on all Unity versions, so parse it manually
+        
         Rect result = default(Rect);
 
         if (s == null)

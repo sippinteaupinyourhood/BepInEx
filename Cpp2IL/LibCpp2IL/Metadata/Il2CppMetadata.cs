@@ -30,20 +30,20 @@ public class Il2CppMetadata : ClassReadingBinaryReader
     private Il2CppFieldDefaultValue[] fieldDefaultValues;
     private Il2CppParameterDefaultValue[] parameterDefaultValues;
     internal Il2CppPropertyDefinition[] propertyDefs;
-    public List<Il2CppCustomAttributeTypeRange>? attributeTypeRanges; //Removed in v29
+    public List<Il2CppCustomAttributeTypeRange>? attributeTypeRanges; 
     public Il2CppStringLiteral[] stringLiterals;
-    public Il2CppMetadataUsageList[]? metadataUsageLists; //Removed in v27
-    private Il2CppMetadataUsagePair[]? metadataUsagePairs; //Removed in v27
-    public Il2CppRGCTXDefinition[]? RgctxDefinitions; //Moved to binary in v24.2
+    public Il2CppMetadataUsageList[]? metadataUsageLists; 
+    private Il2CppMetadataUsagePair[]? metadataUsagePairs; 
+    public Il2CppRGCTXDefinition[]? RgctxDefinitions; 
     
-    public int[]? attributeTypes; //Removed in v29
-    public List<Il2CppCustomAttributeDataRange>? AttributeDataRanges; //Added in v29
+    public int[]? attributeTypes; 
+    public List<Il2CppCustomAttributeDataRange>? AttributeDataRanges; 
 
-    public Il2CppInlineArrayLength[] TypeInlineArrays; //v104+. TODO: These theoretically map to [InlineArray] attributes in dummy dlls, but that's a recent language version feature, does unity actually support them yet?
+    public Il2CppInlineArrayLength[] TypeInlineArrays; 
     
     public Il2CppVariableWidthIndex<Il2CppType>[] interfaceIndices;
 
-    //Moved to binary in v27.
+    
     public Dictionary<uint, SortedDictionary<uint, uint>>? metadataUsageDic;
 
     private Il2CppNestedTypeIndex[] nestedTypeIndices;
@@ -77,7 +77,7 @@ public class Il2CppMetadata : ClassReadingBinaryReader
     {
         if (!HasMetadataHeader(bytes))
         {
-            //Magic number is wrong
+            
             throw new FormatException("Invalid or corrupt metadata (magic number check failed)");
         }
 
@@ -93,76 +93,76 @@ public class Il2CppMetadata : ClassReadingBinaryReader
         if (version == 24)
         {
             if (unityVersion.GreaterThanOrEquals(2020, 1, 11))
-                actualVersion = 24.4f; //2020.1.11-17 were released prior to 2019.4.21, so are still on 24.4
+                actualVersion = 24.4f; 
             else if (unityVersion.GreaterThanOrEquals(2020))
-                actualVersion = 24.3f; //2020.1.0-10 were released prior to to 2019.4.15, so are still on 24.3
+                actualVersion = 24.3f; 
             else if (unityVersion.GreaterThanOrEquals(2019, 4, 21))
-                actualVersion = 24.5f; //2019.4.21 introduces v24.5
+                actualVersion = 24.5f; 
             else if (unityVersion.GreaterThanOrEquals(2019, 4, 15))
-                actualVersion = 24.4f; //2019.4.15 introduces v24.4
+                actualVersion = 24.4f; 
             else if (unityVersion.GreaterThanOrEquals(2019, 3, 7))
-                actualVersion = 24.3f; //2019.3.7 introduces v24.3
+                actualVersion = 24.3f; 
             else if (unityVersion.GreaterThanOrEquals(2019))
-                actualVersion = 24.2f; //2019.1.0 introduces v24.2
+                actualVersion = 24.2f; 
             else if (unityVersion.GreaterThanOrEquals(2018, 4, 34))
-                actualVersion = 24.15f; //2018.4.34 made a tiny little change which just removes HashValueIndex from AssemblyNameDefinition
+                actualVersion = 24.15f; 
             else if (unityVersion.GreaterThanOrEquals(2018, 3))
-                actualVersion = 24.1f; //2018.3.0 introduces v24.1
+                actualVersion = 24.1f; 
             else
-                actualVersion = version; //2017.1.0 was the first v24 version
+                actualVersion = version; 
         }
         else if (version == 27)
         {
             if (unityVersion.GreaterThanOrEquals(2021, 1))
-                actualVersion = 27.2f; //2021.1 and up is v27.2, which just changes Il2CppType to have one new bit
+                actualVersion = 27.2f; 
             else if (unityVersion.GreaterThanOrEquals(2020, 2, 4))
-                actualVersion = 27.1f; //2020.2.4 and above is v27.1
+                actualVersion = 27.1f; 
             else
-                actualVersion = version; //2020.2 and above is v27
+                actualVersion = version; 
         }
         else if (version == 29)
         {
             if (unityVersion.GreaterThanOrEquals(2022, 1, 0, UnityVersionType.Beta, 7))
-                actualVersion = 29.1f; //2022.1.0b7 introduces v29.1 which adds two new pointers to codereg
+                actualVersion = 29.1f; 
             else
-                actualVersion = 29; //2021.3.0 introduces v29
+                actualVersion = 29; 
         }
         else if (version == 31)
         {
-            //2022.3.33 introduces v31. Unity why would you bump this on a minor version.
-            //Adds one new field (return type token) to method def
-            //2021.3.40 backported the new field but NOT the changes from v29.1, so there's a 31.1 now.
+            
+            
+            
             if (unityVersion.GreaterThanOrEquals(2022, 3, 33, UnityVersionType.Final, 1))
-                //V31 with changes in codereg
+                
                 actualVersion = 31.1f;
             else
-                //v31 WITHOUT changes in codereg 
+                
                 actualVersion = 31;
         }
         else
         {
-            //6000.3 and 6000.5 alphas made a bunch of quick-succession version changes:
-            //6.3.0a2 => v35
-            //  - drops elementTypeIndex from Il2CppTypeDefinition
-            //  - drops lengths from string literals
-            //6.3.0a5 => v38
-            //  - adds moduleToken to Il2CppAssemblyDefinition
-            //  - adds Il2CppSectionMetadataStruct (offset/size/count) replacing all the offset/size pairs in metadata header
-            //  - adds variable size (32/16/8-bit) indices into TypeDefinition array, GenericContainer array, and Type array (the one in the binary) 
-            //  - other changes (related to Il2CppClass) not relevant to metadata reader
-            //6.3.0b1 => v39
-            //  - changes ParameterIndex to variable size, same as TypeIndex was in v38
-            //6.5.0a3 => v104
-            //  - adds typeInlineArrays section to metadata
-            //  - Adds bit 18 to TypeDefinition bitfield
-            //  - changes InterfaceIndex, EventIndex, PropertyIndex, NestedTypeIndex to variable size
-            //  - other changes (some related to Il2CppClass, many seem to be porting over coreclr structures) not relevant to metadata reader
-            //6.5.0a5 => v105
-            //  - changes MethodIndex to variable size.
-            //  - brings the Il2CppClass changes from v38 to v10x.
-            //6.5.0a6 => v106
-            //  - changes GenericParameterIndex, FieldIndex, DefaultValueDataIndex to variable size
-            //  - changes Il2CppGenericContainer type_argc int32 => uint16, is_method int32 => uint8
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             actualVersion = version;
         }
 
@@ -185,30 +185,30 @@ public class Il2CppMetadata : ClassReadingBinaryReader
         int typeIndexSize;
         if (metadataVersion >= 38)
         {
-            //Need to init dynamic widths
             
-            //We're on v38 or later so we know we can use .Count on these header sections.
+            
+            
             var typeDefinitionIndexWidth = GetIndexWidth(metadataHeader.typeDefinitions.Count);
             var genericContainerIndexWidth = GetIndexWidth(metadataHeader.genericContainers.Count);
             
-            //Unfortunately, the type list is not in the metadata file, but the binary, so we don't have its count. We do have interface offsets, though, and those are just an index and an int.
-            //So we can derive the width of a type index from that.
-            var bytesPerInterfaceOffset = metadataHeader.interfaceOffsets.Size / metadataHeader.interfaceOffsets.Count;
-            typeIndexSize = bytesPerInterfaceOffset - sizeof(int); //Subtract the int for the offset, the rest is the type index
             
-            //v39 additionally makes parameter definitions use dynamic widths
+            
+            var bytesPerInterfaceOffset = metadataHeader.interfaceOffsets.Size / metadataHeader.interfaceOffsets.Count;
+            typeIndexSize = bytesPerInterfaceOffset - sizeof(int); 
+            
+            
             var parameterDefinitionIndexWidth = metadataVersion >= 39 ? GetIndexWidth(metadataHeader.parameters.Count) : sizeof(int);
             
-            //v104 extends dynamic widths to interface, event, property, and nested type indices
+            
             var interfaceOffsetIndexWidth = metadataVersion >= 104 ? GetIndexWidth(metadataHeader.interfaceOffsets.Count) : sizeof(int);
             var eventIndexWidth = metadataVersion >= 104 ? GetIndexWidth(metadataHeader.events.Count) : sizeof(int);
             var propertyIndexWidth = metadataVersion >= 104 ? GetIndexWidth(metadataHeader.properties.Count) : sizeof(int);
             var nestedTypeIndexWidth = metadataVersion >= 104 ? GetIndexWidth(metadataHeader.nestedTypes.Count) : sizeof(int);
             
-            //v105 extends dynamic widths to method definitions as well
+            
             var methodDefinitionIndexWidth = metadataVersion >= 105 ? GetIndexWidth(metadataHeader.methods.Count) : sizeof(int);
             
-            //v106 extends dynamic widths to generic parameters, field indices, and default value data indices
+            
             var genericParameterIndexWidth = metadataVersion >= 106 ? GetIndexWidth(metadataHeader.genericParameters.Count) : sizeof(int);
             var fieldIndexWidth = metadataVersion >= 106 ? GetIndexWidth(metadataHeader.fields.Count) : sizeof(int);
             var defaultValueDataIndexWidth = metadataVersion >= 106 ? GetIndexWidth(metadataHeader.fieldAndParameterDefaultValueData.Count) : sizeof(int);
@@ -351,7 +351,7 @@ public class Il2CppMetadata : ClassReadingBinaryReader
             referencedAssemblies = ReadClassArrayAtRawAddr<int>(metadataHeader.referencedAssemblies.Offset, metadataHeader.referencedAssemblies.Size / sizeof(int));
             LibLogger.VerboseNewline($"OK ({(DateTime.Now - start).TotalMilliseconds} ms)");
 
-            //v17+ fields
+            
             LibLogger.Verbose("\tReading string definitions...");
             start = DateTime.Now;
             stringLiterals = ReadMetadataClassArray<Il2CppStringLiteral>(metadataHeader.stringLiteral);
@@ -367,7 +367,7 @@ public class Il2CppMetadata : ClassReadingBinaryReader
                 LibLogger.VerboseNewline($"OK ({(DateTime.Now - start).TotalMilliseconds} ms)");
             }
 
-            //Removed in v27 (2020.2) and also 24.5 (2019.4.21)
+            
             if (MetadataVersion < 27f)
             {
                 LibLogger.Verbose("\tReading usage data...");
@@ -384,11 +384,11 @@ public class Il2CppMetadata : ClassReadingBinaryReader
             fieldRefs = ReadMetadataClassArray<Il2CppFieldRef>(metadataHeader.fieldRefs);
             LibLogger.VerboseNewline($"OK ({(DateTime.Now - start).TotalMilliseconds} ms)");
 
-            //v21+ fields
+            
 
             if (MetadataVersion < 29)
             {
-                //Removed in v29
+                
                 LibLogger.Verbose("\tReading attribute types...");
                 start = DateTime.Now;
                 attributeTypeRanges = ReadMetadataClassArray<Il2CppCustomAttributeTypeRange>(metadataHeader.attributesInfo).ToList();
@@ -397,16 +397,16 @@ public class Il2CppMetadata : ClassReadingBinaryReader
             }
             else
             {
-                //Since v29
+                
                 LibLogger.Verbose("\tReading Attribute data...");
                 start = DateTime.Now;
 
-                //Pointer array
+                
                 AttributeDataRanges = ReadReadableArrayAtRawAddr<Il2CppCustomAttributeDataRange>(metadataHeader.attributeDataRange.Offset, metadataHeader.attributeDataRange.Size / 8).ToList();
                 LibLogger.VerboseNewline($"OK ({(DateTime.Now - start).TotalMilliseconds} ms)");
             }
             
-            //v104+ fields
+            
             if(MetadataVersion >= 104)
             {
                 LibLogger.Verbose("\tReading type inline arrays...");
@@ -422,7 +422,7 @@ public class Il2CppMetadata : ClassReadingBinaryReader
             for (var i = 0; i < fieldDefaultValues.Length; i++)
             {
                 if(MetadataVersion >= 104 && i == fieldDefaultValues.Length - 1 && fieldDefaultValues[i].fieldIndex.Value == -1)
-                    //v104 added this silly dummy entry at the end with field and type index -1. We skip it.
+                    
                     continue;
                 
                 var il2CppFieldDefaultValue = fieldDefaultValues[i];
@@ -652,24 +652,24 @@ public class Il2CppMetadata : ClassReadingBinaryReader
 
     private T[] ReadMetadataClassArray<T>(Il2CppGlobalMetadataSectionHeader section) where T : ReadableClass, new()
     {
-        //First things first, we're going to be moving the position around a lot, so we need to lock. 
+        
         GetLockOrThrow();
 
         Position = section.Offset;
 
         try
         {
-            //Length is in bytes, not in elements, so we need to work out the element size to know how big of an array to allocate.
-            //We do this by reading the first element, then count how many bytes we read.
+            
+            
             var first = ReadReadableHereNoLock<T>();
 
-            //How many bytes did we read?
+            
             var elementSize = (int)(Position - section.Offset);
 
-            //For build report purposes, we track that many bytes. FillReadableArrayHereNoLock will add the rest.
+            
             TrackRead<T>(elementSize);
 
-            //Now we can work out how many elements there are.
+            
             var numElements = section.Size / elementSize;
             
             if (numElements == 0) {
@@ -678,11 +678,11 @@ public class Il2CppMetadata : ClassReadingBinaryReader
             
             Debug.Assert(!section.HasCount || section.Count == numElements, $"Section {typeof(T).Name} has a count field of {section.Count} but we calculated {numElements} elements based on the size and element size. Dynamic-width indices wrong?");
 
-            //And so we can allocate an array of that length, and assign the first element.
+            
             var arr = new T[numElements];
             arr[0] = first;
 
-            //And finally, read the rest of the elements, starting at index 1.
+            
             FillReadableArrayHereNoLock(arr, 1);
 
             return arr;
@@ -720,7 +720,7 @@ public class Il2CppMetadata : ClassReadingBinaryReader
     public uint GetMaxMetadataUsages()
     {
         if (metadataUsageDic == null)
-            //V27+
+            
             return 0;
 
         return metadataUsageDic.Max(x => x.Value.Max(y => y.Key)) + 1;
@@ -736,7 +736,7 @@ public class Il2CppMetadata : ClassReadingBinaryReader
         return index & 0x1FFFFFFFU;
     }
 
-    //Getters for human readability
+    
     public Il2CppFieldDefaultValue? GetFieldDefaultValueFromIndex(Il2CppVariableWidthIndex<Il2CppFieldDefinition> index)
     {
         return _fieldDefaultValueLookup.GetOrDefault(index);
@@ -774,11 +774,11 @@ public class Il2CppMetadata : ClassReadingBinaryReader
         return metadataHeader.fieldAndParameterDefaultValueData.Offset + index.Value;
     }
 
-    /// <summary>
-    /// Read a byte array from the string data section of the metadata.
-    /// </summary>
-    /// <param name="index">The offset relative to the start of the string section.</param>
-    /// <returns>The </returns>
+    
+    
+    
+    
+    
     public byte[] GetByteArrayFromIndex(int index)
     {
         var offset = metadataHeader.@string.Offset + index;
@@ -818,14 +818,14 @@ public class Il2CppMetadata : ClassReadingBinaryReader
         if (MetadataVersion <= 24f)
         {
             idx = customAttributeIndex;
-            return attributeTypeRanges![customAttributeIndex]; //Not-null assertion because we've checked version
+            return attributeTypeRanges![customAttributeIndex]; 
         }
 
         var target = new Il2CppCustomAttributeTypeRange { token = token };
 
         if (imageDef.customAttributeStart < 0)
             throw new("Image has customAttributeStart < 0");
-        if (imageDef.customAttributeStart + imageDef.customAttributeCount > attributeTypeRanges!.Count) //Not-null assertion because we've checked version is < 29
+        if (imageDef.customAttributeStart + imageDef.customAttributeCount > attributeTypeRanges!.Count) 
             throw new($"Image has customAttributeStart + customAttributeCount > attributeTypeRanges.Count ({imageDef.customAttributeStart + imageDef.customAttributeCount} > {attributeTypeRanges.Count})");
 
         idx = attributeTypeRanges.BinarySearch(imageDef.customAttributeStart, (int)imageDef.customAttributeCount, target, new TokenComparer());
@@ -872,7 +872,7 @@ public class Il2CppMetadata : ClassReadingBinaryReader
         if(MetadataVersion < 35f)
             return Encoding.UTF8.GetString(ReadByteArrayAtRawAddress(metadataHeader.stringLiteralData.Offset + stringLiteral.dataIndex, (int)stringLiteral.length));
         
-        //v35 and above - no length field. have to read until next string literal or end of string literal data
+        
         var nextOffset = index < stringLiterals.Length - 1 
             ? metadataHeader.stringLiteralData.Offset + stringLiterals[index + 1].dataIndex 
             : metadataHeader.stringLiteralData.Offset + metadataHeader.stringLiteralData.Size;

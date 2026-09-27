@@ -42,10 +42,10 @@ public static class Cpp2IlApi
 
     public static void ConfigureLib(bool allowUserToInputAddresses)
     {
-        //Set this flag from the options
+        
         LibCpp2IlMain.Settings.AllowManualMetadataAndCodeRegInput = allowUserToInputAddresses;
 
-        //We have to have this on, despite the cost, because we need them for attribute restoration
+        
         LibCpp2IlMain.Settings.DisableMethodPointerMapping = false;
 
         LibLogger.Writer = new LibLogWriter();
@@ -124,30 +124,30 @@ public static class Cpp2IlApi
         CurrentAppContext = null;
     }
 
-    // public static void PopulateConcreteImplementations()
-    // {
-    //     CheckLibInitialized();
-    //
-    //     Logger.InfoNewline("Populating Concrete Implementation Table...");
-    //
-    //     foreach (var def in LibCpp2IlMain.TheMetadata!.typeDefs)
-    //     {
-    //         if (def.IsAbstract)
-    //             continue;
-    //
-    //         var baseTypeReflectionData = def.BaseType;
-    //         while (baseTypeReflectionData != null)
-    //         {
-    //             if (baseTypeReflectionData.baseType == null)
-    //                 break;
-    //
-    //             if (baseTypeReflectionData.isType && baseTypeReflectionData.baseType.IsAbstract && !SharedState.ConcreteImplementations.ContainsKey(baseTypeReflectionData.baseType))
-    //                 SharedState.ConcreteImplementations[baseTypeReflectionData.baseType] = def;
-    //
-    //             baseTypeReflectionData = baseTypeReflectionData.baseType.BaseType;
-    //         }
-    //     }
-    // }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     private static bool IsLibInitialized()
     {

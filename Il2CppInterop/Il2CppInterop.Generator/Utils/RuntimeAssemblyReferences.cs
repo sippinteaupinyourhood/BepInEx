@@ -1,4 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
+﻿
 
 using AsmResolver.DotNet;
 using AsmResolver.DotNet.Signatures;
@@ -64,6 +64,7 @@ public class RuntimeAssemblyReferences
     public Lazy<IMethodDefOrRef> IL2CPP_il2cpp_object_new { get; private set; }
     public Lazy<IMethodDefOrRef> IL2CPP_il2cpp_method_get_from_reflection { get; private set; }
     public Lazy<IMethodDefOrRef> IL2CPP_il2cpp_method_get_object { get; private set; }
+    public Lazy<IMethodDefOrRef> RuntimeGenericMethodResolver_MakeGenericMethod { get; private set; }
     public Lazy<IMethodDefOrRef> IL2CPP_PointerToValueGeneric { get; private set; }
     public Lazy<IMethodDefOrRef> IL2CPP_RenderTypeName { get; private set; }
     public Lazy<IMethodDefOrRef> OriginalNameAttributector { get; private set; }
@@ -150,6 +151,8 @@ public class RuntimeAssemblyReferences
         allTypes["Il2CppInterop.Runtime.InteropTypes.Arrays.Il2CppStructArray<T>"] = Il2CppStructArray;
         allTypes["Il2CppInterop.Runtime.Il2CppException"] = Il2CppException;
         allTypes["Il2CppInterop.Runtime.IL2CPP"] = Il2Cpp;
+        allTypes["Il2CppInterop.Runtime.Injection.RuntimeGenericMethodResolver"] =
+            new TypeReference(Module, assemblyRef, "Il2CppInterop.Runtime.Injection", "RuntimeGenericMethodResolver").ToTypeSignature();
     }
 
     private void InitMethodRefs()
@@ -462,6 +465,18 @@ public class RuntimeAssemblyReferences
             var mr = ReferenceCreator.CreateStaticMethodReference("il2cpp_method_get_object", ResolveType("System.IntPtr"),
                 ResolveType("Il2CppInterop.Runtime.IL2CPP").ToTypeDefOrRef(), ResolveType("System.IntPtr"), ResolveType("System.IntPtr"));
             return mr;
+        });
+
+        RuntimeGenericMethodResolver_MakeGenericMethod = new Lazy<IMethodDefOrRef>(() =>
+        {
+            var methodInfo = globalCtx.GetAssemblyByName("mscorlib")
+                .GetTypeByName("System.Reflection.MethodInfo").NewType.ToTypeSignature();
+            var systemType = globalCtx.GetAssemblyByName("mscorlib")
+                .GetTypeByName("System.Type").NewType.ToTypeSignature();
+            var arguments = Il2CppReferenceArray.MakeGenericInstanceType(systemType);
+            return ReferenceCreator.CreateStaticMethodReference("MakeGenericMethod", methodInfo,
+                ResolveType("Il2CppInterop.Runtime.Injection.RuntimeGenericMethodResolver").ToTypeDefOrRef(),
+                methodInfo, arguments);
         });
 
         IL2CPP_PointerToValueGeneric = new Lazy<IMethodDefOrRef>(() =>

@@ -13,7 +13,7 @@ public class Il2CppEventDefinition : ReadableClass
     public Il2CppVariableWidthIndex<Il2CppMethodDefinition> add;
     public Il2CppVariableWidthIndex<Il2CppMethodDefinition> remove;
     public Il2CppVariableWidthIndex<Il2CppMethodDefinition> raise;
-    [Version(Max = 24)] public int customAttributeIndex; //Not in 24.1 or 24.2
+    [Version(Max = 24)] public int customAttributeIndex; 
     public uint token;
 
     [NonSerialized] private Il2CppTypeDefinition? _type;
@@ -62,7 +62,7 @@ public class Il2CppEventDefinition : ReadableClass
     {
         nameIndex = reader.ReadInt32();
 
-        //Cache name now
+        
         var pos = reader.Position;
         Name = ((Il2CppMetadata)reader).ReadStringFromIndexNoReadLock(nameIndex);
         reader.Position = pos;

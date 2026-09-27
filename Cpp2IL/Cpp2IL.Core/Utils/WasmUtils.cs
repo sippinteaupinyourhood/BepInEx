@@ -21,48 +21,48 @@ public static class WasmUtils
     {
         var instanceParam = definition.IsStatic ? "" : "i";
 
-        //Something still off about p/invoke functions. They do have methodinfo args, but something is wrong somewhere.
         
-        //Also, this is STILL wrong for a lot of methods in DateTimeFormat and TimeZoneInfo.
-        //It feels like it's something to do with when DateTime is considered a struct and when it's considered a class.
-        //But I can find no rhyme nor reason to it.
+        
+        
+        
+        
 
         var returnTypeSignature = definition.ReturnType.IsWasmPrimitive()
             ? GetSignatureLetter(definition.ReturnType)
             : definition.ReturnType switch
             {
                 { Namespace: nameof(System), Name: "Void" } => "v",
-                { IsValueType: true, Definition: null or { Size: < 0 or > 8 } } => "vi", //Large or Generic Struct returns have a void return type, but the actual return value is the first parameter.
-                { IsValueType: true, Definition.Size: > 4 } => "j", //Medium structs are returned as longs
-                { IsValueType: true, Definition.Size: <= 4 } => "i", //Small structs are returned as ints
+                { IsValueType: true, Definition: null or { Size: < 0 or > 8 } } => "vi", 
+                { IsValueType: true, Definition.Size: > 4 } => "j", 
+                { IsValueType: true, Definition.Size: <= 4 } => "i", 
                 _ => GetSignatureLetter(definition.ReturnType!)
             };
 
-        return $"{returnTypeSignature}{instanceParam}{string.Join("", definition.Parameters!.Select(p => GetSignatureLetter(p.ParameterType, p.IsRef)))}i"; //Add an extra i on the end for the method info param
+        return $"{returnTypeSignature}{instanceParam}{string.Join("", definition.Parameters!.Select(p => GetSignatureLetter(p.ParameterType, p.IsRef)))}i"; 
     }
 
     public static bool IsWasmPrimitive(this TypeAnalysisContext type)
     {
         var typeEnum = type.Type;
 
-        //TODO Validate this, it's only the remnant from some poorly written logic for checking if a TypeAnalysisContext IsPrimitive.
+        
         return typeEnum is >= Il2CppTypeEnum.IL2CPP_TYPE_BOOLEAN and <= Il2CppTypeEnum.IL2CPP_TYPE_R8;
     }
 
     private static string GetSignatureLetter(TypeAnalysisContext type, bool isRefOrOut = false)
     {
         if (isRefOrOut)
-            //ref/out params are passed as pointers 
+            
             return "i";
 
         if (type is WrappedTypeAnalysisContext)
-            //Pointers, arrays, etc are ints
+            
             return "i";
 
         if (type.IsEnumType)
             type = type.EnumUnderlyingType ?? throw new($"Enum type {type} has no underlying type");
 
-        // var typeDefinition = type.BaseType ?? type.AppContext.SystemTypes.SystemInt32Type;
+        
 
         return type.Name switch
         {
@@ -71,7 +71,7 @@ public static class WasmUtils
             "Single" => "f",
             "Double" => "d",
             "Int32" => "i",
-            _ when !type.IsWasmPrimitive() && type is { IsValueType: true, IsEnumType: false, Definition.Size: <= 8 and > 0 } => "j", //TODO check - value types < 16 bytes (including base object header which is irrelevant here) are passed directly as long?
+            _ when !type.IsWasmPrimitive() && type is { IsValueType: true, IsEnumType: false, Definition.Size: <= 8 and > 0 } => "j", 
             _ => "i"
         };
     }
@@ -102,7 +102,7 @@ public static class WasmUtils
         if (context.Definition == null)
             throw new($"Attempted to get wasm definition for probably-injected method context: {context}");
         
-        //First, we have to calculate the signature
+        
         var signature = BuildSignature(context);
         try
         {
@@ -114,56 +114,56 @@ public static class WasmUtils
         }
     }
 
-    // private static void CalculateAllMethodDefinitionIndices()
-    // {
-    //     foreach (var il2CppMethodDefinition in LibCpp2IlMain.TheMetadata!.methodDefs)
-    //     {
-    //         var methodDefinition = il2CppMethodDefinition;
-    //
-    //         try
-    //         {
-    //             var wasmDef = GetWasmDefinition(methodDefinition);
-    //             var index = ((WasmFile)LibCpp2IlMain.Binary!).FunctionTable.IndexOf(wasmDef);
-    //
-    //             if (!MethodDefinitionIndices.TryGetValue(index, out var mDefs))
-    //                 MethodDefinitionIndices[index] = mDefs = [];
-    //
-    //             mDefs.Add(methodDefinition);
-    //         }
-    //         catch (Exception)
-    //         {
-    //             //Ignore
-    //         }
-    //     }
-    // }
-    //
-    // public static List<Il2CppMethodDefinition>? GetMethodDefinitionsAtIndex(int index)
-    // {
-    //     if (MethodDefinitionIndices.Count == 0)
-    //         CalculateAllMethodDefinitionIndices();
-    //
-    //     if (MethodDefinitionIndices.TryGetValue(index, out var methodDefinitions))
-    //         return methodDefinitions;
-    //
-    //     return null;
-    // }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     public static Dictionary<string, string> ExtractAndParseDynCallRemaps(string frameworkJsFile)
     {
-        //At least one WASM binary found in the wild had the exported function names obfuscated.
-        //However, the framework.js file has mappings to the correct names.
-        /*e.g.
-         var dynCall_viffiiii = Module["dynCall_viffiiii"] = function() {
-            return (dynCall_viffiiii = Module["dynCall_viffiiii"] = Module["asm"]["Wo"]).apply(null, arguments)
-         }
-        */
+        
+        
+        
+
+
+
+
 
         var ret = new Dictionary<string, string>();
         var matches = DynCallRemappingRegex.Matches(frameworkJsFile);
         foreach (Match match in matches)
         {
-            //Group 1 is the original method name, e.g. dynCall_viffiiii
-            //Group 2 is the remapped name, e.g Wo
+            
+            
             var origName = match.Groups[1];
             var remappedName = match.Groups[2];
 

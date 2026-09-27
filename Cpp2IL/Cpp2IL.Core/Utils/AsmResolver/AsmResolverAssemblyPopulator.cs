@@ -27,17 +27,17 @@ public static class AsmResolverAssemblyPopulator
 
             var typeDefinition = typeCtx.GetExtraData<TypeDefinition>("AsmResolverType") ?? throw new($"AsmResolver type not found in type analysis context for {typeCtx.FullName}");
 
-            //Type generic params.
+            
             PopulateGenericParamsForType(typeCtx, typeDefinition);
 
-            //Set base type
+            
             if(asmCtx.AppContext.MetadataVersion >= 35 && typeCtx is {Definition.IsEnumType: true })
-                //v35 restructures this a bit so that enums now directly inherit from their primitive type, so we need to explicitly set this to enum
+                
                 typeDefinition.BaseType = typeCtx.AppContext.SystemTypes.EnumType.ToTypeSignature(typeDefinition.DeclaringModule!).ToTypeDefOrRef();
             else
                 typeDefinition.BaseType = typeCtx.BaseType?.ToTypeSignature(typeDefinition.DeclaringModule!).ToTypeDefOrRef();
 
-            //Set interfaces
+            
             foreach (var interfaceType in typeCtx.InterfaceContexts)
                 typeDefinition.Interfaces.Add(new(interfaceType.ToTypeSignature(typeDefinition.DeclaringModule!).ToTypeDefOrRef()));
         }
@@ -95,7 +95,7 @@ public static class AsmResolverAssemblyPopulator
                 };
 
                 if (isObjectArray)
-                    //Object params have to be boxed
+                    
                     return new BoxedArgument(GetTypeSigFromAttributeArg(parentAssembly, e), rawValue);
 
                 return rawValue;
@@ -113,7 +113,7 @@ public static class AsmResolverAssemblyPopulator
 
     private static CustomAttributeArgument BuildEmptyArrayArgument(AssemblyDefinition parentAssembly, CustomAttributeArrayParameter arrayParameter)
     {
-        //Need to resolve the type of the array because it's not in the blob and AsmResolver needs it.
+        
 
         var typeSig = arrayParameter.Kind switch
         {
@@ -127,15 +127,15 @@ public static class AsmResolverAssemblyPopulator
         return new(typeSig) { IsNullArray = true };
     }
 
-    /// <summary>
-    /// Converts the given parameter to a custom attribute argument, given the context of the parent assembly.
-    /// </summary>
-    /// <param name="parentAssembly">The assembly that the resulting attribute will be part of.</param>
-    /// <param name="parameter">The parameter to convert</param>
-    /// <param name="boxIfNeeded">Whether the returned attribute will be used in context of a member that is typed as object. If true, the resulting attribute will be an object-typed one wrapping a BoxedArgument containing the real value. If false, the real value will be returned directly.</param>
-    /// <remarks>
-    /// BoxIfNeeded will cause the resulting attribute to be boxed if the parameter is an enum or a type parameter. This is required if, for example, the enum or type is being passed as the argument in a constructor for which the parameter is typed as object.
-    /// </remarks>
+    
+    
+    
+    
+    
+    
+    
+    
+    
     private static CustomAttributeArgument FromAnalyzedAttributeArgument(AssemblyDefinition parentAssembly, BaseCustomAttributeParameter parameter, bool boxIfNeeded)
     {
 #if !DEBUG
@@ -149,7 +149,7 @@ public static class AsmResolverAssemblyPopulator
                 CustomAttributeEnumParameter enumParameter when boxIfNeeded => new(TypeDefinitionsAsmResolver.Object.ToTypeSignature(), new BoxedArgument(GetTypeSigFromAttributeArg(parentAssembly, enumParameter), enumParameter.UnderlyingPrimitiveParameter.PrimitiveValue)),
                 CustomAttributeEnumParameter enumParameter => new(GetTypeSigFromAttributeArg(parentAssembly, enumParameter), enumParameter.UnderlyingPrimitiveParameter.PrimitiveValue),
                 
-                //BaseCustomAttributeTypeParameter typeParameter when boxIfNeeded => new(TypeDefinitionsAsmResolver.Object.ToTypeSignature(), new BoxedArgument(GetTypeSigFromAttributeArg(parentAssembly, typeParameter), typeParameter.TypeContext?.ToTypeSignature(parentAssembly.ManifestModule!))),
+                
                 BaseCustomAttributeTypeParameter typeParameter => new(TypeDefinitionsAsmResolver.Type.ToTypeSignature(), typeParameter.TypeContext?.ToTypeSignature(parentAssembly.ManifestModule!)),
                 
                 CustomAttributeArrayParameter arrayParameter => BuildArrayArgument(parentAssembly, arrayParameter),
@@ -199,12 +199,12 @@ public static class AsmResolverAssemblyPopulator
             {
                 if (numNamedArgs == 0)
                 {
-                    //Only fixed arguments.
+                    
                     signature = new(analyzedCustomAttribute.ConstructorParameters.Select(p => FromAnalyzedAttributeArgument(assemblyDefinition, p, analyzedCustomAttribute.Constructor.Parameters[p.Index].ParameterType == analyzedCustomAttribute.Constructor.AppContext.SystemTypes.SystemObjectType)));
                 }
                 else
                 {
-                    //Has named arguments.
+                    
                     signature = new(
                         analyzedCustomAttribute.ConstructorParameters.Select(p => FromAnalyzedAttributeArgument(assemblyDefinition, p, analyzedCustomAttribute.Constructor.Parameters[p.Index].ParameterType == analyzedCustomAttribute.Constructor.AppContext.SystemTypes.SystemObjectType)),
                         analyzedCustomAttribute.Fields
@@ -347,7 +347,7 @@ public static class AsmResolverAssemblyPopulator
                 continue;
 
             var managedType = typeContext.GetExtraData<TypeDefinition>("AsmResolverType") ?? throw new($"AsmResolver type not found in type analysis context for {typeContext.Definition?.FullName}");
-            // CopyCustomAttributes(typeContext, managedType.CustomAttributes);
+            
 
 #if !DEBUG
             try
@@ -387,18 +387,18 @@ public static class AsmResolverAssemblyPopulator
 
             var managedField = new FieldDefinition(fieldContext.Name, (FieldAttributes)fieldContext.Attributes, fieldTypeSig);
 
-            //Field default values
+            
             if (managedField.HasDefault && fieldContext.ConstantValue is { } constVal)
                 managedField.Constant = AsmResolverConstants.GetOrCreateConstant(constVal);
 
-            //Field Initial Values (used for allocation of Array Literals)
+            
             if (managedField.HasFieldRva)
                 managedField.FieldRva = new DataSegment(fieldContext.StaticArrayInitialValue);
 
             if (fieldInfo != null)
             {
                 if (ilTypeDefinition.IsExplicitLayout && !fieldContext.IsStatic)
-                    //Copy field offset
+                    
                     managedField.FieldOffset = fieldInfo.FieldOffset;
             }
 
@@ -422,7 +422,7 @@ public static class AsmResolverAssemblyPopulator
                 var i = parameterAnalysisContext.ParameterIndex;
                 parameterTypes[i] = parameterAnalysisContext.ParameterType.ToTypeSignature(importer.TargetModule);
 
-                var sequence = (ushort)(i + 1); //Add one because sequence 0 is the return type
+                var sequence = (ushort)(i + 1); 
                 parameterDefinitions[i] = new(sequence, parameterAnalysisContext.Name, (ParameterAttributes)parameterAnalysisContext.Attributes);
 
                 if (parameterAnalysisContext.DefaultValue is not { } defaultValueData || !parameterAnalysisContext.Attributes.HasFlag(System.Reflection.ParameterAttributes.HasDefault))
@@ -432,7 +432,7 @@ public static class AsmResolverAssemblyPopulator
                     parameterDefinitions[i].Constant = AsmResolverConstants.GetOrCreateConstant(constVal);
                 else if (defaultValueData is { dataIndex.IsNull: true })
                 {
-                    //Literal null
+                    
                     parameterDefinitions[i].Constant = AsmResolverConstants.Null;
                 }
             }
@@ -457,13 +457,13 @@ public static class AsmResolverAssemblyPopulator
 
             }
 
-            //Add parameter definitions if we have them so we get names, defaults, out params, etc
+            
             foreach (var parameterDefinition in parameterDefinitions)
             {
                 managedMethod.ParameterDefinitions.Add(parameterDefinition);
             }
 
-            //Handle generic parameters.
+            
             methodCtx.GenericParameters
                 .ForEach(p =>
                 {
@@ -500,7 +500,7 @@ public static class AsmResolverAssemblyPopulator
 
             managedProperty.SetSemanticMethods(managedGetter, managedSetter);
 
-            //Indexer parameters
+            
             if (managedGetter != null && managedGetter.Parameters.Count > 0)
             {
                 foreach (var parameter in managedGetter.Parameters)
@@ -510,7 +510,7 @@ public static class AsmResolverAssemblyPopulator
             }
             else if (managedSetter != null && managedSetter.Parameters.Count > 1)
             {
-                //value parameter is always last
+                
                 for (var i = 0; i < managedSetter.Parameters.Count - 1; i++)
                 {
                     var parameter = managedSetter.Parameters[i];
@@ -606,7 +606,7 @@ public static class AsmResolverAssemblyPopulator
             }
         }
 
-        // Il2Cpp doesn't include properties for explicit interface implementations, so we have to create them ourselves.
+        
         if (getMethodsToCreate is not null)
         {
             foreach (var entry in getMethodsToCreate)

@@ -40,10 +40,10 @@ public class GenericParameterTypeAnalysisContext : ReferencedTypeAnalysisContext
 
     public HasGenericParameters Owner { get; }
 
-    /// <summary>
-    /// This should only be used by the initializers for <see cref="TypeAnalysisContext.GenericParameters"/> and <see cref="MethodAnalysisContext.GenericParameters"/>.
-    /// It ensures that generic parameters are only held by their owners.
-    /// </summary>
+    
+    
+    
+    
     internal GenericParameterTypeAnalysisContext(Il2CppGenericParameter genericParameter, HasGenericParameters owner)
         : this(genericParameter.Name ?? "T", genericParameter.genericParameterIndexInOwner, genericParameter.Type, genericParameter.Attributes, owner)
     {

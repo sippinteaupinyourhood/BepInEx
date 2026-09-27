@@ -15,12 +15,12 @@ internal class MemoryUtils
     {
         if (sigDef.pattern is null || sigDef.mask is null) throw new ArgumentException("Missing native signature pattern.");
         ValidatePattern(sigDef.pattern.ToCharArray(), sigDef.mask.ToCharArray());
-        // On newer Unity (6000.x) the loaded GameAssembly maps some pages PAGE_NOACCESS / guard pages; the raw
-        // linear byte walk in FindSignatureInBlock dereferences them and throws a fatal AccessViolationException.
-        // Use VirtualQuery to enumerate the module's regions and scan only the readable committed ones, skipping
-        // the rest -- without ever modifying page protections. VirtualQuery and the TerraFX MEMORY_BASIC_INFORMATION
-        // fields are Windows-only (the struct is annotated for Windows 6.1+); elsewhere (where this guard-page issue
-        // does not arise) fall back to the plain whole-module scan.
+        
+        
+        
+        
+        
+        
         nint ptr = 0;
         if (OperatingSystem.IsWindowsVersionAtLeast(6, 1))
         {
@@ -61,10 +61,10 @@ internal class MemoryUtils
         if (block == 0 || blockSize < 0 || (ulong)blockSize > (ulong)nuint.MaxValue - (ulong)(nuint)block)
             throw new ArgumentOutOfRangeException(nameof(blockSize));
         nint result = 0;
-        // Stop at blockSize - mask.Length so the inner read (block + address + mask.Length - 1) never passes the
-        // end of this block. When the caller scans per-region (Unity 6 readable regions interleaved with guard /
-        // PAGE_NOACCESS pages), an overread off the tail would fault the adjacent page -> a fatal
-        // AccessViolationException that aborts the chainloader. If the block is smaller than the mask, scan nothing.
+        
+        
+        
+        
         for (long address = 0; address <= blockSize - mask.Length; address++)
         {
             var found = true;
@@ -96,10 +96,10 @@ internal class MemoryUtils
             throw new ArgumentException("Invalid native signature pattern.");
     }
 
-    /// <summary>
-    /// Walks the module's address space via <c>VirtualQuery</c>, collecting each memory region so the scan can pick
-    /// the readable committed ones. Stops at the first <c>VirtualQuery</c> failure or once the module end is reached.
-    /// </summary>
+    
+    
+    
+    
     [SupportedOSPlatform("windows6.1")]
     internal static unsafe List<MEMORY_BASIC_INFORMATION> GetModuleRegions(ProcessModule module)
     {
@@ -111,7 +111,7 @@ internal class MemoryUtils
             MEMORY_BASIC_INFORMATION memoryInfo = default;
             var result = Windows.VirtualQuery((void*)currentAddress, &memoryInfo, (nuint)sizeof(MEMORY_BASIC_INFORMATION));
             if (result == 0)
-                break; // error, or reached the end of the module's mapped memory
+                break; 
 
             long regionStart = (long)memoryInfo.BaseAddress;
             long regionEnd = checked(regionStart + (long)memoryInfo.RegionSize);

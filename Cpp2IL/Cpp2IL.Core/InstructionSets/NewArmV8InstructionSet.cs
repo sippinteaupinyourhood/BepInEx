@@ -22,7 +22,7 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
     {
         if (context is not ConcreteGenericMethodAnalysisContext)
         {
-            //Managed method or attr gen => grab raw byte range between a and b
+            
             var startOfNextFunction = (int)MiscUtils.GetAddressOfNextFunctionStart(context.UnderlyingPointer);
             var ptrAsInt = (int)context.UnderlyingPointer;
             var count = startOfNextFunction - ptrAsInt;
@@ -35,11 +35,11 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
         var lastInsn = result.LastValid();
 
         var start = (int)context.AppContext.Binary.MapVirtualAddressToRaw(context.UnderlyingPointer);
-        // Map the last instruction (always within segment) and add 4 (ARM64 instruction size).
-        // This avoids mapping endVa which may land exactly at a segment boundary gap.
+        
+        
         var end = (int)context.AppContext.Binary.MapVirtualAddressToRaw(lastInsn.Address) + 4;
 
-        //Sanity check
+        
         if (start < 0 || end < 0 || start >= context.AppContext.Binary.RawLength || end >= context.AppContext.Binary.RawLength)
             throw new Exception($"Failed to map virtual address 0x{context.UnderlyingPointer:X} to raw address for method {context!.DeclaringType?.FullName}/{context.Name} - start: 0x{start:X}, end: 0x{end:X} are out of bounds for length {context.AppContext.Binary.RawLength}.");
 
@@ -52,7 +52,7 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
 
         var builder = new IsilBuilder();
 
-        if (adrpOffsets == null!) //Null suppress because thread static weirdness
+        if (adrpOffsets == null!) 
             adrpOffsets = new();
         
         adrpOffsets.Clear();
@@ -76,14 +76,14 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
             case Arm64Mnemonic.MOV:
             case Arm64Mnemonic.MOVZ:
             case Arm64Mnemonic.FMOV:
-            case Arm64Mnemonic.SXTW: // move and sign extend Wn to Xd
+            case Arm64Mnemonic.SXTW: 
             case Arm64Mnemonic.LDR:
             case Arm64Mnemonic.LDRB:
-                //Load and move are (dest, src)
                 
-                if (instruction.MemIsPreIndexed) //  such as  X8, [X19,#0x30]! 
+                
+                if (instruction.MemIsPreIndexed) 
                 {
-                    //Regardless of anything else, we're trashing any possible ADRP offsets in the dest here, so let's clear that
+                    
                     if(instruction.Op0Kind == Arm64OperandKind.Register)
                         adrpOffsets.Remove(instruction.Op0Reg);
                     
@@ -91,9 +91,9 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
                     if (operate.Data is IsilMemoryOperand operand)
                     {
                         var register = operand.Base!.Value;
-                        // X19= X19, #0x30
+                        
                         builder.Add(instruction.Address, register, register, InstructionSetIndependentOperand.MakeImmediate(operand.Addend));
-                        //X8 = [X19]
+                        
                         builder.Move(instruction.Address, ConvertOperand(instruction, 0), InstructionSetIndependentOperand.MakeMemory(new IsilMemoryOperand(
                             InstructionSetIndependentOperand.MakeRegister(register.ToString()!.ToUpperInvariant()),
                             0)));
@@ -103,13 +103,13 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
 
                 if (instruction.Op1Kind == Arm64OperandKind.Memory && adrpOffsets.TryGetValue(instruction.MemBase, out var page) && instruction.MemOffset != 0 && instruction.MemAddendReg == Arm64Register.INVALID)
                 {
-                    //Maybe this is a bit hacky? But I really don't want to write paged load handling into ISIL itself, it's an Arm64 quirk
-                    //LDR X0, [X1, #0x1000], where X1 was previously loaded with a page address via an ADRP instruction
-                    //We just return the final address, it makes ISIL happier.
-                    //TODO check if this is correct
+                    
+                    
+                    
+                    
                     var offset = instruction.MemOffset + (long) page;
                     
-                    //We're also trashing any possible ADRP offsets in the dest here, so let's clear that now we've possibly grabbed the value if we need it (it's common to store the page and final address in the same register)
+                    
                     if(instruction.Op0Kind == Arm64OperandKind.Register)
                         adrpOffsets.Remove(instruction.Op0Reg);
                     
@@ -117,7 +117,7 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
                     break;
                 }
 
-                //And again here we're trashing any possible ADRP offsets in the dest here, so let's clear that
+                
                 if(instruction.Op0Kind == Arm64OperandKind.Register)
                     adrpOffsets.Remove(instruction.Op0Reg);
                 
@@ -125,9 +125,9 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
                 break;
             case Arm64Mnemonic.MOVN:
             {
-                // dest = ~src
                 
-                //See above re: ADRP offsets
+                
+                
                 if(instruction.Op0Kind == Arm64OperandKind.Register)
                     adrpOffsets.Remove(instruction.Op0Reg);
                 
@@ -138,16 +138,16 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
                 break;
             }
             case Arm64Mnemonic.STR:
-            case Arm64Mnemonic.STUR: // unscaled
+            case Arm64Mnemonic.STUR: 
             case Arm64Mnemonic.STRB:
-                //Store is (src, dest)
+                
                 builder.Move(instruction.Address, ConvertOperand(instruction, 1), ConvertOperand(instruction, 0));
                 break;
             case Arm64Mnemonic.STP:
-                // store pair of registers (reg1, reg2, dest)
+                
             {
                 var dest = ConvertOperand(instruction, 2);
-                if (dest.Data is IsilRegisterOperand { RegisterName: "X31" }) // if stack
+                if (dest.Data is IsilRegisterOperand { RegisterName: "X31" }) 
                 {
                     builder.Move(instruction.Address, dest, ConvertOperand(instruction, 0));
                     builder.Move(instruction.Address, dest, ConvertOperand(instruction, 1));
@@ -156,12 +156,12 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
                 {
                     var firstRegister = ConvertOperand(instruction, 0);
                     long size = ((IsilRegisterOperand)firstRegister.Data).RegisterName[0] == 'W' ? 4 : 8;
-                    builder.Move(instruction.Address, dest, firstRegister); // [REG + offset] = REG1
+                    builder.Move(instruction.Address, dest, firstRegister); 
                     memory = new IsilMemoryOperand(memory.Base!.Value, memory.Addend + size);
                     dest = InstructionSetIndependentOperand.MakeMemory(memory);
-                    builder.Move(instruction.Address, dest, ConvertOperand(instruction, 1)); // [REG + offset + size] = REG2
+                    builder.Move(instruction.Address, dest, ConvertOperand(instruction, 1)); 
                 }
-                else // reg pointer
+                else 
                 {
                     var firstRegister = ConvertOperand(instruction, 0);
                     long size = ((IsilRegisterOperand)firstRegister.Data).RegisterName[0] == 'W' ? 4 : 8;
@@ -172,25 +172,25 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
             }
                 break;
             case Arm64Mnemonic.ADRP:
-                //Just handle as a move
-                // builder.Move(instruction.Address, ConvertOperand(instruction, 0), ConvertOperand(instruction, 1));
+                
+                
                 adrpOffsets[instruction.Op0Reg] = (ulong)instruction.Op1Imm;
                 break;
             case Arm64Mnemonic.LDP when instruction.Op2Kind == Arm64OperandKind.Memory:
-                //LDP (dest1, dest2, [mem]) - basically just treat as two loads, with the second offset by the length of the first
+                
                 var destRegSize = instruction.Op0Reg switch
                 {
-                    //vector (128 bit)
-                    >= Arm64Register.V0 and <= Arm64Register.V31 => 16, //TODO check if this is accurate
-                    //double
+                    
+                    >= Arm64Register.V0 and <= Arm64Register.V31 => 16, 
+                    
                     >= Arm64Register.D0 and <= Arm64Register.D31 => 8,
-                    //single
+                    
                     >= Arm64Register.S0 and <= Arm64Register.S31 => 4,
-                    //half
+                    
                     >= Arm64Register.H0 and <= Arm64Register.H31 => 2,
-                    //word
+                    
                     >= Arm64Register.W0 and <= Arm64Register.W31 => 4,
-                    //x
+                    
                     >= Arm64Register.X0 and <= Arm64Register.X31 => 8,
                     _ => throw new($"Unknown register size for LDP: {instruction.Op0Reg}")
                 };
@@ -199,7 +199,7 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
                 var dest2 = ConvertOperand(instruction, 1);
                 var mem = ConvertOperand(instruction, 2);
 
-                //TODO clean this mess up
+                
                 var memInternal = mem.Data as IsilMemoryOperand?;
                 var mem2 = new IsilMemoryOperand(memInternal!.Value.Base!.Value, memInternal.Value.Addend + destRegSize);
 
@@ -217,26 +217,26 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
 
                 if (target < context.UnderlyingPointer || target > context.UnderlyingPointer + (ulong)context.RawBytes.Length)
                 {
-                    //Unconditional branch to outside the method, treat as call (tail-call, specifically) followed by return
+                    
                     builder.Call(instruction.Address, instruction.BranchTarget, GetArgumentOperandsForCall(context, instruction.BranchTarget).ToArray());
                     builder.Return(instruction.Address, GetReturnRegisterForContext(context));
                 }
 
                 break;
             case Arm64Mnemonic.BR:
-                // branches unconditionally to an address in a register, with a hint that this is not a subroutine return.
+                
                 builder.CallRegister(instruction.Address, ConvertOperand(instruction, 0), noReturn: true);
                 break;
             case Arm64Mnemonic.CBNZ:
             case Arm64Mnemonic.CBZ:
             {
-                //Compare and branch if (non-)zero
+                
                 var targetAddr = (ulong)((long)instruction.Address + instruction.Op1Imm);
 
-                //Compare to zero...
+                
                 builder.Compare(instruction.Address, ConvertOperand(instruction, 0), InstructionSetIndependentOperand.MakeImmediate(0));
 
-                //And jump if (not) equal
+                
                 if (instruction.Mnemonic == Arm64Mnemonic.CBZ)
                     builder.JumpIfEqual(instruction.Address, targetAddr);
                 else
@@ -245,76 +245,76 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
                 break;
 
             case Arm64Mnemonic.CMP:
-                // Compare: set flag (N or Z or C or V) = (reg1 - reg2)
-                // builder.Compare(instruction.Address, ConvertOperand(instruction, 0), ConvertOperand(instruction, 0));
+                
+                
                 goto default;
 
             case Arm64Mnemonic.TBNZ:
-            // TBNZ R<t>, #imm, label
-            // test bit and branch if NonZero
+            
+            
             case Arm64Mnemonic.TBZ:
-                // TBZ R<t>, #imm, label
-                // test bit and branch if Zero
+                
+                
             {
                 var targetAddr = (ulong)((long)instruction.Address + instruction.Op2Imm);
                 var bit = InstructionSetIndependentOperand.MakeImmediate(1 << (int)instruction.Op1Imm);
                 var temp = InstructionSetIndependentOperand.MakeRegister("TEMP");
                 var src = ConvertOperand(instruction, 0);
-                builder.Move(instruction.Address, temp, src); // temp = src
-                builder.And(instruction.Address, temp, temp, bit); // temp = temp & bit
-                builder.Compare(instruction.Address, temp, bit); // result = temp == bit
+                builder.Move(instruction.Address, temp, src); 
+                builder.And(instruction.Address, temp, temp, bit); 
+                builder.Compare(instruction.Address, temp, bit); 
                 if (instruction.Mnemonic == Arm64Mnemonic.TBNZ)
-                    builder.JumpIfEqual(instruction.Address, targetAddr); // if (result) goto targetAddr
+                    builder.JumpIfEqual(instruction.Address, targetAddr); 
                 else
-                    builder.JumpIfNotEqual(instruction.Address, targetAddr); // if (result) goto targetAddr
+                    builder.JumpIfNotEqual(instruction.Address, targetAddr); 
             }
                 break;
             case Arm64Mnemonic.UBFM:
-                // UBFM dest, src, #<immr>, #<imms>
-                // dest = (src >> #<immr>) & ((1 << #<imms>) - 1)
+                
+                
             {
                 var dest = ConvertOperand(instruction, 0);
-                builder.Move(instruction.Address, dest, ConvertOperand(instruction, 1)); // dest = src
-                builder.ShiftRight(instruction.Address, dest, ConvertOperand(instruction, 2)); // dest >> #<immr>
+                builder.Move(instruction.Address, dest, ConvertOperand(instruction, 1)); 
+                builder.ShiftRight(instruction.Address, dest, ConvertOperand(instruction, 2)); 
                 var imms = (int)instruction.Op3Imm;
                 builder.And(instruction.Address, dest, dest,
-                    InstructionSetIndependentOperand.MakeImmediate((1 << imms) - 1)); // dest & constexpr { ((1 << #<imms>) - 1) }
+                    InstructionSetIndependentOperand.MakeImmediate((1 << imms) - 1)); 
             }
                 break;
 
             case Arm64Mnemonic.MUL:
             case Arm64Mnemonic.FMUL:
-                //Multiply is (dest, src1, src2)
+                
                 builder.Multiply(instruction.Address, ConvertOperand(instruction, 0), ConvertOperand(instruction, 1), ConvertOperand(instruction, 2));
                 break;
 
             case Arm64Mnemonic.ADD:
-            case Arm64Mnemonic.ADDS: // settings flags
+            case Arm64Mnemonic.ADDS: 
             case Arm64Mnemonic.FADD:
-                //Add is (dest, src1, src2)
+                
                 builder.Add(instruction.Address, ConvertOperand(instruction, 0), ConvertOperand(instruction, 1), ConvertOperand(instruction, 2));
                 break;
 
             case Arm64Mnemonic.SUB:
-            case Arm64Mnemonic.SUBS: // settings flags
+            case Arm64Mnemonic.SUBS: 
             case Arm64Mnemonic.FSUB:
-                //Sub is (dest, src1, src2)
+                
                 builder.Subtract(instruction.Address, ConvertOperand(instruction, 0), ConvertOperand(instruction, 1), ConvertOperand(instruction, 2));
                 break;
 
             case Arm64Mnemonic.AND:
             case Arm64Mnemonic.ANDS:
-                //And is (dest, src1, src2)
+                
                 builder.And(instruction.Address, ConvertOperand(instruction, 0), ConvertOperand(instruction, 1), ConvertOperand(instruction, 2));
                 break;
 
             case Arm64Mnemonic.ORR:
-                //Orr is (dest, src1, src2)
+                
                 builder.Or(instruction.Address, ConvertOperand(instruction, 0), ConvertOperand(instruction, 1), ConvertOperand(instruction, 2));
                 break;
 
             case Arm64Mnemonic.EOR:
-                //Eor (aka xor) is (dest, src1, src2)
+                
                 builder.Xor(instruction.Address, ConvertOperand(instruction, 0), ConvertOperand(instruction, 1), ConvertOperand(instruction, 2));
                 break;
 
@@ -347,7 +347,7 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
             };
 
             if (kind == Arm64OperandKind.ImmediatePcRelative)
-                imm += (long)instruction.Address + 4; //Add 4 to the address to get the address of the next instruction (PC-relative addressing is relative to the address of the next instruction, not the current one
+                imm += (long)instruction.Address + 4; 
 
             return InstructionSetIndependentOperand.MakeImmediate(imm);
         }
@@ -387,10 +387,10 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
             var isPreIndexed = instruction.MemIsPreIndexed;
 
             if (reg == Arm64Register.INVALID)
-                //Offset only
+                
                 return InstructionSetIndependentOperand.MakeMemory(new IsilMemoryOperand(offset));
 
-            //TODO Handle more stuff here
+            
             return InstructionSetIndependentOperand.MakeMemory(new IsilMemoryOperand(
                 InstructionSetIndependentOperand.MakeRegister(reg.ToString().ToUpperInvariant()),
                 offset));
@@ -425,7 +425,7 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
                 _ => throw new ArgumentOutOfRangeException(nameof(vectorElement.Width), $"Unknown vector element width {vectorElement.Width}")
             };
 
-            //<Reg>.<Width>[<Index>]
+            
             return InstructionSetIndependentOperand.MakeVectorElement(reg.ToString().ToUpperInvariant(), width, vectorElement.Index);
         }
 
@@ -443,26 +443,26 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
         {
             return returnType.Name switch
             {
-                "Void" => null, //Void is no return
-                "Double" => InstructionSetIndependentOperand.MakeRegister(nameof(Arm64Register.V0)), //Builtin double is v0
-                "Single" => InstructionSetIndependentOperand.MakeRegister(nameof(Arm64Register.V0)), //Builtin float is v0
-                _ => InstructionSetIndependentOperand.MakeRegister(nameof(Arm64Register.X0)), //All other system types are x0 like any other pointer
+                "Void" => null, 
+                "Double" => InstructionSetIndependentOperand.MakeRegister(nameof(Arm64Register.V0)), 
+                "Single" => InstructionSetIndependentOperand.MakeRegister(nameof(Arm64Register.V0)), 
+                _ => InstructionSetIndependentOperand.MakeRegister(nameof(Arm64Register.X0)), 
             };
         }
 
-        //TODO Do certain value types have different return registers?
+        
 
-        //Any user type is returned in x0
+        
         return InstructionSetIndependentOperand.MakeRegister(nameof(Arm64Register.X0));
     }
 
     private List<InstructionSetIndependentOperand> GetArgumentOperandsForCall(MethodAnalysisContext contextBeingAnalyzed, ulong callAddr)
     {
         if (!contextBeingAnalyzed.AppContext.MethodsByAddress.TryGetValue(callAddr, out var methodsAtAddress))
-            //TODO
+            
             return [];
 
-        //For the sake of arguments, all we care about is the first method at the address, because they'll only be shared if they have the same signature.
+        
         var contextBeingCalled = methodsAtAddress.First();
 
         var vectorCount = 0;
@@ -470,7 +470,7 @@ public class NewArmV8InstructionSet : Cpp2IlInstructionSet
 
         var ret = new List<InstructionSetIndependentOperand>();
 
-        //Handle 'this' if it's an instance method
+        
         if (!contextBeingCalled.IsStatic)
         {
             ret.Add(InstructionSetIndependentOperand.MakeRegister(nameof(Arm64Register.X0)));

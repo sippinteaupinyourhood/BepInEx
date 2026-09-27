@@ -25,11 +25,11 @@ public class InstructionSetIndependentOpCode
 
     public static readonly InstructionSetIndependentOpCode Compare = new(IsilMnemonic.Compare, 2, InstructionSetIndependentOperand.OperandType.Any, InstructionSetIndependentOperand.OperandType.Any);
 
-    //public static readonly InstructionSetIndependentOpCode CompareNotEqual = new(IsilMnemonic.CompareNotEqual, 2, InstructionSetIndependentOperand.OperandType.Any, InstructionSetIndependentOperand.OperandType.Any);
-    //public static readonly InstructionSetIndependentOpCode CompareLessThan = new(IsilMnemonic.CompareLessThan, 2, InstructionSetIndependentOperand.OperandType.Any, InstructionSetIndependentOperand.OperandType.Any);
-    //public static readonly InstructionSetIndependentOpCode CompareGreaterThan = new(IsilMnemonic.CompareGreaterThan, 2, InstructionSetIndependentOperand.OperandType.Any, InstructionSetIndependentOperand.OperandType.Any);
-    //public static readonly InstructionSetIndependentOpCode CompareLessThanOrEqual = new(IsilMnemonic.CompareLessThanOrEqual, 2, InstructionSetIndependentOperand.OperandType.Any, InstructionSetIndependentOperand.OperandType.Any);
-    //public static readonly InstructionSetIndependentOpCode CompareGreaterThanOrEqual = new(IsilMnemonic.CompareGreaterThanOrEqual, 2, InstructionSetIndependentOperand.OperandType.Any, InstructionSetIndependentOperand.OperandType.Any);
+    
+    
+    
+    
+    
     public static readonly InstructionSetIndependentOpCode ShiftStack = new(IsilMnemonic.ShiftStack, 1, InstructionSetIndependentOperand.OperandType.Immediate);
     public static readonly InstructionSetIndependentOpCode Push = new(IsilMnemonic.Push, 2, InstructionSetIndependentOperand.OperandType.Register, InstructionSetIndependentOperand.OperandType.Any);
     public static readonly InstructionSetIndependentOpCode Pop = new(IsilMnemonic.Pop, 2, InstructionSetIndependentOperand.OperandType.Any, InstructionSetIndependentOperand.OperandType.Register);

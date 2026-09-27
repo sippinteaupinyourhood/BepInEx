@@ -127,7 +127,7 @@ public static class Pass05CreateRenameGroups
         }
 
         if (typeDefinition.IsInterface ||
-            allowExtraHeuristics) // method order on non-interface types appears to be unstable
+            allowExtraHeuristics) 
             foreach (var methodDefinition in typeDefinition.Methods)
             {
                 uniqContext.Push(methodDefinition.Name!);

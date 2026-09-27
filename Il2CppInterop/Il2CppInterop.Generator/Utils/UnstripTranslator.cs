@@ -35,9 +35,9 @@ public static class UnstripTranslator
             localVariableMap.Add(variableDefinition, newVariableDefinition);
         }
 
-        // We expand macros because our instructions are not mapped one-to-one,
-        // so specialized instructions like Br_S need to be expanded to Br for safety.
-        // In pass 90, we optimize all macros, so we won't need to worry about that here.
+        
+        
+        
         original.CilMethodBody.Instructions.ExpandMacros();
 
         List<KeyValuePair<CilInstructionLabel, CilInstructionLabel>> labelMap = new();
@@ -52,40 +52,40 @@ public static class UnstripTranslator
                 switch (bodyInstruction.OpCode.Code)
                 {
                     case CilCode.Ldlen:
-                        //This is Il2CppArrayBase.Length
+                        
                         newInstruction = targetBuilder.Add(OpCodes.Callvirt,
                             imports.Module.DefaultImporter.ImportMethod(imports.Il2CppArrayBase_get_Length.Value));
                         break;
 
                     case CilCode.Ldelem_Ref:
-                        //This is Il2CppReferenceArray<T>.get_Item but the T is not known because the operand is null.
+                        
                         return false;
 
                     case CilCode.Stelem_Ref:
-                        //This is Il2CppReferenceArray<T>.set_Item but the T is not known because the operand is null.
+                        
                         return false;
 
                     case CilCode.Ldelem_I1:
                     case CilCode.Ldelem_I2:
                     case CilCode.Ldelem_I4:
                     case CilCode.Ldelem_U4:
-                        //This is Il2CppArrayBase<T>.get_Item but the T could be either the cooresponding primitive or an enum.
+                        
                         return false;
 
                     case CilCode.Ldelem_U1:
-                        //This is Il2CppArrayBase<T>.get_Item but the T could be either byte, bool, or an enum.
+                        
                         return false;
 
                     case CilCode.Ldelem_U2:
-                        //This is Il2CppArrayBase<T>.get_Item but the T could be either ushort, char, or an enum.
+                        
                         return false;
 
                     case CilCode.Ldelem_I8:
-                        //This is Il2CppArrayBase<T>.get_Item but the T could be either signed, unsigned, or an enum.
+                        
                         return false;
 
                     case CilCode.Ldelem_I:
-                        //This is Il2CppArrayBase<T>.get_Item but the T could be either signed, unsigned, or a pointer.
+                        
                         return false;
 
                     case CilCode.Ldelem_R4:
@@ -103,7 +103,7 @@ public static class UnstripTranslator
                         break;
 
                     case >= CilCode.Stelem_I and <= CilCode.Stelem_I8:
-                        //This is Il2CppStructArray<T>.set_Item
+                        
                         return false;
 
                     case CilCode.Stelem_R4:
@@ -121,15 +121,15 @@ public static class UnstripTranslator
                         break;
 
                     case >= CilCode.Ldind_I1 and <= CilCode.Ldind_Ref:
-                        //This is for by ref parameters
+                        
                         goto default;
 
                     case >= CilCode.Stind_Ref and <= CilCode.Stind_R8:
-                        //This is for by ref parameters
+                        
                         goto default;
 
                     default:
-                        //Noop, ldnull, ldarg_0, mul, add, etc.
+                        
                         newInstruction = targetBuilder.Add(bodyInstruction.OpCode);
                         break;
                 }
@@ -138,8 +138,8 @@ public static class UnstripTranslator
             }
             else if (bodyInstruction.OpCode.OperandType == CilOperandType.InlineField)
             {
-                // This code doesn't handle fields in the corlib types well.
-                // Static fields are fine, but references to instance fields can't be redirected.
+                
+                
 
                 var fieldArg = (IFieldDescriptor)bodyInstruction.Operand;
                 var useSystemCorlibType = fieldArg.Signature?.HasThis ?? true;
@@ -189,15 +189,15 @@ public static class UnstripTranslator
                     }
                     else
                     {
-                        //Ldflda, Ldsflda
+                        
                         return false;
                     }
                 }
             }
             else if (bodyInstruction.OpCode.OperandType == CilOperandType.InlineMethod)
             {
-                // This code doesn't handle methods in the corlib types well.
-                // Static methods are fine, but references to instance methods can't be redirected.
+                
+                
 
                 var methodArg = (IMethodDescriptor)bodyInstruction.Operand;
                 var useSystemCorlibType = methodArg.Signature?.HasThis ?? true;
@@ -261,9 +261,9 @@ public static class UnstripTranslator
                 if ((bodyInstruction.OpCode == OpCodes.Castclass && !targetType.IsValueType) ||
                     (bodyInstruction.OpCode == OpCodes.Unbox_Any && targetType is GenericParameterSignature))
                 {
-                    // Compilers use unbox.any for casting to generic parameter types.
-                    // Castclass is only used for reference types.
-                    // Both can be translated to Il2CppObjectBase.Cast<T>().
+                    
+                    
+                    
                     var newInstruction = targetBuilder.Add(OpCodes.Call,
                         imports.Module.DefaultImporter.ImportMethod(imports.Il2CppObjectBase_Cast.Value.MakeGenericInstanceMethod(targetType)));
                     instructionMap.Add(bodyInstruction, newInstruction);
@@ -297,7 +297,7 @@ public static class UnstripTranslator
                 }
                 else if (bodyInstruction.OpCode == OpCodes.Ldelema)
                 {
-                    // Not implemented
+                    
                     return false;
                 }
                 else if (bodyInstruction.OpCode == OpCodes.Ldelem)
@@ -320,7 +320,7 @@ public static class UnstripTranslator
             }
             else if (bodyInstruction.OpCode.OperandType == CilOperandType.InlineSig)
             {
-                // todo: rewrite sig if this ever happens in unity types
+                
                 return false;
             }
             else if (bodyInstruction.OpCode.OperandType == CilOperandType.InlineTok)
@@ -340,7 +340,7 @@ public static class UnstripTranslator
                         }
                         break;
                     default:
-                        // Ldtoken is also used for members, which is not implemented.
+                        
                         return false;
                 }
             }
@@ -398,7 +398,7 @@ public static class UnstripTranslator
             newLabel.Instruction = instructionMap[oldLabel.Instruction!];
         }
 
-        // Copy exception handlers
+        
         foreach (var exceptionHandler in original.CilMethodBody.ExceptionHandlers)
         {
             var newExceptionHandler = new CilExceptionHandler
@@ -469,8 +469,8 @@ public static class UnstripTranslator
                     newExceptionHandler.ExceptionType = imports.Module.CorLibTypeFactory.Object.ToTypeDefOrRef();
                     break;
                 default:
-                    // In the future, we will throw exact exceptions, but we don't right now,
-                    // so attempting to catch a specific exception type will always fail.
+                    
+                    
                     return false;
             }
 
@@ -491,7 +491,7 @@ public static class UnstripTranslator
         processor.Add(OpCodes.Ret);
     }
 
-    //Required for deconstruction on net472
+    
     private static void Deconstruct(this KeyValuePair<CilInstructionLabel, CilInstructionLabel> pair, out CilInstructionLabel key, out CilInstructionLabel value)
     {
         key = pair.Key;

@@ -131,10 +131,10 @@ public static class MiscUtils
 
     public static int GetSlotNum(int offset)
     {
-        var offsetInVtable = offset - Il2CppClassUsefulOffsets.VTABLE_OFFSET; //0x128 being the address of the vtable in an Il2CppClass
+        var offsetInVtable = offset - Il2CppClassUsefulOffsets.VTABLE_OFFSET; 
 
         if (offsetInVtable % 0x10 != 0 && offsetInVtable % 0x8 == 0)
-            offsetInVtable -= 0x8; //Handle read of the second pointer in the struct.
+            offsetInVtable -= 0x8; 
 
         if (offsetInVtable > 0)
         {
@@ -169,7 +169,7 @@ public static class MiscUtils
             _ => throw new($"ReinterpretBytes: Cannot get byte array from {original} (type {original.GetType()}")
         };
 
-    //TODO: Refactor this out to a property of ApplicationAnalysisContext
+    
     internal static void InitFunctionStarts(ApplicationAnalysisContext appContext)
     {
         _allKnownFunctionStarts = appContext.Metadata.methodDefs.Select(m => m.MethodPointer)
@@ -177,17 +177,17 @@ public static class MiscUtils
             .Concat(SharedState.AttributeGeneratorStarts)
             .ToList();
 
-        //Sort in ascending order
+        
         _allKnownFunctionStarts.Sort();
     }
-    //TODO: End
+    
 
     public static ulong GetAddressOfNextFunctionStart(ulong current)
     {
         if (_allKnownFunctionStarts == null)
             throw new("Function starts not initialized!");
 
-        //Binary-search-like approach
+        
         var lower = 0;
         var upper = _allKnownFunctionStarts!.Count - 1;
 
@@ -202,17 +202,17 @@ public static class MiscUtils
             var ptr = _allKnownFunctionStarts[pos];
             if (ptr > current)
             {
-                //This matches what we want to look for
+                
                 if (ptr < ret)
-                    //This is a better "next method" pointer
+                    
                     ret = ptr;
 
-                //Either way, we're above our current address now, so search lower in the list
+                
                 upper = pos;
             }
             else
             {
-                //Not what we want, so move up in the list
+                
                 lower = pos + 1;
             }
         }
@@ -274,7 +274,7 @@ public static class MiscUtils
 
     public static string AnalyzeStackTracePointers(ulong[] pointers)
     {
-        // var pointers = new ulong[] {0x52e6ba0, 0x52ad3a0, 0x11b09714, 0x40a990c, 0xd172c68, 0xa2c0514, 0x35ea45c, 0x1fc43208};
+        
 
         var methodsSortedByPointer = Cpp2IlApi.CurrentAppContext!.Metadata.methodDefs.ToList();
         methodsSortedByPointer.SortByExtractedKey(m => m.MethodPointer);
@@ -308,11 +308,11 @@ public static class MiscUtils
         return string.Join("\n", stack);
     }
 
-    /// <summary>
-    /// Returns the input string with any invalid path characters removed.
-    /// </summary>
-    /// <param name="input">The string to clean up</param>
-    /// <returns>The input string with any characters that are invalid in the NTFS file system replaced with underscores, and additionally escaped if they collide with legacy dos device names.</returns>
+    
+    
+    
+    
+    
     public static string CleanPathElement(string input)
     {
         InvalidPathChars.ForEach(c => input = input.Replace(c, '_'));

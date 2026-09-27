@@ -9,9 +9,9 @@ using Logger = BepInEx.Logging.Logger;
 
 namespace BepInEx.Unity.Mono.Logging
 {
-    /// <summary>
-    ///     Logs entries using Unity specific outputs.
-    /// </summary>
+    
+    
+    
     public class UnityLogListener : ILogListener
     {
         internal static readonly Action<string> WriteStringToUnityLog;
@@ -49,21 +49,21 @@ namespace BepInEx.Unity.Mono.Logging
                 Logger.Log(LogLevel.Error, "Unable to start Unity log writer");
         }
 
-        /// <inheritdoc />
+        
         public LogLevel LogLevelFilter => ConfigUnityLogLevel.Value;
 
-        /// <inheritdoc />
+        
         public void LogEvent(object sender, LogEventArgs eventArgs)
         {
             if (eventArgs.Source is UnityLogSource)
                 return;
 
-            // Special case: don't write console twice since Unity can already do that
+            
             if (LogConsoleToUnity.Value || eventArgs.Source.SourceName != "Console")
                 WriteStringToUnityLog?.Invoke(eventArgs.ToStringLine());
         }
 
-        /// <inheritdoc />
+        
         public void Dispose() { }
     }
 }

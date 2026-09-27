@@ -5,56 +5,56 @@ public class Il2CppGlobalMetadataHeader : ReadableClass
     public uint magicNumber;
     public int version;
 
-    public Il2CppGlobalMetadataSectionHeader stringLiteral; // string data for managed code
+    public Il2CppGlobalMetadataSectionHeader stringLiteral; 
     public Il2CppGlobalMetadataSectionHeader stringLiteralData;
-    public Il2CppGlobalMetadataSectionHeader @string; // string data for metadata
-    public Il2CppGlobalMetadataSectionHeader events; // Il2CppEventDefinition
-    public Il2CppGlobalMetadataSectionHeader properties; // Il2CppPropertyDefinition
-    public Il2CppGlobalMetadataSectionHeader methods; // Il2CppMethodDefinition
-    public Il2CppGlobalMetadataSectionHeader parameterDefaultValues; // Il2CppParameterDefaultValue
-    public Il2CppGlobalMetadataSectionHeader fieldDefaultValues; // Il2CppFieldDefaultValue
-    public Il2CppGlobalMetadataSectionHeader fieldAndParameterDefaultValueData; // uint8_t
-    public Il2CppGlobalMetadataSectionHeader fieldMarshaledSizes; // Il2CppFieldMarshaledSize
-    public Il2CppGlobalMetadataSectionHeader parameters; // Il2CppParameterDefinition
-    public Il2CppGlobalMetadataSectionHeader fields; // Il2CppFieldDefinition
-    public Il2CppGlobalMetadataSectionHeader genericParameters; // Il2CppGenericParameter
-    public Il2CppGlobalMetadataSectionHeader genericParameterConstraints; // TypeIndex
-    public Il2CppGlobalMetadataSectionHeader genericContainers; // Il2CppGenericContainer
-    public Il2CppGlobalMetadataSectionHeader nestedTypes; // TypeDefinitionIndex
-    public Il2CppGlobalMetadataSectionHeader interfaces; // TypeIndex
-    public Il2CppGlobalMetadataSectionHeader vtableMethods; // EncodedMethodIndex
-    public Il2CppGlobalMetadataSectionHeader interfaceOffsets; // Il2CppInterfaceOffsetPair
-    public Il2CppGlobalMetadataSectionHeader typeDefinitions; // Il2CppTypeDefinition
+    public Il2CppGlobalMetadataSectionHeader @string; 
+    public Il2CppGlobalMetadataSectionHeader events; 
+    public Il2CppGlobalMetadataSectionHeader properties; 
+    public Il2CppGlobalMetadataSectionHeader methods; 
+    public Il2CppGlobalMetadataSectionHeader parameterDefaultValues; 
+    public Il2CppGlobalMetadataSectionHeader fieldDefaultValues; 
+    public Il2CppGlobalMetadataSectionHeader fieldAndParameterDefaultValueData; 
+    public Il2CppGlobalMetadataSectionHeader fieldMarshaledSizes; 
+    public Il2CppGlobalMetadataSectionHeader parameters; 
+    public Il2CppGlobalMetadataSectionHeader fields; 
+    public Il2CppGlobalMetadataSectionHeader genericParameters; 
+    public Il2CppGlobalMetadataSectionHeader genericParameterConstraints; 
+    public Il2CppGlobalMetadataSectionHeader genericContainers; 
+    public Il2CppGlobalMetadataSectionHeader nestedTypes; 
+    public Il2CppGlobalMetadataSectionHeader interfaces; 
+    public Il2CppGlobalMetadataSectionHeader vtableMethods; 
+    public Il2CppGlobalMetadataSectionHeader interfaceOffsets; 
+    public Il2CppGlobalMetadataSectionHeader typeDefinitions; 
     
-    [Version(Min = 104f)] public Il2CppGlobalMetadataSectionHeader typeInlineArrays; // Il2CppInlineArrayLength
+    [Version(Min = 104f)] public Il2CppGlobalMetadataSectionHeader typeInlineArrays; 
 
-    [Version(Max = 24.15f)] public Il2CppGlobalMetadataSectionHeader rgctxEntries; // Il2CppRGCTXDefinition
+    [Version(Max = 24.15f)] public Il2CppGlobalMetadataSectionHeader rgctxEntries; 
 
-    public Il2CppGlobalMetadataSectionHeader images; // Il2CppImageDefinition
-    public Il2CppGlobalMetadataSectionHeader assemblies; // Il2CppAssemblyDefinition
+    public Il2CppGlobalMetadataSectionHeader images; 
+    public Il2CppGlobalMetadataSectionHeader assemblies; 
 
-    [Version(Max = 24.5f)] public Il2CppGlobalMetadataSectionHeader metadataUsageLists; // Il2CppMetadataUsageList, Removed in v27
-    [Version(Max = 24.5f)] public Il2CppGlobalMetadataSectionHeader metadataUsagePairs; // Il2CppMetadataUsagePair, Removed in v27
+    [Version(Max = 24.5f)] public Il2CppGlobalMetadataSectionHeader metadataUsageLists; 
+    [Version(Max = 24.5f)] public Il2CppGlobalMetadataSectionHeader metadataUsagePairs; 
 
-    public Il2CppGlobalMetadataSectionHeader fieldRefs; // Il2CppFieldRef
-    public Il2CppGlobalMetadataSectionHeader referencedAssemblies; // int32_t
+    public Il2CppGlobalMetadataSectionHeader fieldRefs; 
+    public Il2CppGlobalMetadataSectionHeader referencedAssemblies; 
 
-    //Pre-29 attribute data
-    [Version(Max = 27.9f)] public Il2CppGlobalMetadataSectionHeader attributesInfo; // Il2CppCustomAttributeTypeRange
-    [Version(Max = 27.9f)] public Il2CppGlobalMetadataSectionHeader attributeTypes; // TypeIndex
+    
+    [Version(Max = 27.9f)] public Il2CppGlobalMetadataSectionHeader attributesInfo; 
+    [Version(Max = 27.9f)] public Il2CppGlobalMetadataSectionHeader attributeTypes; 
 
-    //Post-29 attribute data
-    [Version(Min = 27.9f)] public Il2CppGlobalMetadataSectionHeader attributeData; //uint8_t
-    [Version(Min = 27.9f)] public Il2CppGlobalMetadataSectionHeader attributeDataRange; //Il2CppCustomAttributeDataRange
+    
+    [Version(Min = 27.9f)] public Il2CppGlobalMetadataSectionHeader attributeData; 
+    [Version(Min = 27.9f)] public Il2CppGlobalMetadataSectionHeader attributeDataRange; 
 
-    public Il2CppGlobalMetadataSectionHeader unresolvedVirtualCallParameterTypes; // TypeIndex
-    public Il2CppGlobalMetadataSectionHeader unresolvedVirtualCallParameterRanges; // Il2CppRange
+    public Il2CppGlobalMetadataSectionHeader unresolvedVirtualCallParameterTypes; 
+    public Il2CppGlobalMetadataSectionHeader unresolvedVirtualCallParameterRanges; 
 
-    [Version(Min = 23)] public Il2CppGlobalMetadataSectionHeader windowsRuntimeTypeNames; // Il2CppWindowsRuntimeTypeNamePair
+    [Version(Min = 23)] public Il2CppGlobalMetadataSectionHeader windowsRuntimeTypeNames; 
 
-    [Version(Min = 27)] public Il2CppGlobalMetadataSectionHeader windowsRuntimeStrings; // const char*
+    [Version(Min = 27)] public Il2CppGlobalMetadataSectionHeader windowsRuntimeStrings; 
 
-    [Version(Min = 24)] public Il2CppGlobalMetadataSectionHeader exportedTypeDefinitions; // TypeDefinitionIndex
+    [Version(Min = 24)] public Il2CppGlobalMetadataSectionHeader exportedTypeDefinitions; 
 
     public override void Read(ClassReadingBinaryReader reader)
     {

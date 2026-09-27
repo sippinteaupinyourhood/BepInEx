@@ -8,9 +8,9 @@ using LibCpp2IL.BinaryStructures;
 
 namespace Cpp2IL.Core.Model.CustomAttributes;
 
-/// <summary>
-/// Represents a custom attribute parameter which is an instance of IConvertible (that is, a numeric type, or a nullable string)
-/// </summary>
+
+
+
 public class CustomAttributePrimitiveParameter : BaseCustomAttributeParameter
 {
     public readonly Il2CppTypeEnum PrimitiveType;

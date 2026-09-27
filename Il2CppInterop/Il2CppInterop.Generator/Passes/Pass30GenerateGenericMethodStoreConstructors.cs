@@ -73,8 +73,7 @@ public static class Pass30GenerateGenericMethodStoreConstructors
                         ctorBuilder.Add(OpCodes.Newobj,
                             ReferenceCreator.CreateInstanceMethodReference(".ctor", assemblyContext.Imports.Module.Void(), il2CppTypeArray.ToTypeDefOrRef(), new GenericParameterSignature(GenericParameterType.Type, 0).MakeSzArrayType()));
                         ctorBuilder.Add(OpCodes.Call,
-                            ReferenceCreator.CreateInstanceMethodReference(nameof(MethodInfo.MakeGenericMethod), il2CppSystemReflectionMethodInfoRef.ToTypeSignature(),
-                                    il2CppSystemReflectionMethodInfoRef, il2CppTypeArray));
+                            assemblyContext.Imports.RuntimeGenericMethodResolver_MakeGenericMethod.Value);
                         ctorBuilder.Add(OpCodes.Call, assemblyContext.Imports.IL2CPP_Il2CppObjectBaseToPtrNotNull.Value);
 
                         ctorBuilder.Add(OpCodes.Call, assemblyContext.Imports.IL2CPP_il2cpp_method_get_from_reflection.Value);

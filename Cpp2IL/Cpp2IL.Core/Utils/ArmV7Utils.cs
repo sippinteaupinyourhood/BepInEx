@@ -29,7 +29,7 @@ public static class ArmV7Utils
             return null;
 
         if (startOfNext <= 0)
-            //We have to fall through to default behavior for the last method because we cannot accurately pinpoint its end
+            
             return null;
 
         var rawStartOfNextMethod = LibCpp2IlMain.Binary!.MapVirtualAddressToRaw(startOfNext);
@@ -46,14 +46,14 @@ public static class ArmV7Utils
         if (_armDisassembler == null)
             InitArmDecompilation();
 
-        //We can't use CppMethodBodyBytes to get the byte array, because ARMv7 doesn't have filler bytes like x86 does.
-        //So we can't work out the end of the method.
-        //But we can find the start of the next one! (If managed)
+        
+        
+        
         if (managed)
         {
             var startOfNext = MiscUtils.GetAddressOfNextFunctionStart(virtAddress);
 
-            //We have to fall through to default behavior for the last method because we cannot accurately pinpoint its end
+            
             if (startOfNext > 0)
             {
                 var rawStartOfNextMethod = LibCpp2IlMain.Binary!.MapVirtualAddressToRaw(startOfNext);
@@ -72,14 +72,14 @@ public static class ArmV7Utils
             }
         }
 
-        //Unmanaged function, look for first b or bl
+        
         var pos = (int)LibCpp2IlMain.Binary!.MapVirtualAddressToRaw(virtAddress);
         var allBytes = LibCpp2IlMain.Binary.GetRawBinaryContent();
         List<ArmInstruction> ret = [];
 
         while (!ret.Any(i => i.Mnemonic is "b" or ".byte") && (count == -1 || ret.Count < count))
         {
-            //All arm64 instructions are 4 bytes
+            
             ret.AddRange(_armDisassembler!.Iterate(allBytes.SubArray(pos..(pos + 4)), (long)virtAddress));
             virtAddress += 4;
             pos += 4;

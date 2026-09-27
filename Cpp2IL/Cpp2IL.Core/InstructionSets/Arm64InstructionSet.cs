@@ -16,10 +16,10 @@ public class Arm64InstructionSet : Cpp2IlInstructionSet
 {
     public override Memory<byte> GetRawBytesForMethod(MethodAnalysisContext context, bool isAttributeGenerator)
     {
-        //Avoid use of capstone where possible
+        
         if (true || context is not ConcreteGenericMethodAnalysisContext)
         {
-            //Managed method or attr gen => grab raw byte range between a and b
+            
             var startOfNextFunction = (int)MiscUtils.GetAddressOfNextFunctionStart(context.UnderlyingPointer) - 1;
             var ptrAsInt = (int)context.UnderlyingPointer;
             var count = startOfNextFunction - ptrAsInt;

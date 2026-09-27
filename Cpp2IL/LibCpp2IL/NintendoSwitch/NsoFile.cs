@@ -101,18 +101,18 @@ public sealed class NsoFile : Il2CppBinary
 
         _modHeader = new();
 
-        //Location of real mod header must be at .text + 4
-        //Which allows .text + 0 to be a jump over it
+        
+        
         Position = _header.TextSegment.FileOffset + 4;
         _modHeader.ModOffset = ReadUInt32();
 
-        //Now we have the real mod header position, go to it and read
+        
         Position = _header.TextSegment.FileOffset + _modHeader.ModOffset + 4;
         _modHeader.DynamicOffset = ReadUInt32() + _modHeader.ModOffset;
         _modHeader.BssStart = ReadUInt32();
         _modHeader.BssEnd = ReadUInt32();
 
-        //Construct the bss segment information from the fields we just read
+        
         _modHeader.BssSegment = new() { FileOffset = _modHeader.BssStart, MemoryOffset = _modHeader.BssStart, DecompressedSize = _modHeader.BssEnd - _modHeader.BssStart };
 
         _modHeader.EhFrameHdrStart = ReadUInt32();
@@ -125,16 +125,16 @@ public sealed class NsoFile : Il2CppBinary
 
         Position = MapVirtualAddressToRaw(_modHeader.DynamicOffset);
 
-        //This is mostly a sanity check so we don't read the entire damn file 16 bytes at a time
-        //This will be way more than we need in general (like, 100 times more)
+        
+        
         var endOfData = _header.DataSegment.MemoryOffset + _header.DataSegment.DecompressedSize;
-        var maxPossibleDynSectionEntryCount = (endOfData - _modHeader.DynamicOffset) / 16; //16 being sizeof(ElfDynamicEntry) on 64-bit
+        var maxPossibleDynSectionEntryCount = (endOfData - _modHeader.DynamicOffset) / 16; 
 
         for (var i = 0; i < maxPossibleDynSectionEntryCount; i++)
         {
             var dynEntry = ReadReadable<ElfDynamicEntry>();
             if (dynEntry.Tag == ElfDynamicType.DT_NULL)
-                //End of dynamic section
+                
                 break;
             dynamicEntries.Add(dynEntry);
         }
@@ -153,7 +153,7 @@ public sealed class NsoFile : Il2CppBinary
         }
 
         Position = MapVirtualAddressToRaw(hash.Value);
-        ReadUInt32(); //Ignored
+        ReadUInt32(); 
         var symbolCount = ReadUInt32();
 
         var symTab = GetDynamicEntry(ElfDynamicType.DT_SYMTAB);
@@ -177,11 +177,11 @@ public sealed class NsoFile : Il2CppBinary
         {
             var dtRela = GetDynamicEntry(ElfDynamicType.DT_RELA) ?? throw new("No relocations found in NSO");
             var dtRelaSize = GetDynamicEntry(ElfDynamicType.DT_RELASZ) ?? throw new("No relocation size entry found in NSO");
-            relaEntries = ReadReadableArrayAtVirtualAddress<ElfRelaEntry>(dtRela.Value, (long)(dtRelaSize.Value / 24)); //24 being sizeof(ElfRelaEntry) on 64-bit
+            relaEntries = ReadReadableArrayAtVirtualAddress<ElfRelaEntry>(dtRela.Value, (long)(dtRelaSize.Value / 24)); 
         }
         catch
         {
-            //If we don't have relocations, that's fine.
+            
             return;
         }
 
@@ -221,17 +221,17 @@ public sealed class NsoFile : Il2CppBinary
         writer.Write(_header.Magic);
         writer.Write(_header.Version);
         writer.Write(_header.Reserved);
-        writer.Write(0); //Flags
+        writer.Write(0); 
         writer.Write(_header.TextSegment.FileOffset);
         writer.Write(_header.TextSegment.MemoryOffset);
         writer.Write(_header.TextSegment.DecompressedSize);
         writer.Write(_header.ModuleOffset);
         var roOffset = _header.TextSegment.FileOffset + _header.TextSegment.DecompressedSize;
-        writer.Write(roOffset); //header.RoDataSegment.FileOffset
+        writer.Write(roOffset); 
         writer.Write(_header.RoDataSegment.MemoryOffset);
         writer.Write(_header.RoDataSegment.DecompressedSize);
         writer.Write(_header.ModuleFileSize);
-        writer.Write(roOffset + _header.RoDataSegment.DecompressedSize); //header.DataSegment.FileOffset
+        writer.Write(roOffset + _header.RoDataSegment.DecompressedSize); 
         writer.Write(_header.DataSegment.MemoryOffset);
         writer.Write(_header.DataSegment.DecompressedSize);
         writer.Write(_header.BssSize);

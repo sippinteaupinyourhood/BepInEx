@@ -44,7 +44,7 @@ public static class Pass21GenerateValueTypeFields
 
                         newField.FieldOffset = field.ExtractFieldOffset();
 
-                        // Special case: bools in Il2Cpp are bytes
+                        
                         if (newField.Signature!.FieldType.FullName == "System.Boolean")
                             newField.MarshalDescriptor = new SimpleMarshalDescriptor(NativeType.U1);
 

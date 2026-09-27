@@ -29,8 +29,8 @@ public class TypeRewriteContext
 
     public readonly bool OriginalNameWasObfuscated;
 #nullable disable
-    // OriginalType is null for unstripped types, but we don't want to warn anywhere,
-    // including in the constructor, so we disable all null tracking for this field.
+    
+    
     public readonly TypeDefinition OriginalType;
 #nullable enable
 
@@ -61,10 +61,10 @@ public class TypeRewriteContext
         else if (OriginalType.IsEnum)
             ComputedTypeSpecifics = TypeSpecifics.BlittableStruct;
         else if (OriginalType.HasGenericParameters())
-            ComputedTypeSpecifics = TypeSpecifics.NonBlittableStruct; // not reference type, covered by first if
+            ComputedTypeSpecifics = TypeSpecifics.NonBlittableStruct; 
     }
 
-    // These are initialized in AddMembers, which is called from an early rewrite pass.
+    
     public IFieldDescriptor ClassPointerFieldRef { get; private set; } = null!;
     public ITypeDefOrRef SelfSubstitutedRef { get; private set; } = null!;
 

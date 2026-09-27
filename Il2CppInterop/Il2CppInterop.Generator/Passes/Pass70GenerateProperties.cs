@@ -65,7 +65,7 @@ public static class Pass70GenerateProperties
         {
             return attribute.AttributeType()?.Name == "AttributeAttribute" && attribute.Signature!.NamedArguments.Any(it =>
             {
-                // Name support is for backwards compatibility.
+                
                 return (it.MemberName == "Type" && it.Argument.Element is ITypeDescriptor { Namespace: "System.Reflection", Name: nameof(DefaultMemberAttribute) })
                     || (it.MemberName == "Name" && it.Argument.GetElementAsString() == nameof(DefaultMemberAttribute));
             });
@@ -113,7 +113,7 @@ public static class Pass70GenerateProperties
 
     private static void FixPropertyDefinitionParameters(PropertyDefinition property)
     {
-        // See: https://github.com/SamboyCoding/Cpp2IL/issues/249
+        
 
         if (property.Signature is null or { ParameterTypes.Count: > 0 })
             return;

@@ -31,7 +31,7 @@ public static class HarmonyBackendFix
 
     private enum MonoModBackend
     {
-        // Enum names are important!
+        
         [Description("Auto")]
         auto = 0,
 

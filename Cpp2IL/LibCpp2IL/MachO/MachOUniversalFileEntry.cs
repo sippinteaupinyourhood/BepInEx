@@ -2,11 +2,11 @@ namespace LibCpp2IL.MachO;
 
 public class MachOUniversalFileEntry : ReadableClass
 {
-    public MachOCpuType CpuType; //cpu specifier of MachOFile
-    public MachOCpuSubtype CpuSubtype; //cpu specifier of MachOFile
-    public ulong FileOffset; // offset of MachOFile in universal container
-    public ulong FileSize; // size of MachOFile
-    public uint FileAlignment; // alignment of MachOFile
+    public MachOCpuType CpuType; 
+    public MachOCpuSubtype CpuSubtype; 
+    public ulong FileOffset; 
+    public ulong FileSize; 
+    public uint FileAlignment; 
 
     public override void Read(ClassReadingBinaryReader reader)
     {

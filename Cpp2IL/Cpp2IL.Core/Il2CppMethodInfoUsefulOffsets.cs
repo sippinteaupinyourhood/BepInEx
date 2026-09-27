@@ -7,14 +7,14 @@ namespace Cpp2IL.Core;
 
 public static class Il2CppMethodInfoUsefulOffsets
 {
-    public const int X86_KLASS_OFFSET = 0x00; //TODO
+    public const int X86_KLASS_OFFSET = 0x00; 
     public const int X86_64_KLASS_OFFSET = 0x18;
 
     public static readonly List<UsefulOffset> UsefulOffsets =
     [
         new UsefulOffset("klass", X86_KLASS_OFFSET, typeof(ushort), true),
 
-        //64-bit offsets:
+        
         new UsefulOffset("klass", X86_64_KLASS_OFFSET, typeof(IntPtr), false)
     ];
 

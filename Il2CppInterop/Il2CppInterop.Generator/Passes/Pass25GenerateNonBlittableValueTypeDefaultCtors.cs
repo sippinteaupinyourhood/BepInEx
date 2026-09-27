@@ -24,8 +24,8 @@ public static class Pass25GenerateNonBlittableValueTypeDefaultCtors
 
                 emptyCtor.CilMethodBody = new();
 
-                // NOTE(Kas): This used to stackalloc data of the valuetype's size and box it into an object
-                // but it seems like it caused issues on certain games. If more issues arise - revert this.
+                
+                
                 var bodyBuilder = emptyCtor.CilMethodBody.Instructions;
                 bodyBuilder.Add(OpCodes.Ldarg_0);
                 bodyBuilder.Add(OpCodes.Ldsfld, typeContext.ClassPointerFieldRef);

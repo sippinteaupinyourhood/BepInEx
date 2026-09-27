@@ -49,7 +49,7 @@ internal static class EnumerableExtensions
 
         public void Dispose()
         {
-            // Nothing to dispose
+            
         }
     }
 }

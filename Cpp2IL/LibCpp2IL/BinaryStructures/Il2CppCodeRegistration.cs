@@ -2,52 +2,52 @@ namespace LibCpp2IL.BinaryStructures;
 
 public class Il2CppCodeRegistration : ReadableClass
 {
-    /*
-     * IMPORTANT:
-     * Again, like in Il2CppMetadataRegistration, all of the counts are defined as int32_t, but due to alignment, we treat them as native-width uints.
-     * See the comment in Il2CppMetadataRegistration for more info.
-     */
+    
+
+
+
+
     public static int GetStructSize(bool isBinary32Bit, float metadataVersion)
     {
-        //Unfortunately, this struct is not a fixed size, so we have to do some manual calculations.
+        
         var size = 0;
         var ptrSize = isBinary32Bit ? 4 : 8;
 
         if (metadataVersion <= 24.15f)
-            //methodPointers
+            
             size += 2 * ptrSize;
 
-        //reversePInvokeWrappers and genericMethodPointers
+        
         size += 4 * ptrSize;
 
         if (metadataVersion is (>= 24.5f and < 27f) or >= 27.1f)
-            //genericAdjustorThunks
+            
             size += ptrSize;
 
-        //invokerPointers
+        
         size += 2 * ptrSize;
 
         if (metadataVersion <= 24.5f)
-            //customAttributes
+            
             size += 2 * ptrSize;
 
-        //unresolvedVirtualCallPointers
+        
         size += 2 * ptrSize;
 
         if (metadataVersion is (>= 29.1f and < 31f) or >= 31.1f)
-            //unresolvedInstanceCallPointers and unresolvedStaticCallPointers
+            
             size += 2 * ptrSize;
 
         if (metadataVersion >= 23f)
-            //interopData
+            
             size += 2 * ptrSize;
 
         if (metadataVersion >= 24.3f)
-            //windowsRuntimeFactoryTable
+            
             size += 2 * ptrSize;
 
         if (metadataVersion >= 24.2f)
-            //addrCodeGenModulePtrs
+            
             size += 2 * ptrSize;
 
         return size;
@@ -62,20 +62,20 @@ public class Il2CppCodeRegistration : ReadableClass
     public ulong genericMethodPointersCount;
     public ulong genericMethodPointers;
 
-    //Present in v27.1 and v24.5, but not v27.0
+    
     [Version(Min = 27.1f)] [Version(Min = 24.5f, Max = 24.5f)]
     public ulong genericAdjustorThunks;
 
     public ulong invokerPointersCount;
     public ulong invokerPointers;
 
-    [Version(Max = 24.5f)] //Removed in v27
+    [Version(Max = 24.5f)] 
     public ulong customAttributeCount;
 
-    [Version(Max = 24.5f)] //Removed in v27
+    [Version(Max = 24.5f)] 
     public ulong customAttributeGeneratorListAddress;
 
-    public ulong unresolvedVirtualCallCount; //Renamed to unresolvedIndirectCallCount in v29.1
+    public ulong unresolvedVirtualCallCount; 
     public ulong unresolvedVirtualCallPointers;
 
     [Version(Min = 29.1f, Max=31f), Version(Min=31.1f)] public ulong unresolvedInstanceCallPointers;

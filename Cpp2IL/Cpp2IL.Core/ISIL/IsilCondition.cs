@@ -9,7 +9,7 @@ public class IsilCondition(
     public InstructionSetIndependentOperand Right = right;
     public InstructionSetIndependentOpCode OpCode = opCode;
 
-    public bool IsAnd; //E.g. x86 TEST instruction vs CMP
+    public bool IsAnd; 
 
     public IsilCondition MarkAsAnd()
     {

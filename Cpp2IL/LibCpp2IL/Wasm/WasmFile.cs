@@ -30,7 +30,7 @@ public sealed class WasmFile : Il2CppBinary
         var magic = ReadUInt32();
         var version = ReadInt32();
 
-        if (magic != 0x6D736100) //\0asm
+        if (magic != 0x6D736100) 
             throw new Exception($"WASM magic mismatch; got 0x{magic:X}");
 
         if (version != 1)
@@ -81,17 +81,17 @@ public sealed class WasmFile : Il2CppBinary
     {
         if (!DynCallCoefficients.TryGetValue(signature, out var coefficients))
         {
-            // LibLogger.WarnNewline($"Can't get function with signature {signature}, as it's not defined in the binary");
+            
             throw new($"Can't get function with signature {signature}, as it's not defined in the binary");
         }
 
-        //Calculate adjusted dyncall index
+        
         index = (ulong)((long)(index & coefficients.andWith) + coefficients.addConstant);
 
-        //Use element section to look up real index
-        var realIndex = ElementSection.Elements[0].FunctionIndices![(int)index]; //Minus 1 because the first element in the actual memory layout is FFFFFFFF
+        
+        var realIndex = ElementSection.Elements[0].FunctionIndices![(int)index]; 
 
-        //Look up real index in function table
+        
         return FunctionTable[(int)realIndex];
     }
 
@@ -110,7 +110,7 @@ public sealed class WasmFile : Il2CppBinary
 
     private void CalculateDynCallOffsets()
     {
-        //Remap any exported functions we have remaps for
+        
 
         if (RemappedDynCallFunctions != null)
         {
@@ -132,7 +132,7 @@ public sealed class WasmFile : Il2CppBinary
             var funcBody = function!.Instructions;
             var disassembled = Disassembler.Disassemble(funcBody, (uint)function.InstructionsOffset);
 
-            //Find the consts, ands, and adds
+            
             var relevantInstructions = disassembled.Where(i => i.Mnemonic is WasmMnemonic.I32Const or WasmMnemonic.I32And or WasmMnemonic.I32Add or WasmMnemonic.I32Sub).ToArray();
 
             ulong andWith;
@@ -158,7 +158,7 @@ public sealed class WasmFile : Il2CppBinary
             }
             else if (relevantInstructions.Length == 4)
             {
-                //Should be const, and, const, add
+                
                 var mnemonics = relevantInstructions.Select(i => i.Mnemonic).ToArray();
                 var isAddVariant = mnemonics.SequenceEqual([WasmMnemonic.I32Const, WasmMnemonic.I32And, WasmMnemonic.I32Const, WasmMnemonic.I32Add]);
                 var isSubVariant = mnemonics.SequenceEqual([WasmMnemonic.I32Const, WasmMnemonic.I32And, WasmMnemonic.I32Const, WasmMnemonic.I32Sub]);
@@ -179,14 +179,14 @@ public sealed class WasmFile : Il2CppBinary
             }
             else if (disassembled.All(d => d.Mnemonic is WasmMnemonic.LocalGet or WasmMnemonic.CallIndirect or WasmMnemonic.End))
             {
-                //No remapping
+                
                 andWith = int.MaxValue;
                 add = 0;
             }
             else if (disassembled[^1].Mnemonic == WasmMnemonic.End && disassembled[^2].Mnemonic == WasmMnemonic.CallIndirect && disassembled[^3].Mnemonic == WasmMnemonic.LocalGet && (byte)disassembled[^3].Operands[0] == 0)
             {
-                //If we're ending with LocalGet 0, CallIndirect, End, then we're *probably* just keeping the same index as was passed in
-                //Tentatively assume we're doing shenanigans only to the params and we don't touch the index
+                
+                
                 LibLogger.VerboseNewline($"\t\tAssuming index is not manipulated for dynCall_{signature} (method ends with LocalGet 0, CallIndirect, End)");
                 andWith = int.MaxValue;
                 add = 0;
@@ -203,12 +203,12 @@ public sealed class WasmFile : Il2CppBinary
 
     public override long MapVirtualAddressToRaw(ulong uiAddr, bool throwOnError = true)
     {
-        // var data = DataSection;
-        // var matchingEntry = data.DataEntries.FirstOrDefault(e => e.VirtualOffset <= uiAddr && e.VirtualOffset + (ulong) e.Data.Length > uiAddr);
-        // if (matchingEntry != null)
-        // {
-        //     return matchingEntry.FileOffset + (long) (uiAddr - (ulong) matchingEntry.VirtualOffset);
-        // }
+        
+        
+        
+        
+        
+        
 
         if (uiAddr > (ulong)(_memoryBlock.Bytes.Length + _raw.Length))
             if (throwOnError)
@@ -237,7 +237,7 @@ public sealed class WasmFile : Il2CppBinary
 
     public override Stream BaseStream => _memoryBlock?.BaseStream ?? base.BaseStream;
 
-    //Delegate to the memory block
+    
     internal override object? ReadPrimitive(Type type, bool overrideArchCheck = false) => _memoryBlock.ReadPrimitive(type, overrideArchCheck);
 
     public override string ReadStringToNull(long offset) => _memoryBlock.ReadStringToNull(offset);
@@ -249,7 +249,7 @@ public sealed class WasmFile : Il2CppBinary
 
     public override ulong GetVirtualAddressOfExportedFunctionByName(string toFind)
     {
-        return 0; //Never going to be anything useful, so don't bother looking
+        return 0; 
     }
 
     public override byte[] GetEntirePrimaryExecutableSection() => ((WasmCodeSection)Sections.First(s => s.Type == WasmSectionId.SEC_CODE)).RawSectionContent;

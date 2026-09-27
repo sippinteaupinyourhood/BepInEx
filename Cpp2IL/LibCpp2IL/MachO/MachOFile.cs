@@ -77,9 +77,9 @@ public class MachOFile : Il2CppBinary
         var dyldData = _loadCommands.FirstOrDefault(c => c.Command is LoadCommandId.LC_DYLD_INFO or LoadCommandId.LC_DYLD_INFO_ONLY)?.CommandData as MachODynamicLinkerCommand;
         var exports = dyldData?.Exports ?? [];
         
-        _exportAddressesDict = exports.ToDictionary(e => e.Name[1..], e => e.Address); //Skip the first character, which is a leading underscore inserted by the compiler
+        _exportAddressesDict = exports.ToDictionary(e => e.Name[1..], e => e.Address); 
         _exportNamesDict = new Dictionary<ulong, string>();
-        foreach (var export in exports) // there may be duplicate names
+        foreach (var export in exports) 
         {
             _exportNamesDict[export.Address] = export.Name[1..];
         }
@@ -123,7 +123,7 @@ public class MachOFile : Il2CppBinary
 
     public override ulong GetRva(ulong pointer)
     {
-        return pointer; //TODO?
+        return pointer; 
     }
 
     public override byte[] GetRawBinaryContent() => _raw;
@@ -167,7 +167,7 @@ public class MachOFile : Il2CppBinary
 
     public override ulong GetVirtualAddressOfPrimaryExecutableSection() => GetTextSection64().Address;
     
-    //Thanks to LukeFZ for this
+    
     private void ApplyChainedFixups(MachOLinkEditDataCommand cmd)
     {
         LibLogger.Verbose("\tApplying chained fixups...");
@@ -218,7 +218,7 @@ public class MachOFile : Il2CppBinary
                     var fixedValue = 0ul;
                     if (currentEntry.Bind)
                     {
-                        //TODO: Bind.
+                        
                     }
                     else
                     {

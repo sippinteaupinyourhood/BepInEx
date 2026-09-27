@@ -31,7 +31,7 @@ public static class Pass10CreateTypedefs
                 convertedName, AdjustAttributes(type.Attributes));
         newType.IsSequentialLayout = false;
 
-        if (type.IsSealed && type.IsAbstract) // is static
+        if (type.IsSealed && type.IsAbstract) 
             newType.IsSealed = newType.IsAbstract = true;
 
         if (parentType == null)

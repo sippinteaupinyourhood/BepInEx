@@ -47,11 +47,11 @@ internal class NativeParameterInfoStructHandler_16_0 : INativeParameterInfoStruc
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct Il2CppParameterInfo_16_0
     {
-        public IntPtr name; // const char*
+        public IntPtr name; 
         public int position;
         public uint token;
         public int customAttributeIndex;
-        public Il2CppTypeStruct* parameter_type; // const
+        public Il2CppTypeStruct* parameter_type; 
     }
 
     internal unsafe class NativeParameterInfoStructWrapper : INativeParameterInfoStruct

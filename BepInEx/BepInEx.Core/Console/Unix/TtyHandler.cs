@@ -1,4 +1,4 @@
-﻿// Sections of this code have been abridged from https://github.com/mono/mono/blob/master/mcs/class/corlib/System/TermInfoReader.cs under the MIT license
+﻿
 
 using System;
 using System.IO;
@@ -121,7 +121,7 @@ internal static class TtyInfoParser
                 break;
 
             default:
-                // Unknown ttyinfo format
+                
                 return TtyInfo.Default;
         }
 
@@ -129,37 +129,37 @@ internal static class TtyInfoParser
         int intFieldLength = GetInt16(buffer, 6);
         int strOffsetFieldLength = GetInt16(buffer, 8);
 
-        // Normally i'd put a more complete implementation here, but I only need to parse this info to get the max color count
-        // Feel free to implement the rest of this using these sources:
-        // https://github.com/mono/mono/blob/master/mcs/class/corlib/System/TermInfoReader.cs
-        // https://invisible-island.net/ncurses/man/term.5.html
-        // https://invisible-island.net/ncurses/man/terminfo.5.html
+        
+        
+        
+        
+        
 
-        var baseOffset = 12 + GetString(buffer, 12).Length + 1; // Skip the terminal name
-        baseOffset += boolFieldLength;                          // Length of bool field section
-        baseOffset += baseOffset % 2;                           // Correct for boundary
+        var baseOffset = 12 + GetString(buffer, 12).Length + 1; 
+        baseOffset += boolFieldLength;                          
+        baseOffset += baseOffset % 2;                           
 
         var colorOffset =
             baseOffset
-          + intSize * (int) TermInfoNumbers.MaxColors; // Finally the offset for the max color integer
+          + intSize * (int) TermInfoNumbers.MaxColors; 
 
-        //int stringOffset = baseOffset + (intSize * intFieldLength);
+        
 
-        //int foregoundColorOffset =
-        //	stringOffset
-        //	+ (2 * (int)TermInfoStrings.SetAForeground);
+        
+        
+        
 
-        //foregoundColorOffset = stringOffset
-        //					   + (2 * strOffsetFieldLength)
-        //					   + GetInt16(buffer, foregoundColorOffset);
+        
+        
+        
 
         var info = new TtyInfo();
 
         info.MaxColors = GetInteger(intSize, buffer, colorOffset);
 
-        //string setForegroundTemplate = GetString(buffer, foregoundColorOffset);
+        
 
-        //info.ForegroundColorStrings = ansiColorMapping.Select(x => setForegroundTemplate.Replace("%p1%", x.ToString())).ToArray();
+        
         info.ForegroundColorStrings =
             ansiColorMapping.Select(x => $"\u001B[{(x > 7 ? 82 + x : 30 + x)}m").ToArray();
 

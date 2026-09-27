@@ -22,11 +22,11 @@ public static class Arm64Utils
         if (CachedArm64RegNamesNew.TryGetValue(key, out var ret))
             return ret;
 
-        //General purpose registers: X0-X30 are 64-bit registers. Can be accessed via W0-W30 to only take lower 32-bits. These need upscaling.
-        //Vector registers: V0-V31 are 128-bit vector registers. Aliased to Q0-Q31. D0-D31 are the lower half (64 bits), S0-S31 are the lower half of that (32 bits)
-        //H0-H31 are the lower half of *that* (16 bits), and b0-b31 are the lowest 8 bits of the vector registers. All of these should be upscaled to V registers.
+        
+        
+        
 
-        //Upscale W registers to X.
+        
         if (registerId is >= Arm64RegisterId.ARM64_REG_W0 and <= Arm64RegisterId.ARM64_REG_W30)
             registerId = (registerId - Arm64RegisterId.ARM64_REG_W0) + Arm64RegisterId.ARM64_REG_X0;
 
@@ -57,31 +57,31 @@ public static class Arm64Utils
 
         if (registerId is Arm64RegisterId.ARM64_REG_WZR or Arm64RegisterId.ARM64_REG_XZR)
         {
-            //Zero register - upscale to x variant
+            
             CachedArm64RegNamesNew[key] = "xzr";
             return "xzr";
         }
 
-        //Upscale vector registers.
-        //One by one.
+        
+        
 
-        //B to V
+        
         if (registerId is >= Arm64RegisterId.ARM64_REG_B0 and <= Arm64RegisterId.ARM64_REG_B31)
             registerId = (registerId - Arm64RegisterId.ARM64_REG_B0) + Arm64RegisterId.ARM64_REG_V0;
 
-        //H to V
+        
         if (registerId is >= Arm64RegisterId.ARM64_REG_H0 and <= Arm64RegisterId.ARM64_REG_H31)
             registerId = (registerId - Arm64RegisterId.ARM64_REG_H0) + Arm64RegisterId.ARM64_REG_V0;
 
-        //S to V
+        
         if (registerId is >= Arm64RegisterId.ARM64_REG_B0 and <= Arm64RegisterId.ARM64_REG_B31)
             registerId = (registerId - Arm64RegisterId.ARM64_REG_B0) + Arm64RegisterId.ARM64_REG_V0;
 
-        //D to V
+        
         if (registerId is >= Arm64RegisterId.ARM64_REG_D0 and <= Arm64RegisterId.ARM64_REG_D31)
             registerId = (registerId - Arm64RegisterId.ARM64_REG_D0) + Arm64RegisterId.ARM64_REG_V0;
 
-        //Q to V
+        
         if (registerId is >= Arm64RegisterId.ARM64_REG_Q0 and <= Arm64RegisterId.ARM64_REG_Q31)
             registerId = (registerId - Arm64RegisterId.ARM64_REG_Q0) + Arm64RegisterId.ARM64_REG_V0;
 
@@ -104,14 +104,14 @@ public static class Arm64Utils
         if (_arm64Disassembler == null)
             InitArm64Decompilation();
 
-        //We can't use CppMethodBodyBytes to get the byte array, because ARMv7 doesn't have filler bytes like x86 does.
-        //So we can't work out the end of the method.
-        //But we can find the start of the next one! (If managed)
+        
+        
+        
         if (managed)
         {
             var startOfNext = MiscUtils.GetAddressOfNextFunctionStart(virtAddress);
 
-            //We have to fall through to default behavior for the last method because we cannot accurately pinpoint its end
+            
             if (startOfNext > 0)
             {
                 var rawStartOfNextMethod = LibCpp2IlMain.Binary!.MapVirtualAddressToRaw(startOfNext);
@@ -130,14 +130,14 @@ public static class Arm64Utils
             }
         }
 
-        //Unmanaged function, look for first b or bl
+        
         var pos = (int)LibCpp2IlMain.Binary!.MapVirtualAddressToRaw(virtAddress);
         var allBytes = LibCpp2IlMain.Binary.GetRawBinaryContent();
         List<Arm64Instruction> ret = [];
 
         while (!ret.Any(i => i.Mnemonic is "b" or ".byte") && (count == -1 || ret.Count < count))
         {
-            //All arm64 instructions are 4 bytes
+            
             ret.AddRange(_arm64Disassembler!.Iterate(allBytes.SubArray(pos..(pos + 4)), (long)virtAddress));
             virtAddress += 4;
             pos += 4;

@@ -80,7 +80,7 @@ public class DllOutputTests
         }
         foreach (var typeDefinition in module.GetAllTypes())
         {
-            // Type
+            
             {
                 if (ContainsTypeReference(typeDefinition.BaseType))
                 {
@@ -230,7 +230,7 @@ public class DllOutputTests
             TypeSpecificationSignature typeSpecificationSignature => ContainsTypeReference(typeSpecificationSignature.BaseType),
             GenericInstanceTypeSignature genericInstanceTypeSignature => ContainsTypeReference(genericInstanceTypeSignature.GenericType) || ContainsTypeReference(genericInstanceTypeSignature.TypeArguments),
             FunctionPointerTypeSignature functionPointerTypeSignature => ContainsTypeReference(functionPointerTypeSignature.Signature),
-            _ => false, // null, GenericParameterSignature, SentinelTypeSignature
+            _ => false, 
         };
     }
 

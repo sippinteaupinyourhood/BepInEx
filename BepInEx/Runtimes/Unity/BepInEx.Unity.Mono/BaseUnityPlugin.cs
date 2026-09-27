@@ -5,15 +5,15 @@ using UnityEngine;
 
 namespace BepInEx.Unity.Mono;
 
-/// <summary>
-///     The base plugin type that is used by the BepInEx plugin loader.
-/// </summary>
+
+
+
 public abstract class BaseUnityPlugin : MonoBehaviour
 {
-    /// <summary>
-    ///     Create a new instance of a plugin and all of its tied in objects.
-    /// </summary>
-    /// <exception cref="InvalidOperationException">BepInPlugin attribute is missing.</exception>
+    
+    
+    
+    
     protected BaseUnityPlugin()
     {
         var metadata = MetadataHelper.GetMetadata(this);
@@ -35,19 +35,19 @@ public abstract class BaseUnityPlugin : MonoBehaviour
         Config = new ConfigFile(Utility.CombinePaths(Paths.ConfigPath, metadata.GUID + ".cfg"), false, metadata);
     }
 
-    /// <summary>
-    ///     Information about this plugin as it was loaded.
-    /// </summary>
+    
+    
+    
     public PluginInfo Info { get; }
 
-    /// <summary>
-    ///     Logger instance tied to this plugin.
-    /// </summary>
+    
+    
+    
     protected ManualLogSource Logger { get; }
 
-    /// <summary>
-    ///     Default config file tied to this plugin. The config file will not be created until
-    ///     any settings are added and changed, or <see cref="ConfigFile.Save" /> is called.
-    /// </summary>
+    
+    
+    
+    
     public ConfigFile Config { get; }
 }

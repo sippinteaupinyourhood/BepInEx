@@ -36,7 +36,7 @@ public class DeobfuscationMapProcessingLayer : Cpp2IlProcessingLayer
             try
             {
                 Logger.InfoNewline($"Downloading deobfuscation map from {mapPath}...", "DeobfuscationMapProcessingLayer");
-                //Blocking call, but it's fine. All of cpp2il is blocking.
+                
                 deobfMap = new HttpClient().GetByteArrayAsync(mapPath).Result;
             }
             catch (Exception e)
@@ -58,7 +58,7 @@ public class DeobfuscationMapProcessingLayer : Cpp2IlProcessingLayer
         Logger.InfoNewline("Parsing deobfuscation map...", "DeobfuscationMapProcessingLayer");
 
         string deobfMapContent;
-        //Check if gzipped.
+        
         if (deobfMap.Length > 2 && deobfMap[0] == 0x1F && deobfMap[1] == 0x8B)
         {
             using var ms = new MemoryStream(deobfMap);
@@ -92,14 +92,14 @@ public class DeobfuscationMapProcessingLayer : Cpp2IlProcessingLayer
 
         if (!_logUnknownTypes)
         {
-            //Print a summary if we didn't log each individually.
+            
             Logger.WarnNewline($"Encountered {_numUnknownTypes} unknown types in deobf map. Add the configuration option deobf-map-log-unknown-types=yes to log them.", "DeobfuscationMapProcessingLayer");
         }
     }
 
     private static void ProcessLine(ApplicationAnalysisContext appContext, string line)
     {
-        //Obfuscated;deobfuscated[;priority]
+        
         var split = line.Split(';');
 
         if (split.Length < 2)
@@ -123,7 +123,7 @@ public class DeobfuscationMapProcessingLayer : Cpp2IlProcessingLayer
             var member = type?.Fields.FirstOrDefault(f => f.Name == memberName);
             if (member == null)
             {
-                //TODO Non-fields? Currently only used for enums
+                
                 return;
             }
 
@@ -136,16 +136,16 @@ public class DeobfuscationMapProcessingLayer : Cpp2IlProcessingLayer
         if (matchingType == null)
             return;
 
-        //The way the rename maps work is something like this:
-        //  If the obfuscated name was a nested type, the deobfuscated name is just the new name of the nested type
-        //  If the obfuscated name was a top-level type, the deobfuscated name is the new namespace + . + new name
+        
+        
+        
 
-        // var originalName = matchingType.FullName;
+        
 
         if (matchingType.DeclaringType != null)
         {
             matchingType.OverrideName = deobfuscated;
-            // Logger.VerboseNewline($"Renamed nested type {originalName} to {matchingType.FullName}", "DeobfuscationMapProcessingLayer");
+            
             return;
         }
 
@@ -164,22 +164,22 @@ public class DeobfuscationMapProcessingLayer : Cpp2IlProcessingLayer
             matchingType.OverrideName = deobfuscated;
         }
 
-        // Logger.VerboseNewline($"Renamed {originalName} to {matchingType.FullName}", "DeobfuscationMapProcessingLayer");
+        
     }
 
     private static TypeAnalysisContext? GetTypeByObfName(ApplicationAnalysisContext appContext, string obfuscated)
     {
         if (obfuscated.StartsWith("."))
-            //If there's no namespace, strip the leading dot
+            
             obfuscated = obfuscated[1..];
 
-        //Create another copy of obfuscated name with last . replaced with a /, for subclasses
+        
         var lastDot = obfuscated.LastIndexOf('.');
         var withSlash = obfuscated;
         if (lastDot > 0)
             withSlash = obfuscated[..lastDot] + "/" + obfuscated[(lastDot + 1)..];
 
-        //TODO Change this to a dict at some point and recalculate between type and member names.
+        
         var matchingType = appContext.AllTypes.AsParallel().WithConfiguredParallelism()
             .FirstOrDefault(t => t.FullName == obfuscated || t.FullName == withSlash);
 

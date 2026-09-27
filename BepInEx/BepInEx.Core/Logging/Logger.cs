@@ -6,9 +6,9 @@ using BepInEx.Core.Logging.Interpolation;
 
 namespace BepInEx.Logging;
 
-/// <summary>
-///     Handles pub-sub event marshalling across all log listeners and sources.
-/// </summary>
+
+
+
 public static class Logger
 {
     private static readonly ManualLogSource InternalLogSource;
@@ -23,19 +23,19 @@ public static class Logger
         InternalLogSource = CreateLogSource("BepInEx");
     }
 
-    /// <summary>
-    ///     Log levels that are currently listened to by at least one listener.
-    /// </summary>
+    
+    
+    
     public static LogLevel ListenedLogLevels => listeners.ActiveLogLevels;
 
-    /// <summary>
-    ///     Collection of all log listeners that receive log events.
-    /// </summary>
+    
+    
+    
     public static ICollection<ILogListener> Listeners => listeners;
 
-    /// <summary>
-    ///     Collection of all log source that output log events.
-    /// </summary>
+    
+    
+    
     public static ICollection<ILogSource> Sources { get; }
 
     internal static void InternalLogEvent(object sender, LogEventArgs eventArgs)
@@ -43,28 +43,28 @@ public static class Logger
         listeners.SendLogEvent(sender, eventArgs);
     }
 
-    /// <summary>
-    ///     Logs an entry to the internal logger instance.
-    /// </summary>
-    /// <param name="level">The level of the entry.</param>
-    /// <param name="data">The data of the entry.</param>
+    
+    
+    
+    
+    
     internal static void Log(LogLevel level, object data) => InternalLogSource.Log(level, data);
 
-    /// <summary>
-    ///     Logs an entry to the internal logger instance if any log listener wants the message.
-    /// </summary>
-    /// <param name="level">The level of the entry.</param>
-    /// <param name="logHandler">Log handler to resolve log from.</param>
+    
+    
+    
+    
+    
     internal static void Log(LogLevel level,
                              [InterpolatedStringHandlerArgument("level")]
                              BepInExLogInterpolatedStringHandler logHandler) =>
         InternalLogSource.Log(level, logHandler);
 
-    /// <summary>
-    ///     Creates a new log source with a name and attaches it to <see cref="Sources" />.
-    /// </summary>
-    /// <param name="sourceName">Name of the log source to create.</param>
-    /// <returns>An instance of <see cref="ManualLogSource" /> that allows to write logs.</returns>
+    
+    
+    
+    
+    
     public static ManualLogSource CreateLogSource(string sourceName)
     {
         var source = new ManualLogSource(sourceName);
@@ -78,9 +78,9 @@ public static class Logger
 
         internal void SendLogEvent(object sender, LogEventArgs eventArgs)
         {
-            // Do this instead of foreach to avoid boxing, also very slightly faster
+            
             var aListInTime = BaseList;
-            // ReSharper disable once ForCanBeConvertedToForeach
+            
             for (int i = 0; i < aListInTime.Count; i++)
             {
                 if ((eventArgs.Level & aListInTime[i].LogLevelFilter) != LogLevel.None)
@@ -175,12 +175,12 @@ public static class Logger
         }
     }
     
-    /// <summary>
-    /// Simple thread safe list that prioritizes read speed over write speed.
-    /// Read is the same as a normal list, while write locks and allocates a copy of the list.
-    /// Logger lists are rarely updated so this tradeoff should be fine.
-    /// </summary>
-    /// <inheritdoc />
+    
+    
+    
+    
+    
+    
     private class ThreadSafeCollection<T> : ICollection<T> where T : class
     {
         protected readonly object SpinLock = new();
@@ -192,13 +192,13 @@ public static class Logger
 
         public IEnumerator<T> GetEnumerator()
         {
-            // Can't avoid boxing
+            
             return BaseList.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            // Can't avoid boxing
+            
             return BaseList.GetEnumerator();
         }
 

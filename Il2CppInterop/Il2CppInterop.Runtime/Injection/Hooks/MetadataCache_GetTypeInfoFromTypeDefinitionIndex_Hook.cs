@@ -30,11 +30,11 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
         {
             IntPtr getTypeInfoFromTypeDefinitionIndex = IntPtr.Zero;
 
-            // il2cpp_image_get_class is added in 2018.3.0f1
+            
             if (Il2CppInteropRuntime.Instance.UnityVersion < new Version(2018, 3, 0) || forceICallMethod)
             {
-                // (Kasuromi): RuntimeHelpers.InitializeArray calls an il2cpp icall, proxy function does some magic before it invokes it
-                // https://github.com/Unity-Technologies/mono/blob/unity-2018.2/mcs/class/corlib/System.Runtime.CompilerServices/RuntimeHelpers.cs#L53-L54
+                
+                
                 IntPtr runtimeHelpersInitializeArray = InjectorHelpers.GetIl2CppMethodPointer(
                     typeof(Il2CppSystem.Runtime.CompilerServices.RuntimeHelpers)
                         .GetMethod("InitializeArray", new Type[] { typeof(Il2CppSystem.Array), typeof(IntPtr) })
@@ -44,7 +44,7 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
                 var runtimeHelpersInitializeArrayICall = XrefScannerLowLevel.JumpTargets(runtimeHelpersInitializeArray).Last();
                 if (XrefScannerLowLevel.JumpTargets(runtimeHelpersInitializeArrayICall).Count() == 1)
                 {
-                    // is a thunk function
+                    
                     Logger.Instance.LogTrace("RuntimeHelpers::thunk_InitializeArray: 0x{RuntimeHelpersInitializeArrayICallAddress}", runtimeHelpersInitializeArrayICall.ToInt64().ToString("X2"));
                     runtimeHelpersInitializeArrayICall = XrefScannerLowLevel.JumpTargets(runtimeHelpersInitializeArrayICall).Single();
                 }
@@ -68,8 +68,8 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
 
                 if (imageGetTypeXrefs.Length == 0)
                 {
-                    // (Kasuromi): Image::GetType appears to be inlined in il2cpp_image_get_class on some occasions,
-                    // if the unconditional xrefs are 0 then we are in the correct method (seen on unity 2019.3.15)
+                    
+                    
                     getTypeInfoFromTypeDefinitionIndex = imageGetType;
                 }
                 else getTypeInfoFromTypeDefinitionIndex = imageGetTypeXrefs[0];
@@ -80,19 +80,19 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
                 }
                 if (imageGetTypeXrefs.Count() > 1 && UnityVersionHandler.IsMetadataV29OrHigher)
                 {
-                    // (Kasuromi): metadata v29 introduces handles and adds extra calls, a check for unity versions might be necessary in the future
+                    
 
                     Logger.Instance.LogTrace($"imageGetTypeXrefs.Length: {imageGetTypeXrefs.Length}");
 
-                    // If the game is built as IL2CPP Master, GetAssemblyTypeHandle is inlined, xrefs length is 3 and it's the first function call,
-                    // if not, it's the last call.
+                    
+                    
                     var getTypeInfoFromHandle = imageGetTypeXrefs.Length == 2 ? imageGetTypeXrefs.Last() : imageGetTypeXrefs.First();
 
                     Logger.Instance.LogTrace($"getTypeInfoFromHandle: {getTypeInfoFromHandle:X2}");
 
                     var getTypeInfoFromHandleXrefs = XrefScannerLowLevel.JumpTargets(getTypeInfoFromHandle).ToArray();
 
-                    // If getTypeInfoFromHandle xrefs is not a single call, it's the function we want, if not, we keep xrefing until we find it
+                    
                     if (getTypeInfoFromHandleXrefs.Length != 1)
                     {
                         getTypeInfoFromTypeDefinitionIndex = getTypeInfoFromHandle;
@@ -100,9 +100,9 @@ namespace Il2CppInterop.Runtime.Injection.Hooks
                     }
                     else
                     {
-                        // Two calls, second one (GetIndexForTypeDefinitionInternal) is inlined
+                        
                         getTypeInfoFromTypeDefinitionIndex = getTypeInfoFromHandleXrefs.Single();
-                        // Xref scanner is sometimes confused about getTypeInfoFromHandle so we walk all the thunks until we hit the big method we need
+                        
                         while (XrefScannerLowLevel.JumpTargets(getTypeInfoFromTypeDefinitionIndex).ToArray().Length == 1)
                         {
                             getTypeInfoFromTypeDefinitionIndex = XrefScannerLowLevel.JumpTargets(getTypeInfoFromTypeDefinitionIndex).Single();

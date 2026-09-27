@@ -66,10 +66,10 @@ public class RegisterTypeOptions
 
 public static unsafe partial class ClassInjector
 {
-    /// <summary> type.FullName </summary>
+    
     private static readonly HashSet<string> InjectedTypes = new();
 
-    /// <summary> (method) : (method_inst, method) </summary>
+    
     internal static readonly Dictionary<IntPtr, (MethodInfo, Dictionary<IntPtr, IntPtr>)>
         InflatedMethodFromContextDictionary = new();
 
@@ -90,7 +90,7 @@ public static unsafe partial class ClassInjector
     public static IntPtr DerivedConstructorPointer<T>()
     {
         return IL2CPP.il2cpp_object_new(Il2CppClassPointerStore<T>
-            .NativeClassPtr); // todo: consider calling base constructor
+            .NativeClassPtr); 
     }
 
     public static void DerivedConstructorBody(Il2CppObjectBase objectBase)
@@ -190,7 +190,7 @@ public static unsafe partial class ClassInjector
 
         var currentPointer = Il2CppClassPointerStore.GetNativeClassPointer(type);
         if (currentPointer != IntPtr.Zero)
-            return; //already registered in il2cpp
+            return; 
 
         var baseType = type.BaseType;
         if (baseType == null)
@@ -207,7 +207,7 @@ public static unsafe partial class ClassInjector
 
         InjectorHelpers.Setup();
 
-        // Initialize the vtable of all base types (Class::Init is recursive internally)
+        
         InjectorHelpers.ClassInit(baseClassPointer.ClassPointer);
         foreach (var nativeInterface in interfaces)
         {
@@ -261,11 +261,11 @@ public static unsafe partial class ClassInjector
         classPointer.ActualSize = classPointer.InstanceSize = baseClassPointer.InstanceSize;
 
         Marshal.WriteInt32(classPointer.Pointer, 0xFC,
-            Marshal.ReadInt32(baseClassPointer.Pointer, 0xFC)); // stack_slot_size
+            Marshal.ReadInt32(baseClassPointer.Pointer, 0xFC)); 
         Marshal.WriteByte(classPointer.Pointer, 0x133,
-            Marshal.ReadByte(baseClassPointer.Pointer, 0x133)); // minimumAlignment
+            Marshal.ReadByte(baseClassPointer.Pointer, 0x133)); 
         Marshal.WriteByte(classPointer.Pointer, 0x134,
-            Marshal.ReadByte(baseClassPointer.Pointer, 0x134)); // packingSize
+            Marshal.ReadByte(baseClassPointer.Pointer, 0x134)); 
 
         classPointer.Initialized = true;
         classPointer.InitializedAndNoError = true;
@@ -279,7 +279,7 @@ public static unsafe partial class ClassInjector
         classPointer.ThisArg.Type = classPointer.ByValArg.Type = Il2CppTypeEnum.IL2CPP_TYPE_CLASS;
         classPointer.ThisArg.ByRef = true;
 
-        classPointer.Flags = baseClassPointer.Flags; // todo: adjust flags?
+        classPointer.Flags = baseClassPointer.Flags; 
 
         if (!type.IsAbstract) classPointer.Flags &= ~Il2CppClassAttributes.TYPE_ATTRIBUTE_ABSTRACT;
         var fieldsToInject = type
@@ -356,7 +356,7 @@ public static unsafe partial class ClassInjector
 
         classPointer.InstanceSize = (uint)(fieldOffset + sizeof(InjectedClassData));
         classPointer.ActualSize = classPointer.InstanceSize;
-        var methodsOffset = type.IsAbstract ? 1 : 2; // 1 is the finalizer, 1 is empty ctor
+        var methodsOffset = type.IsAbstract ? 1 : 2; 
         var methodCount = methodsOffset + eligibleMethods.Length;
 
         classPointer.MethodCount = (ushort)methodCount;
@@ -471,7 +471,7 @@ public static unsafe partial class ClassInjector
 
             var methodName = Marshal.PtrToStringUTF8(baseMethod.Name);
 
-            if (methodName == "Finalize") // slot number is not static
+            if (methodName == "Finalize") 
             {
                 vTablePointer[i].method = methodPointerArray[0];
                 vTablePointer[i].methodPtr = finalizeMethod.MethodPointer;
@@ -1046,9 +1046,9 @@ public static unsafe partial class ClassInjector
                     var labelNotNull = body.DefineLabel();
                     body.Emit(OpCodes.Dup);
                     body.Emit(OpCodes.Brfalse, labelNull);
-                    // We need to directly resolve from all constructors because on mono GetConstructor can cause the following issue:
-                    // `Missing field layout info for ...`
-                    // This is caused by GetConstructor calling RuntimeTypeHandle.CanCastTo which can fail since right now unhollower emits ALL fields which appear to now work properly
+                    
+                    
+                    
                     body.Emit(OpCodes.Newobj, type.GetConstructors().FirstOrDefault(ci =>
                     {
                         var ps = ci.GetParameters();
@@ -1103,7 +1103,7 @@ public static unsafe partial class ClassInjector
                 ? stindOpCodde
                 : OpCodes.Stind_I);
         }
-        // body.Emit(OpCodes.Ret); // breaks coreclr
+        
 
         var exceptionLocal = body.DeclareLocal(typeof(Exception));
         body.BeginCatchBlock(typeof(Exception));
@@ -1129,7 +1129,7 @@ public static unsafe partial class ClassInjector
         body.Emit(OpCodes.Ret);
 
         var @delegate = method.CreateDelegate(delegateType);
-        GCHandle.Alloc(@delegate); // pin it forever
+        GCHandle.Alloc(@delegate); 
         return @delegate;
     }
 

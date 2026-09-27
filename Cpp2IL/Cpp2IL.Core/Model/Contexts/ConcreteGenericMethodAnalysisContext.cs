@@ -13,25 +13,25 @@ public class ConcreteGenericMethodAnalysisContext : MethodAnalysisContext
     public readonly Cpp2IlMethodRef? MethodRef;
     public readonly MethodAnalysisContext BaseMethodContext;
 
-    /// <summary>
-    /// The generic parameters for the <see cref="BaseMethodContext"/> declaring type.
-    /// </summary>
-    /// <remarks>
-    /// If not empty, <see cref="MethodAnalysisContext.DeclaringType"/> is a <see cref="GenericInstanceTypeAnalysisContext"/>.
-    /// </remarks>
+    
+    
+    
+    
+    
+    
     public IReadOnlyList<TypeAnalysisContext> TypeGenericParameters { get; }
 
-    /// <summary>
-    /// The generic parameters for the <see cref="BaseMethodContext"/>.
-    /// </summary>
-    /// <remarks>
-    /// These may be empty if <see cref="BaseMethodContext"/> has no generic parameters or if <see cref="IsPartialInstantiation"/>.
-    /// </remarks>
+    
+    
+    
+    
+    
+    
     public IReadOnlyList<TypeAnalysisContext> MethodGenericParameters { get; }
 
-    /// <summary>
-    /// If true, this is a generic method on a <see cref="GenericInstanceTypeAnalysisContext"/>, but it does not specify any <see cref="MethodGenericParameters"/>.
-    /// </summary>
+    
+    
+    
     public bool IsPartialInstantiation => MethodGenericParameters.Count == 0 && BaseMethodContext.GenericParameters.Count > 0;
 
     public sealed override ulong UnderlyingPointer => MethodRef?.GenericVariantPtr ?? default;
@@ -68,15 +68,15 @@ public class ConcreteGenericMethodAnalysisContext : MethodAnalysisContext
     {
     }
 
-    /// <summary>
-    /// Generically instantiate a method.
-    /// </summary>
-    /// <param name="baseMethod">The method definition on which this instantiation is based.</param>
-    /// <param name="typeGenericParameters">The type parameters for the declaring type, if any. These must always be specified.</param>
-    /// <param name="methodGenericParameters">
-    /// The type parameters for the base method, if any.
-    /// These may be omitted (<see cref="IsPartialInstantiation"/> == <see langword="true"/>).
-    /// </param>
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public ConcreteGenericMethodAnalysisContext(MethodAnalysisContext baseMethod, IEnumerable<TypeAnalysisContext> typeGenericParameters, IEnumerable<TypeAnalysisContext> methodGenericParameters)
         : this(baseMethod, [.. typeGenericParameters], [.. methodGenericParameters])
     {
@@ -108,7 +108,7 @@ public class ConcreteGenericMethodAnalysisContext : MethodAnalysisContext
         TypeGenericParameters = typeGenericParameters;
         MethodGenericParameters = methodGenericParameters;
 
-        // For the purpose of generic instantiation, we need an array of method generic parameters, even if none are provided.
+        
         if (methodGenericParameters.Length == 0 && baseMethodContext.GenericParameters.Count > 0)
             methodGenericParameters = baseMethodContext.GenericParameters.ToArray();
 

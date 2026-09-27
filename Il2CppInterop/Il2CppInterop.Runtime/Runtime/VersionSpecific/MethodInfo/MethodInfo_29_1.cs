@@ -24,8 +24,8 @@ namespace Il2CppInterop.Runtime.Runtime.VersionSpecific.MethodInfo
             public void* virtualMethodPointer;
             public void* invoker_method;
             public Il2CppTypeStruct* return_type;
-            public Il2CppClass* klass;
             public byte* name;
+            public Il2CppClass* klass;
             public Il2CppTypeStruct** parameters;
             public void* runtime_data;
             public void* generic_data;

@@ -13,7 +13,7 @@ public record Il2CppStructWrapperGeneratorOptions(
     ILogger? Logger
 );
 
-// TODO: Instead expose as source generator (might not be viable since clang is platform-dependent)
+
 public static class Il2CppStructWrapperGenerator
 {
     private static readonly Dictionary<int, List<VersionSpecificGenerator>> SGenerators = new();
@@ -136,12 +136,12 @@ public static class Il2CppStructWrapperGenerator
             }
 
             var classInternalsIsTmp = true;
-            // Graduated top of my class by the way
+            
             {
                 if (!File.Exists($"{classInternalsPath}_backup"))
                 {
                     var classInternalsData = File.ReadAllText(classInternalsPath);
-                    // I have to do this because the lib I use doesn't recognize these unions, so I have to name them in the most disgusting way imaginable
+                    
                     classInternalsData = Regex.Replace(classInternalsData,
                         @"(union.{0,60}?rgctx_data;.*?method(?:Definition|MetadataHandle);.*?});", "$1 runtime_data;",
                         RegexOptions.Singleline);
@@ -173,7 +173,7 @@ public static class Il2CppStructWrapperGenerator
         }
 
         Logger?.LogInformation("Building version specific classes");
-        // In the eyes of god - I am a disappointment
+        
         Dictionary<Type, Dictionary<UnityVersion, VersionSpecificGenerator>> versionToGeneratorLookup = new();
         foreach (var generator in SGenerators.Values.SelectMany(x => x))
         {

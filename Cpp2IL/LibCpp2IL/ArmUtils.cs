@@ -17,7 +17,7 @@ public static class ArmUtils
         if (inst.Bits(20, 12) != 0b_1110_0111_1001)
             return (0, 0, 0);
 
-        //Ldr t, n, m
+        
         var reg_n = inst.Bits(16, 4);
         var reg_t = inst.Bits(12, 4);
         var reg_m = inst.Bits(0, 4);

@@ -13,44 +13,44 @@ using StableNameDotNet.Providers;
 
 namespace Cpp2IL.Core.Model.Contexts;
 
-/// <summary>
-/// Represents one managed type in the application.
-/// </summary>
+
+
+
 public class TypeAnalysisContext : HasGenericParameters, ITypeInfoProvider, ICSharpSourceToken
 {
-    /// <summary>
-    /// The context for the assembly this type was defined in.
-    /// </summary>
+    
+    
+    
     public readonly AssemblyAnalysisContext DeclaringAssembly;
 
-    /// <summary>
-    /// The underlying metadata for this type. Allows access to RGCTX data, the raw bitfield properties, interfaces, etc.
-    /// </summary>
+    
+    
+    
     public readonly Il2CppTypeDefinition? Definition;
 
-    /// <summary>
-    /// The analysis contexts for methods contained within this type.
-    /// </summary>
+    
+    
+    
     public readonly List<MethodAnalysisContext> Methods;
 
-    /// <summary>
-    /// The analysis contexts for properties contained within this type.
-    /// </summary>
+    
+    
+    
     public readonly List<PropertyAnalysisContext> Properties;
 
-    /// <summary>
-    /// The analysis contexts for events contained within this type.
-    /// </summary>
+    
+    
+    
     public readonly List<EventAnalysisContext> Events;
 
-    /// <summary>
-    /// The analysis contexts for fields contained within this type.
-    /// </summary>
+    
+    
+    
     public readonly List<FieldAnalysisContext> Fields;
 
-    /// <summary>
-    /// The analysis contexts for nested types within this type.
-    /// </summary>
+    
+    
+    
     public List<TypeAnalysisContext> NestedTypes { get; internal set; } = [];
 
     protected override int CustomAttributeIndex => Definition!.CustomAttributeIndex;
@@ -98,7 +98,7 @@ public class TypeAnalysisContext : HasGenericParameters, ITypeInfoProvider, ICSh
     {
         get
         {
-            // Lazy load the interface contexts
+            
             _interfaceContexts ??= (Definition?.RawInterfaces.Select(DeclaringAssembly.ResolveIl2CppType).ToList() ?? [])!;
             return _interfaceContexts;
         }
@@ -109,7 +109,7 @@ public class TypeAnalysisContext : HasGenericParameters, ITypeInfoProvider, ICSh
     {
         get
         {
-            // Lazy load the generic parameters
+            
             _genericParameters ??= Definition?.GenericContainer?.GenericParameters.Select(g => new GenericParameterTypeAnalysisContext(g, this)).ToList() ?? [];
             return _genericParameters;
         }
@@ -177,10 +177,10 @@ public class TypeAnalysisContext : HasGenericParameters, ITypeInfoProvider, ICSh
     public bool IsSealed => (Attributes & TypeAttributes.Sealed) != default;
     public bool IsStatic => IsAbstract && IsSealed;
 
-    /// <summary>
-    /// Returns the namespace of this type expressed as a folder hierarchy, with each sub-namespace becoming a sub-directory.
-    /// If this type is in the global namespace, this will return an empty string.
-    /// </summary>
+    
+    
+    
+    
     public string NamespaceAsSubdirs
     {
         get
@@ -190,9 +190,9 @@ public class TypeAnalysisContext : HasGenericParameters, ITypeInfoProvider, ICSh
         }
     }
 
-    /// <summary>
-    /// Returns the top-level type this type is nested inside. If this type is not nested, will return this type.
-    /// </summary>
+    
+    
+    
     public TypeAnalysisContext UltimateDeclaringType => DeclaringType ?? this;
 
     public TypeAnalysisContext(Il2CppTypeDefinition? il2CppTypeDefinition, AssemblyAnalysisContext containingAssembly) : base(il2CppTypeDefinition?.Token ?? 0, containingAssembly.AppContext)
@@ -322,7 +322,7 @@ public class TypeAnalysisContext : HasGenericParameters, ITypeInfoProvider, ICSh
             var genericParamTypes = genericClass.Context.ClassInst.Types;
 
             if (genericParamTypes.Any(t => t.Type is Il2CppTypeEnum.IL2CPP_TYPE_VAR or Il2CppTypeEnum.IL2CPP_TYPE_MVAR))
-                //Discard non-fixed generic instances
+                
                 return elementType;
 
             var genericArguments = genericParamTypes.Select(t => GetSndnProviderForType(appContext, t)).ToArray();
@@ -360,7 +360,7 @@ public class TypeAnalysisContext : HasGenericParameters, ITypeInfoProvider, ICSh
                 return Definition.IsValueType;
 
             if (BaseType is { Namespace: "System", Name: "ValueType" })
-                return Namespace is not "System" || Name is not "Enum"; // Enum is a reference type
+                return Namespace is not "System" || Name is not "Enum"; 
 
             return IsEnumType;
         }

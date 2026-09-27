@@ -39,7 +39,7 @@ public class Block
 
     public void CaculateBlockType()
     {
-        // This enum is kind of redundant, can be possibly swapped for IsilFlowControl and no need for BlockType?
+        
         if (isilInstructions.Count > 0)
         {
             var instruction = isilInstructions.Last();

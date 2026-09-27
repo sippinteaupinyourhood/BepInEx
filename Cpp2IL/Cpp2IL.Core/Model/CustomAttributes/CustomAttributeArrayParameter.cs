@@ -9,17 +9,17 @@ using LibCpp2IL.Metadata;
 
 namespace Cpp2IL.Core.Model.CustomAttributes;
 
-/// <summary>
-/// Represents a custom attribute parameter which is an array of other parameters, which can themselves potentially be arrays, enums, etc.
-///
-/// When parsing this, first check IsNullArray - if it's true, emit a null and continue.
-///
-/// Then check EnumType - if it's non-null, it means this is an enum array, not a simple primitive array, and the type of the enum should be used when emitting.
-///
-/// If it's null, use ArrType to determine the type of the array, which will be a primitive, string, or type.
-///
-/// Then read the ArrayElements list and output each one. Remember to type-prefix if ArrType is Object.
-/// </summary>
+
+
+
+
+
+
+
+
+
+
+
 public class CustomAttributeArrayParameter(AnalyzedCustomAttribute owner, CustomAttributeParameterKind kind, int index)
     : BaseCustomAttributeParameter(owner, kind, index)
 {
@@ -35,7 +35,7 @@ public class CustomAttributeArrayParameter(AnalyzedCustomAttribute owner, Custom
         var arrLength = reader.BaseStream.ReadUnityCompressedInt();
         if (arrLength == -1)
         {
-            //Array length is -1 when the array itself is null
+            
             IsNullArray = true;
             return;
         }
@@ -45,10 +45,10 @@ public class CustomAttributeArrayParameter(AnalyzedCustomAttribute owner, Custom
         {
             var enumTypeIndex = reader.BaseStream.ReadUnityCompressedInt();
 
-            //Save the actual enum type for later.
-            EnumType = context.Binary.GetType(Il2CppVariableWidthIndex<Il2CppType>.MakeTemporaryForFixedWidthUsage(enumTypeIndex)); //DynWidth: enumTypeIndex is already compressed, they didn't make it dynamic
+            
+            EnumType = context.Binary.GetType(Il2CppVariableWidthIndex<Il2CppType>.MakeTemporaryForFixedWidthUsage(enumTypeIndex)); 
 
-            //We read as the primitive underlying type.
+            
             var enumClass = EnumType.AsClass();
             ArrType = enumClass.EnumUnderlyingType.Type;
         }
@@ -65,7 +65,7 @@ public class CustomAttributeArrayParameter(AnalyzedCustomAttribute owner, Custom
             if (arrayElementsAreTypePrefixed)
                 thisType = (Il2CppTypeEnum)reader.ReadByte();
 
-            //ConstructParameterForType will handle reading the enum type
+            
             var arrayElement = V29AttributeUtils.ConstructParameterForType(reader, context, thisType, Owner, CustomAttributeParameterKind.ArrayElement, i);
 
             arrayElement.ReadFromV29Blob(reader, context);

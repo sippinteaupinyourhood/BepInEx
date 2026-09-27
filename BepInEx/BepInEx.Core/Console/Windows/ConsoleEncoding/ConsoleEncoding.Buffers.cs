@@ -1,16 +1,16 @@
-﻿// --------------------------------------------------
-// UnityInjector - ConsoleEncoding.Buffers.cs
-// Copyright (c) Usagirei 2015 - 2015
-// --------------------------------------------------
+﻿
+
+
+
 
 namespace UnityInjector.ConsoleUtil;
-// --------------------------------------------------
-// Code ported from
-// https://gist.github.com/asm256/9bfb88336a1433e2328a
-// Which in turn was seemingly ported from
-// http://jonskeet.uk/csharp/ebcdic/
-// using only safe (managed) code
-// --------------------------------------------------
+
+
+
+
+
+
+
 
 internal partial class ConsoleEncoding
 {

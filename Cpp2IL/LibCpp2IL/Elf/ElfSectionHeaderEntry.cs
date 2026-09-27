@@ -5,8 +5,8 @@ public class ElfSectionHeaderEntry : ReadableClass
     public uint NameOffset;
     public ElfSectionEntryType Type;
     public ElfSectionHeaderFlags Flags;
-    public ulong VirtualAddress; //Address
-    public ulong RawAddress; //Offset
+    public ulong VirtualAddress; 
+    public ulong RawAddress; 
     public ulong Size;
     public int LinkedSectionIndex;
     public int SectionInfo;

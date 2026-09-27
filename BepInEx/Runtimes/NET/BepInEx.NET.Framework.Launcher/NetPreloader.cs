@@ -89,7 +89,7 @@ public static class NetPreloader
         using (var launcherAssembly = AssemblyDefinition.ReadAssembly(typeof(NetPreloader).Assembly.Location))
             launcherInfo = AssemblyBuildInfo.DetermineInfo(launcherAssembly);
 
-        // we don't particularly care about AnyCPU here since the fallback bitness is almost never the case
+        
         if (executableInfo.Is64Bit != launcherInfo.Is64Bit)
         {
             Log.LogError($"Game executable is {(executableInfo.Is64Bit ? "64" : "32")}-bit while BepInEx has been compiled as {(launcherInfo.Is64Bit ? "64" : "32")}-bit. Expect crashes");
@@ -130,7 +130,7 @@ public static class NetPreloader
 
             foreach (var loadedAssembly in assemblyPatcher.PatcherContext.LoadedAssemblies)
             {
-                // TODO: Need full paths for loaded assemblies
+                
                 var assemblyPath = Path.Combine(Paths.GameRootPath, loadedAssembly.Key);
 
                 Log.LogDebug($"Registering '{assemblyPath}' as a loaded assembly");
@@ -175,8 +175,8 @@ public static class NetPreloader
             }
             else if (paramTypes.Length != 0)
             {
-                // Only other entrypoint signatures I can think of that .NET supports is Task / Task<int>
-                //   async entrypoints. That's a can of worms for another time though
+                
+                
 
                 Log.LogFatal($"Could not figure out how to handle entrypoint method with this signature: {entrypointAssembly.EntryPoint.FullDescription()}");
                 return;

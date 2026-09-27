@@ -5,7 +5,7 @@ namespace LibCpp2IL.Elf;
 public class ElfProgramHeaderEntry64 : ReadableClass, IElfProgramHeaderEntry
 {
     public ElfProgramEntryType _internalType;
-    public ElfProgramHeaderFlags _internalFlags; //This is here in 64-bit elf files.
+    public ElfProgramHeaderFlags _internalFlags; 
     public ulong _internalOffsetRaw;
     public ulong _internalVirtualAddr;
     public ulong _internalPhysicalAddr;

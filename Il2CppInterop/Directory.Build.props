@@ -28,7 +28,7 @@
   </ItemGroup>
 
   <PropertyGroup>
-    <!-- TODO: Remove once all public methods have been documented or hidden.  -->
+    
     <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 </Project>

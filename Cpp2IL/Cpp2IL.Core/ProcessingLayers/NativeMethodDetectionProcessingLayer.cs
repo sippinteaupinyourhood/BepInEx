@@ -21,7 +21,7 @@ public class NativeMethodDetectionProcessingLayer : Cpp2IlProcessingLayer
             "Cpp2ILInjected",
             "CppNativeMethods",
             null,
-            TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed); //public static class
+            TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Abstract | TypeAttributes.Sealed); 
         foreach (var assemblyAnalysisContext in appContext.Assemblies)
         {
             foreach (var m in assemblyAnalysisContext.Types.SelectMany(t => t.Methods))

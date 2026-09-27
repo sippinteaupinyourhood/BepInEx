@@ -3,7 +3,7 @@
 public class Il2CppGlobalMetadataSectionHeader : ReadableClass
 {
     public int Offset;
-    public int Size; //previously called Count in older versions but it's always been length in bytes
+    public int Size; 
     [Version(Min = 38)] public int Count;
     
     public bool HasCount => IsAtLeast(38);

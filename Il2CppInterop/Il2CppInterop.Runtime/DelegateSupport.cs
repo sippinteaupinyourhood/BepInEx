@@ -117,7 +117,7 @@ public static class DelegateSupport
         var returnType = managedMethod.ReturnType.NativeType();
 
         var managedParameters = managedMethod.GetParameters();
-        var parameterTypes = new Type[managedParameters.Length + 1 + 1]; // thisptr for target, methodInfo last arg
+        var parameterTypes = new Type[managedParameters.Length + 1 + 1]; 
         parameterTypes[0] = typeof(IntPtr);
         parameterTypes[managedParameters.Length + 1] = typeof(Il2CppMethodInfo*);
         for (var i = 0; i < managedParameters.Length; i++)
@@ -300,13 +300,13 @@ public static class DelegateSupport
         }
 
         converted.method_ptr = methodInfo.MethodPointer;
-        converted.method_info = nativeDelegateInvokeMethod; // todo: is this truly a good hack?
+        converted.method_info = nativeDelegateInvokeMethod; 
         converted.method = methodInfo.Pointer;
         converted.m_target = delegateReference;
 
         if (UnityVersionHandler.MustUseDelegateConstructor)
         {
-            // U2021.2.0+ hack in case the constructor did the wrong thing anyway
+            
             converted.invoke_impl = converted.method_ptr;
             converted.method_code = delegateReference.Pointer;
         }

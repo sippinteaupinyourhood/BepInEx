@@ -18,7 +18,7 @@ public static class StreamExtensions
             return (uint)b;
         if (b == 240)
         {
-            //Full Uint
+            
 #if NET7_0_OR_GREATER
             Span<byte> buffer = stackalloc byte[4];
             stream.ReadExactly(buffer);
@@ -34,7 +34,7 @@ public static class StreamExtensions
 #endif
         }
 
-        //Special constant values
+        
         if (b == byte.MaxValue)
             return uint.MaxValue;
         if (b == 254)
@@ -42,13 +42,13 @@ public static class StreamExtensions
 
         if ((b & 192) == 192)
         {
-            //3 more to read
+            
             return (uint)((b & ~192U) << 24 | (uint)(stream.ReadByte() << 16) | (uint)(stream.ReadByte() << 8) | (uint)stream.ReadByte());
         }
 
         if ((b & 128) == 128)
         {
-            //1 more to read
+            
             return (uint)((b & ~128U) << 8 | (uint)stream.ReadByte());
         }
 
@@ -58,7 +58,7 @@ public static class StreamExtensions
 
     public static int ReadUnityCompressedInt(this Stream stream)
     {
-        //Ref libil2cpp, il2cpp\utils\ReadCompressedInt32
+        
         var unsigned = stream.ReadUnityCompressedUint();
 
         if (unsigned == uint.MaxValue)
@@ -82,14 +82,14 @@ public static class StreamExtensions
             var b = reader.ReadByte();
 
             if (b == 0 && lastWasNull)
-                //Double null is a terminator for unicode strings
+                
                 continueReading = false;
 
             lastWasNull = b == 0;
             bytes.Add(b);
         }
 
-        bytes.Add(reader.ReadByte()); //Last byte of null terminator will always be skipped - unskip it
+        bytes.Add(reader.ReadByte()); 
 
         return Encoding.Unicode.GetString(bytes.ToArray()).TrimEnd('\0');
     }

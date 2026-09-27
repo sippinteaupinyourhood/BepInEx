@@ -58,7 +58,7 @@ internal static class Program
 
     private static void HandleMacOSGamePath(string gamePath, string? inputExeName, ref Cpp2IlRuntimeArgs args)
     {
-        //macOS game.
+        
         args.PathToAssembly = Path.Combine(gamePath, "Contents", "Frameworks", "GameAssembly.dylib");
         var exeName = Path.GetFileName(Directory.GetFiles(Path.Combine(gamePath, "Contents", "MacOS"))
             .FirstOrDefault(f => MiscUtils.BlacklistedExecutableFilenames.Any(f.EndsWith)));
@@ -125,7 +125,7 @@ internal static class Program
 
     private static void HandleLinuxGamePath(string gamePath, string? inputExeName, ref Cpp2IlRuntimeArgs args)
     {
-        //Linux game.
+        
         args.PathToAssembly = Path.Combine(gamePath, "GameAssembly.so");
         var exeName = Path.GetFileName(Directory.GetFiles(gamePath)
             .FirstOrDefault(f =>
@@ -195,7 +195,7 @@ internal static class Program
 
     private static void HandleWindowsGamePath(string gamePath, string? inputExeName, ref Cpp2IlRuntimeArgs args)
     {
-        //Windows game.
+        
         args.PathToAssembly = Path.Combine(gamePath, "GameAssembly.dll");
         var exeName = Path.GetFileNameWithoutExtension(Directory.GetFiles(gamePath)
             .FirstOrDefault(f => f.EndsWith(".exe") && !MiscUtils.BlacklistedExecutableFilenames.Any(f.EndsWith)));
@@ -261,9 +261,9 @@ internal static class Program
 
     private static void HandleSingleApk(string gamePath, ref Cpp2IlRuntimeArgs args)
     {
-        //APK
-        //Metadata: assets/bin/Data/Managed/Metadata
-        //Binary: lib/(armeabi-v7a)|(arm64-v8a)/libil2cpp.so
+        
+        
+        
 
         Logger.VerboseNewline("Trying HandleSingleApk as provided path is an apk file");
 
@@ -327,10 +327,10 @@ internal static class Program
 
     private static void HandleXapk(string gamePath, ref Cpp2IlRuntimeArgs args)
     {
-        //XAPK file
-        //Contains two APKs - one starting with `config.` and one with the package name
-        //The config one is architecture-specific and so contains the binary
-        //The other contains the metadata
+        
+        
+        
+        
 
         Logger.VerboseNewline("Trying HandleXapk as provided path is an xapk or apkm file");
 
@@ -350,7 +350,7 @@ internal static class Program
                 break;
         }
 
-        //Try for base.apk, else find any apk that isn't the config apk
+        
         var mainApk = xapkZip.Entries.FirstOrDefault(e => e.FullName.EndsWith(".apk") && e.FullName.Contains("base.apk"))
                       ?? xapkZip.Entries.FirstOrDefault(e => e != configApk && e.FullName.EndsWith(".apk"));
 
@@ -415,11 +415,11 @@ internal static class Program
 
     private static void HandleIpa(string gamePath, ref Cpp2IlRuntimeArgs args)
     {
-        //IPA
-        //Metadata: Payload/AppName.app/Data/Managed/Metadata/global-metadata.dat
-        //Binary: Payload/AppName.app/Frameworks/UnityFramework.framework/UnityFramework
-        //GlobalGameManager: Payload/AppName.app/Data/globalgamemanagers
-        //Unity3d: Payload/AppName.app/Data/data.unity3d
+        
+        
+        
+        
+        
 
         Logger.VerboseNewline("Trying HandleIpa as provided path is an ipa or tipa file");
 
@@ -486,7 +486,7 @@ internal static class Program
         var parserResult = Parser.Default.ParseArguments<CommandLineArgs>(commandLine);
 
         if (parserResult is NotParsed<CommandLineArgs> notParsed && notParsed.Errors.Count() == 1 && notParsed.Errors.All(e => e.Tag is ErrorType.VersionRequestedError or ErrorType.HelpRequestedError))
-            //Version or help requested
+            
             Environment.Exit(0);
 
         if (parserResult is not Parsed<CommandLineArgs> { Value: { } options })
@@ -494,7 +494,7 @@ internal static class Program
 
         ConsoleLogger.ShowVerbose = options.Verbose;
 
-#pragma warning disable IL2026 // RequiresUnreferencedCode
+#pragma warning disable IL2026 
         Cpp2IlApi.Init();
 #pragma warning restore IL2026
 
@@ -541,7 +541,7 @@ internal static class Program
             result.UnityVersion = UnityVersion.Parse(options.ForcedUnityVersion!);
 
             if (result.UnityVersion.Type == UnityVersionType.Alpha && result.UnityVersion.Build == 0)
-                //Map a0 to f1 - we assume the user simply didn't provide the final part of the version number
+                
                 result.UnityVersion = new UnityVersion(result.UnityVersion.Major, result.UnityVersion.Minor, result.UnityVersion.Build, UnityVersionType.Final, 1);
 
             result.Valid = true;
@@ -553,7 +553,7 @@ internal static class Program
 
         result.LowMemoryMode = options.LowMemoryMode;
 
-        // if(string.IsNullOrEmpty(options.OutputFormatId))      // throw new SoftException("No output format specified, so nothing to do!");
+        
 
         if (!string.IsNullOrEmpty(options.OutputFormatId))
         {
@@ -608,7 +608,7 @@ internal static class Program
             var runtimeArgs = GetRuntimeOptionsFromCommandLine(args);
 
             if (runtimeArgs.LowMemoryMode)
-                //Force an early collection for all the zip shenanigans we may have just done
+                
                 GC.Collect();
 
             return MainWithArgs(runtimeArgs);
@@ -675,13 +675,13 @@ internal static class Program
         foreach (var (key, value) in runtimeArgs.ProcessingLayerConfigurationOptions)
             Cpp2IlApi.CurrentAppContext.PutExtraData(key, value);
 
-        //Pre-process processing layers, allowing them to stop others from running
+        
         Logger.InfoNewline("Pre-processing processing layers...");
         var layers = runtimeArgs.ProcessingLayersToRun.Clone();
         RunProcessingLayers(runtimeArgs, processingLayer => processingLayer.PreProcess(Cpp2IlApi.CurrentAppContext, layers));
         runtimeArgs.ProcessingLayersToRun = layers;
 
-        //Run processing layers
+        
         Logger.InfoNewline("Invoking processing layers...");
         RunProcessingLayers(runtimeArgs, processingLayer => processingLayer.Process(Cpp2IlApi.CurrentAppContext));
 
@@ -701,11 +701,11 @@ internal static class Program
             Logger.WarnNewline("No output format requested, so not outputting anything. The il2cpp game loaded properly though! (Hint: You probably want to specify an output format, try --output-as)");
         }
 
-        // if (runtimeArgs.EnableMetadataGeneration)
-        // Cpp2IlApi.GenerateMetadataForAllAssemblies(runtimeArgs.OutputRootDirectory);
+        
+        
 
-        // if (runtimeArgs.EnableAnalysis)
-        // Cpp2IlApi.PopulateConcreteImplementations();
+        
+        
 
         CleanupExtractedFiles();
 
@@ -755,7 +755,7 @@ internal static class Program
             }
             catch (Exception)
             {
-                //Ignore
+                
             }
         }
     }

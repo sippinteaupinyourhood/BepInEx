@@ -9,13 +9,13 @@ namespace Cpp2IL.Core.Utils;
 
 public static class CsFileUtils
 {
-    /// <summary>
-    /// Returns the parameters of the given method as they would likely appear in a C# method signature.
-    /// That is to say, joined with a comma and a space, and with each parameter expressed as its type, a space, then its name, and optionally a default value if one is set.
-    /// Note this does not include the method name, the return type, or the parentheses around the parameters.
-    /// </summary>
-    /// <param name="method">The method to generate the parameter string for</param>
-    /// <returns>A properly-formatted parameter string as described above.</returns>
+    
+    
+    
+    
+    
+    
+    
     public static string GetMethodParameterString(MethodAnalysisContext method)
     {
         var sb = new StringBuilder();
@@ -27,17 +27,17 @@ public static class CsFileUtils
 
             first = false;
 
-            sb.Append(paramData); //ToString on the ParameterData will do the right thing.
+            sb.Append(paramData); 
         }
 
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Returns all the keywords that would be present in the c# source file to generate this type, i.e. access modifiers, static/sealed/etc, and the type of type (class, enum, interface).
-    /// Does not include the name of the type.
-    /// </summary>
-    /// <param name="type">The type to generate the keywords for</param>
+    
+    
+    
+    
+    
     public static string GetKeyWordsForType(TypeAnalysisContext type)
     {
         var sb = new StringBuilder();
@@ -48,7 +48,7 @@ public static class CsFileUtils
         else if (attributes.HasFlag(TypeAttributes.Public))
             sb.Append("public ");
         else
-            sb.Append("internal "); //private top-level classes don't exist, for obvious reasons
+            sb.Append("internal "); 
 
         if (type.IsEnumType)
             sb.Append("enum ");
@@ -59,7 +59,7 @@ public static class CsFileUtils
         else
         {
             if (attributes.HasFlag(TypeAttributes.Abstract) && attributes.HasFlag(TypeAttributes.Sealed))
-                //Abstract Sealed => Static
+                
                 sb.Append("static ");
             else if (attributes.HasFlag(TypeAttributes.Abstract))
                 sb.Append("abstract ");
@@ -72,11 +72,11 @@ public static class CsFileUtils
         return sb.ToString().Trim();
     }
 
-    /// <summary>
-    /// Returns all the keywords that would be present in the c# source file to generate this method, i.e. access modifiers, static/const/etc.
-    /// Does not include the type of the field or its name.
-    /// </summary>
-    /// <param name="field">The field to generate keywords for</param>
+    
+    
+    
+    
+    
     public static string GetKeyWordsForField(FieldAnalysisContext field)
     {
         var sb = new StringBuilder();
@@ -105,13 +105,13 @@ public static class CsFileUtils
         return sb.ToString().Trim();
     }
 
-    /// <summary>
-    /// Returns all the keywords that would be present in the c# source file to generate this method, i.e. access modifiers, static/abstract/etc.
-    /// Does not include the return type, name, or parameters.
-    /// </summary>
-    /// <param name="method">The method to generate keywords for</param>
-    /// <param name="skipSlotRelated">Skip slot-related modifiers like abstract, virtual, override</param>
-    /// <param name="skipKeywordsInvalidForAccessors">Skip the public and static keywords, as those aren't valid for property accessors</param>
+    
+    
+    
+    
+    
+    
+    
     public static string GetKeyWordsForMethod(MethodAnalysisContext method, bool skipSlotRelated = false, bool skipKeywordsInvalidForAccessors = false)
     {
         var sb = new StringBuilder();
@@ -135,7 +135,7 @@ public static class CsFileUtils
 
         if (method.DeclaringType!.Definition!.Attributes.HasFlag(TypeAttributes.Interface) || skipSlotRelated)
         {
-            //Deliberate no-op to avoid unnecessarily marking interface methods as abstract
+            
         }
         else if (attributes.HasFlag(MethodAttributes.Abstract))
             sb.Append("abstract ");
@@ -148,11 +148,11 @@ public static class CsFileUtils
         return sb.ToString().Trim();
     }
 
-    /// <summary>
-    /// Returns all the keywords that would be present in the c# source file to generate this event, i.e. access modifiers, static/abstract/etc.
-    /// Does not include the event type or name
-    /// </summary>
-    /// <param name="evt">The event to generate keywords for</param>
+    
+    
+    
+    
+    
     public static string GetKeyWordsForEvent(EventAnalysisContext evt)
     {
         var sb = new StringBuilder();
@@ -163,10 +163,10 @@ public static class CsFileUtils
 
         var all = addAttrs | removeAttrs | raiseAttrs;
 
-        //Accessibility must be that of the most accessible method
+        
         if (addAttrs.HasFlag(MethodAttributes.Public) || removeAttrs.HasFlag(MethodAttributes.Public) || raiseAttrs.HasFlag(MethodAttributes.Public))
             sb.Append("public ");
-        else if (all.HasFlag(MethodAttributes.Family)) //Family is only one bit so we can use the OR'd attributes
+        else if (all.HasFlag(MethodAttributes.Family)) 
             sb.Append("protected ");
         if (addAttrs.HasFlag(MethodAttributes.Assembly) || removeAttrs.HasFlag(MethodAttributes.Assembly) || raiseAttrs.HasFlag(MethodAttributes.Assembly))
             sb.Append("internal ");
@@ -178,7 +178,7 @@ public static class CsFileUtils
 
         if (evt.DeclaringType!.Definition!.Attributes.HasFlag(TypeAttributes.Interface))
         {
-            //Deliberate no-op to avoid unnecessarily marking interface methods as abstract
+            
         }
         else if (all.HasFlag(MethodAttributes.Abstract))
             sb.Append("abstract ");
@@ -192,11 +192,11 @@ public static class CsFileUtils
         return sb.ToString().Trim();
     }
 
-    /// <summary>
-    /// Returns all the keywords that would be present in the c# source file to generate this event, i.e. access modifiers, static/abstract/etc.
-    /// Does not include the event type or name
-    /// </summary>
-    /// <param name="prop">The event to generate keywords for</param>
+    
+    
+    
+    
+    
     public static string GetKeyWordsForProperty(PropertyAnalysisContext prop)
     {
         var sb = new StringBuilder();
@@ -206,10 +206,10 @@ public static class CsFileUtils
 
         var all = getterAttributes | setterAttributes;
 
-        //Accessibility must be that of the most accessible method
+        
         if (getterAttributes.HasFlag(MethodAttributes.Public) || setterAttributes.HasFlag(MethodAttributes.Public))
             sb.Append("public ");
-        else if (all.HasFlag(MethodAttributes.Family)) //Family is only one bit so we can use the OR'd attributes
+        else if (all.HasFlag(MethodAttributes.Family)) 
             sb.Append("protected ");
         if (getterAttributes.HasFlag(MethodAttributes.Assembly) || setterAttributes.HasFlag(MethodAttributes.Assembly))
             sb.Append("internal ");
@@ -221,7 +221,7 @@ public static class CsFileUtils
 
         if (prop.DeclaringType!.Definition!.Attributes.HasFlag(TypeAttributes.Interface))
         {
-            //Deliberate no-op to avoid unnecessarily marking interface methods as abstract
+            
         }
         else if (all.HasFlag(MethodAttributes.Abstract))
             sb.Append("abstract ");
@@ -233,13 +233,13 @@ public static class CsFileUtils
         return sb.ToString().Trim();
     }
 
-    /// <summary>
-    /// Returns all the custom attributes for the given entity, as they would appear in a C# source file (i.e. properly wrapped in square brackets, with params if known)
-    /// </summary>
-    /// <param name="context">The entity to generate custom attribute strings for</param>
-    /// <param name="indentCount">The number of tab characters to emit at the start of each line</param>
-    /// <param name="analyze">True to call <see cref="HasCustomAttributes.AnalyzeCustomAttributeData"/> before generating.</param>
-    /// <param name="includeIncomplete">True to emit custom attributes even if they have required parameters that aren't known</param>
+    
+    
+    
+    
+    
+    
+    
     public static string GetCustomAttributeStrings(HasCustomAttributes context, int indentCount, bool analyze = true, bool includeIncomplete = true)
     {
         var sb = new StringBuilder();
@@ -247,7 +247,7 @@ public static class CsFileUtils
         if (analyze)
             context.AnalyzeCustomAttributeData();
 
-        //Sort alphabetically by type name
+        
         context.CustomAttributes!.SortByExtractedKey(a => a.Constructor.DeclaringType!.Name);
 
         foreach (var analyzedCustomAttribute in context.CustomAttributes!)
@@ -272,19 +272,19 @@ public static class CsFileUtils
         return sb.ToString();
     }
 
-    /// <summary>
-    /// Returns the name of the given type, as it would appear in a C# source file.
-    /// This mainly involves stripping the backtick section from generic type names, and replacing certain system types with their primitive name.
-    /// </summary>
-    /// <param name="originalName">The original name of the type</param>
+    
+    
+    
+    
+    
     public static string GetTypeName(string originalName)
     {
         if (originalName.Contains("`"))
-            //Generics - remove `1 etc
+            
             return originalName.Remove(originalName.IndexOf('`'), 2);
 
         if (originalName[^1] == '&')
-            originalName = originalName[..^1]; //Remove trailing & for ref params
+            originalName = originalName[..^1]; 
 
         return originalName switch
         {
@@ -308,12 +308,12 @@ public static class CsFileUtils
         };
     }
 
-    /// <summary>
-    /// Appends inheritance data (base class and interfaces) for the given type to the given string builder.
-    /// If the base class is System.Object, System.ValueType, or System.Enum, it will be ignored
-    /// </summary>
-    /// <param name="type"></param>
-    /// <param name="sb"></param>
+    
+    
+    
+    
+    
+    
     public static void AppendInheritanceInfo(TypeAnalysisContext type, StringBuilder sb)
     {
         var baseType = type.BaseType;
@@ -321,7 +321,7 @@ public static class CsFileUtils
         if (needsBaseClass)
             sb.Append(" : ").Append(GetTypeName(baseType!.Name));
 
-        //Interfaces
+        
         if (type.InterfaceContexts.Count <= 0)
             return;
 

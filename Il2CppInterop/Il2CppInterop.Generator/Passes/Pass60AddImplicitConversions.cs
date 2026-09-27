@@ -130,9 +130,9 @@ public static class Pass60AddImplicitConversions
 
                 var invokeMethod = typeContext.NewType.Methods.Single(it => it.Name == "Invoke");
                 if (invokeMethod.Parameters.Count > 8)
-                    continue; // mscorlib only contains delegates of up to 8 parameters
+                    continue; 
 
-                // Don't generate implicit conversions for pointers and byrefs, as they can't be specified in generics
+                
                 if (invokeMethod.Parameters.Any(it => it.ParameterType is PointerTypeSignature or ByReferenceTypeSignature))
                     continue;
 
@@ -179,7 +179,7 @@ public static class Pass60AddImplicitConversions
                 bodyBuilder.Add(OpCodes.Call, typeContext.NewType.DeclaringModule!.DefaultImporter.ImportMethod(convertMethodRef));
                 bodyBuilder.Add(OpCodes.Ret);
 
-                // public static T operator+(T lhs, T rhs) => Il2CppSystem.Delegate.Combine(lhs, rhs).Cast<T>();
+                
                 var addMethod = new MethodDefinition("op_Addition", OperatorAttributes, MethodSignature.CreateStatic(typeContext.SelfSubstitutedRef.ToTypeSignature()));
                 typeContext.NewType.Methods.Add(addMethod);
                 addMethod.AddParameter(typeContext.SelfSubstitutedRef.ToTypeSignature());
@@ -193,7 +193,7 @@ public static class Pass60AddImplicitConversions
                     assemblyContext.Imports.Module.DefaultImporter.ImportMethod(assemblyContext.Imports.Il2CppObjectBase_Cast.Value.MakeGenericInstanceMethod(typeContext.SelfSubstitutedRef.ToTypeSignature())));
                 addBody.Add(OpCodes.Ret);
 
-                // public static T operator-(T lhs, T rhs) => Il2CppSystem.Delegate.Remove(lhs, rhs)?.Cast<T>();
+                
                 var subtractMethod = new MethodDefinition("op_Subtraction", OperatorAttributes, MethodSignature.CreateStatic(typeContext.SelfSubstitutedRef.ToTypeSignature()));
                 typeContext.NewType.Methods.Add(subtractMethod);
                 subtractMethod.AddParameter(typeContext.SelfSubstitutedRef.ToTypeSignature());

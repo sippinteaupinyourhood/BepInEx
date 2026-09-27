@@ -70,9 +70,9 @@ public class V29CustomAttributeTests
         Assert.Multiple(() =>
         {
             Assert.That(reliabilityContractAttribute!.ConstructorParameters![0], Is.InstanceOf<CustomAttributeEnumParameter>().And.Property("EnumTypeContext").Property("FullName").EqualTo("System.Runtime.ConstrainedExecution.Consistency"));
-            Assert.That(reliabilityContractAttribute!.ConstructorParameters![0], Is.InstanceOf<CustomAttributeEnumParameter>().And.Matches<CustomAttributeEnumParameter>(p => p.UnderlyingPrimitiveParameter is {PrimitiveValue: 3 /* Consistency.WillNotCorruptState */}));
+            Assert.That(reliabilityContractAttribute!.ConstructorParameters![0], Is.InstanceOf<CustomAttributeEnumParameter>().And.Matches<CustomAttributeEnumParameter>(p => p.UnderlyingPrimitiveParameter is {PrimitiveValue: 3 }));
             Assert.That(reliabilityContractAttribute!.ConstructorParameters![1], Is.InstanceOf<CustomAttributeEnumParameter>().And.Property("EnumTypeContext").Property("FullName").EqualTo("System.Runtime.ConstrainedExecution.Cer"));
-            Assert.That(reliabilityContractAttribute!.ConstructorParameters![1], Is.InstanceOf<CustomAttributeEnumParameter>().And.Matches<CustomAttributeEnumParameter>(p => p.UnderlyingPrimitiveParameter is {PrimitiveValue: 2 /* Cer.Success */}));
+            Assert.That(reliabilityContractAttribute!.ConstructorParameters![1], Is.InstanceOf<CustomAttributeEnumParameter>().And.Matches<CustomAttributeEnumParameter>(p => p.UnderlyingPrimitiveParameter is {PrimitiveValue: 2 }));
         });
     }
 
@@ -108,7 +108,7 @@ public class V29CustomAttributeTests
         Assert.That(attributeUsageAttribute, Is.Not.Null);
         Assert.Multiple(() =>
         {
-            Assert.That(attributeUsageAttribute!.ConstructorParameters, Has.Count.EqualTo(1)); //But we don't care to check the value of this parameter, just that it's there.
+            Assert.That(attributeUsageAttribute!.ConstructorParameters, Has.Count.EqualTo(1)); 
             Assert.That(attributeUsageAttribute!.Properties, Has.Count.EqualTo(1));
         });
 

@@ -18,13 +18,13 @@ internal static class AccessibilityExtensions
         var inheritsFromIndex = declaringTypesHierarchy.IndexOf(t => referencingType.IsAssignableTo(t));
         var declaringTypeIndex = Array.IndexOf(declaringTypesHierarchy, referencingType);
 
-        if (referenceType.DeclaringAssembly == referencingType.DeclaringAssembly /*or internals visible*/)
+        if (referenceType.DeclaringAssembly == referencingType.DeclaringAssembly )
         {
             for (var i = 0; i < declaringTypesHierarchy.Length; i++)
             {
                 if (i == declaringTypeIndex - 1)
                 {
-                    //All nested classes are accesible to their immediate declaring type.
+                    
                 }
                 else if (i == inheritsFromIndex - 1)
                 {
@@ -50,7 +50,7 @@ internal static class AccessibilityExtensions
             {
                 if (i == declaringTypeIndex - 1)
                 {
-                    //All nested classes are accesible to their immediate declaring type.
+                    
                 }
                 else if (i == inheritsFromIndex - 1)
                 {
@@ -143,12 +143,12 @@ internal static class AccessibilityExtensions
     {
         if (referencingAssembly.Definition is null)
         {
-            // Injected assemblies can access everything
+            
             return true;
         }
         if (referencedAssembly.Definition is null)
         {
-            // Injected assemblies cannot be accessed by metadata assemblies
+            
             return false;
         }
         return referencedAssembly.Definition.IsDependencyOf(referencingAssembly.Definition);
@@ -176,7 +176,7 @@ internal static class AccessibilityExtensions
     {
         foreach (var dependency in referencingAssembly.ReferencedAssemblies)
         {
-            //Assemblies can have circular references
+            
             if (dependencies.Add(dependency))
             {
                 dependency.CollectAllDependencies(dependencies);

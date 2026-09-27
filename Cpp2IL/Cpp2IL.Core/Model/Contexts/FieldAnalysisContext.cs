@@ -8,19 +8,19 @@ using StableNameDotNet.Providers;
 
 namespace Cpp2IL.Core.Model.Contexts;
 
-/// <summary>
-/// Represents a field in a managed type.
-/// </summary>
+
+
+
 public class FieldAnalysisContext : HasCustomAttributesAndName, IFieldInfoProvider
 {
-    /// <summary>
-    /// The analysis context for the type that this field belongs to.
-    /// </summary>
+    
+    
+    
     public readonly TypeAnalysisContext DeclaringType;
 
-    /// <summary>
-    /// The underlying field metadata.
-    /// </summary>
+    
+    
+    
     public readonly Il2CppFieldReflectionData? BackingData;
 
     protected override int CustomAttributeIndex => BackingData?.Field.customAttributeIndex ?? -1;

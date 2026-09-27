@@ -7,21 +7,21 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
 
-// ReSharper disable InconsistentNaming
+
 
 namespace BepInEx
 {
-    /// <summary>
-    /// Abstraction layer over Unity's input systems for use in universal plugins that need to use hotkeys.
-    /// It can use either Input or Unity.InputSystem, depending on what's available. Input is preferred.
-    /// WARNING: Use only inside of Unity's main thread!
-    /// </summary>
+    
+    
+    
+    
+    
     public class UnityInput
     {
         private static IInputSystem current;
-        /// <summary>
-        /// Best currently supported input system.
-        /// </summary>
+        
+        
+        
         public static IInputSystem Current
         {
             get
@@ -52,64 +52,64 @@ namespace BepInEx
             }
         }
 
-        /// <summary>
-        /// True if the Input class is not disabled.
-        /// </summary>
+        
+        
+        
         public bool LegacyInputSystemAvailable => Current is LegacyInputSystem;
     }
 
-    /// <summary>
-    /// Generic input system interface. Just barely good enough for hotkeys.
-    /// </summary>
+    
+    
+    
     public interface IInputSystem
     {
-        // No easy way to use these with the new input system
-        //bool GetButton(string buttonName);
-        //bool GetButtonDown(string buttonName);
-        //bool GetButtonUp(string buttonName);
+        
+        
+        
+        
 
-        /// <inheritdoc cref="Input.GetKey(string)"/>
+        
         bool GetKey(string name);
-        /// <inheritdoc cref="Input.GetKey(KeyCode)"/>
+        
         bool GetKey(KeyCode key);
 
-        /// <inheritdoc cref="Input.GetKeyDown(string)"/>
+        
         bool GetKeyDown(string name);
-        /// <inheritdoc cref="Input.GetKeyDown(KeyCode)"/>
+        
         bool GetKeyDown(KeyCode key);
 
-        /// <inheritdoc cref="Input.GetKeyUp(string)"/>
+        
         bool GetKeyUp(string name);
-        /// <inheritdoc cref="Input.GetKeyUp(KeyCode)"/>
+        
         bool GetKeyUp(KeyCode key);
 
 
-        /// <inheritdoc cref="Input.GetMouseButton(int)"/>
+        
         bool GetMouseButton(int button);
-        /// <inheritdoc cref="Input.GetMouseButtonDown(int)"/>
+        
         bool GetMouseButtonDown(int button);
-        /// <inheritdoc cref="Input.GetMouseButtonUp(int)"/>
+        
         bool GetMouseButtonUp(int button);
 
-        /// <inheritdoc cref="Input.ResetInputAxes()"/>
+        
         void ResetInputAxes();
 
-        /// <inheritdoc cref="Input.mousePosition"/>
+        
         Vector3 mousePosition { get; }
-        /// <inheritdoc cref="Input.mouseScrollDelta"/>
+        
         Vector2 mouseScrollDelta { get; }
 
-        /// <inheritdoc cref="Input.mousePresent"/>
+        
         bool mousePresent { get; }
 
-        /// <inheritdoc cref="Input.anyKey"/>
+        
         bool anyKey { get; }
-        /// <inheritdoc cref="Input.anyKeyDown"/>
+        
         bool anyKeyDown { get; }
 
-        /// <summary>
-        /// All KeyCodes supported by the current input system.
-        /// </summary>
+        
+        
+        
         IEnumerable<KeyCode> SupportedKeyCodes { get; }
     }
 
@@ -169,7 +169,7 @@ namespace BepInEx
 
         public bool GetMouseButtonUp(int button) => GetControl(KeyCode.Mouse0 + button)?.wasReleasedThisFrame ?? false;
 
-        public void ResetInputAxes() { /*Not supported*/ }
+        public void ResetInputAxes() {  }
 
         public Vector3 mousePosition => Mouse.current.position.ReadValue();
         public Vector2 mouseScrollDelta => Mouse.current.scroll.ReadValue();
@@ -851,8 +851,8 @@ namespace BepInEx
                     break;
                 case KeyCode.Joystick8Button19:
                     break;
-                    //default:
-                    //    throw new ArgumentOutOfRangeException(nameof(key), key, null);
+                    
+                    
             }
 
             if (!silent)

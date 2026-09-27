@@ -64,7 +64,7 @@ public static class AsmResolverUtils
 
         var definedType = Cpp2IlApi.CurrentAppContext!.AllTypes.FirstOrDefault(t => string.Equals(t.FullName, name, StringComparison.OrdinalIgnoreCase));
 
-        //Try subclasses
+        
         definedType ??= Cpp2IlApi.CurrentAppContext.AllTypes.FirstOrDefault(t =>
         {
             return t.Definition?.FullName != null
@@ -104,12 +104,12 @@ public static class AsmResolverUtils
         if (TypeDefinitionsAsmResolver.GetPrimitive(name) is { } primitive)
             return primitive.ToTypeSignature();
 
-        //The only real cases we end up here are:
-        //From explicit override resolving, because that has to be done by name
-        //Sometimes in attribute restoration if we come across an object parameter, but this almost always has to be a system or cecil type, or an enum.
-        //While originally initializing the TypeDefinitions class, which is always a system type
-        //And during exception helper location, which is always a system type.
-        //So really the only remapping we should have to handle is during explicit override restoration.
+        
+        
+        
+        
+        
+        
 
         if (name.EndsWith("[]", StringComparison.Ordinal))
         {
@@ -120,7 +120,7 @@ public static class AsmResolverUtils
 
         var parsedType = Parse(name);
 
-        // Arrays should be handled above
+        
         Debug.Assert(parsedType.Suffix is "");
 
         var genericParameterIndex = genericParameterNames.IndexOf(parsedType.BaseType);

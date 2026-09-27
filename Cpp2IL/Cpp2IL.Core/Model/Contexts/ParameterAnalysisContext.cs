@@ -8,56 +8,56 @@ namespace Cpp2IL.Core.Model.Contexts;
 
 public class ParameterAnalysisContext : HasCustomAttributesAndName, IParameterInfoProvider
 {
-    /// <summary>
-    /// The backing il2cpp definition of this parameter. Can be null if the parameter is injected. 
-    /// </summary>
+    
+    
+    
     public Il2CppParameterDefinition? Definition { get; }
 
-    /// <summary>
-    /// The index of this parameter in the declaring method's parameter list.
-    /// </summary>
+    
+    
+    
     public int ParameterIndex { get; }
 
-    /// <summary>
-    /// The method which this parameter belongs to. Cannot be null.
-    /// </summary>
+    
+    
+    
     public MethodAnalysisContext DeclaringMethod { get; }
 
     protected override int CustomAttributeIndex => Definition?.customAttributeIndex ?? throw new("Subclasses of ParameterAnalysisContext must provide a customAttributeIndex");
     public override AssemblyAnalysisContext CustomAttributeAssembly => DeclaringMethod.DeclaringType!.DeclaringAssembly;
     public override string DefaultName => Definition?.Name ?? throw new("Subclasses of ParameterAnalysisContext must provide a default name");
 
-    /// <summary>
-    /// The human-readable display value of the parameter type.
-    /// </summary>
+    
+    
+    
     public string ReadableTypeName => ParameterType.FullName;
 
-    /// <summary>
-    /// The human-readable display value of the parameter, as it would appear in a c# method declaration.
-    /// </summary>
+    
+    
+    
     public string HumanReadableSignature => $"{ReadableTypeName} {Name}";
 
     public virtual ParameterAttributes DefaultAttributes => (ParameterAttributes?)Definition?.RawType?.Attrs ?? throw new("Subclasses of ParameterAnalysisContext must provide parameter attributes");
 
     public virtual ParameterAttributes? OverrideAttributes { get; set; }
 
-    /// <summary>
-    /// The ParameterAttributes of this parameter.
-    /// </summary>
+    
+    
+    
     public ParameterAttributes Attributes
     {
         get => OverrideAttributes ?? DefaultAttributes;
         set => OverrideAttributes = value;
     }
 
-    /// <summary>
-    /// True if this parameter is passed by reference.
-    /// </summary>
+    
+    
+    
     public bool IsRef => ParameterType is ByRefTypeAnalysisContext || Attributes.HasFlag(ParameterAttributes.Out);
 
-    /// <summary>
-    /// The default value data for this parameter. Null if, and only if, the parameter has no default value. If it has a default value of literally null, this will be non-null and have a data index of -1.
-    /// </summary>
+    
+    
+    
     public Il2CppParameterDefaultValue? DefaultValue { get; }
 
     public virtual TypeAnalysisContext DefaultParameterType => DeclaringMethod.DeclaringType!.DeclaringAssembly.ResolveIl2CppType(Definition?.RawType) ?? throw new("Subclasses of ParameterAnalysisContext must provide a parameter type");
@@ -90,7 +90,7 @@ public class ParameterAnalysisContext : HasCustomAttributesAndName, IParameterIn
     public override string ToString()
     {
         if (!AppContext.HasFinishedInitializing)
-            //Cannot safely access ParameterTypeContext.Name if we haven't finished initializing as it may require doing system type lookups etc.
+            
             return $"Parameter {Name} (ordinal {ParameterIndex}) of {DeclaringMethod}";
 
         if (Definition?.RawType == null)

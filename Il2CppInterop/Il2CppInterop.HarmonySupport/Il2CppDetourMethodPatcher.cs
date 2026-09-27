@@ -39,8 +39,8 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
     private static readonly MethodInfo ReportExceptionMethodInfo
         = AccessTools.Method(typeof(Il2CppDetourMethodPatcher), nameof(ReportException));
 
-    // Map each value type to correctly sized store opcode to prevent memory overwrite
-    // Special case: bool is byte in Il2Cpp
+    
+    
     private static readonly Dictionary<Type, OpCode> StIndOpcodes = new()
     {
         [typeof(byte)] = OpCodes.Stind_I1,
@@ -63,10 +63,10 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
 
     private INativeMethodInfoStruct originalNativeMethodInfo;
 
-    /// <summary>
-    ///     Constructs a new instance of <see cref="MonoMod.RuntimeDetour.NativeDetour" /> method patcher.
-    /// </summary>
-    /// <param name="original"></param>
+    
+    
+    
+    
     public Il2CppDetourMethodPatcher(MethodBase original) : base(original) => Init();
 
     internal bool IsValid { get; private set; }
@@ -88,15 +88,15 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
                         Exception($"Method {Original.FullDescription()} is a field accessor, it can't be patched.");
                 }
 
-                // Generated method is probably unstripped, it can be safely handed to IL handler
+                
                 return;
             }
 
-            // Get the native MethodInfo struct for the target method
+            
             originalNativeMethodInfo =
                 UnityVersionHandler.Wrap((Il2CppMethodInfo*)(IntPtr)methodField.GetValue(null));
 
-            // Create a modified native MethodInfo struct, that will point towards the trampoline
+            
             modifiedNativeMethodInfo = UnityVersionHandler.NewMethod();
             Buffer.MemoryCopy(originalNativeMethodInfo.Pointer.ToPointer(),
                 modifiedNativeMethodInfo.Pointer.ToPointer(), UnityVersionHandler.MethodSize(),
@@ -111,31 +111,31 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
         }
     }
 
-    /// <inheritdoc />
+    
     public override DynamicMethodDefinition PrepareOriginal() => null;
 
-    /// <inheritdoc />
+    
     public override MethodBase DetourTo(MethodBase replacement)
     {
-        // // Unpatch an existing detour if it exists
+        
         if (nativeDetour != null)
         {
-            // Point back to the original method before we unpatch
+            
             modifiedNativeMethodInfo.MethodPointer = originalNativeMethodInfo.MethodPointer;
             nativeDetour.Dispose();
         }
 
-        // Generate a new DMD of the modified unhollowed method, and apply harmony patches to it
+        
         var copiedDmd = CopyOriginal();
 
         HarmonyManipulator.Manipulate(copiedDmd.OriginalMethod, copiedDmd.OriginalMethod.GetPatchInfo(),
             new ILContext(copiedDmd.Definition));
 
-        // Generate the MethodInfo instances
+        
         var managedHookedMethod = copiedDmd.Generate();
         var unmanagedTrampolineMethod = GenerateNativeToManagedTrampoline(managedHookedMethod).Generate();
 
-        // Apply a detour from the unmanaged implementation to the patched harmony method
+        
         var unmanagedDelegateType = DelegateTypeFactory.instance.CreateDelegateType(unmanagedTrampolineMethod,
             CallingConvention.Cdecl);
 
@@ -147,12 +147,12 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
         nativeDetour.Apply();
         modifiedNativeMethodInfo.MethodPointer = nativeDetour.OriginalTrampoline;
 
-        // TODO: Add an ILHook for the original unhollowed method to go directly to managedHookedMethod
-        // Right now it goes through three times as much interop conversion as it needs to, when being called from managed side
+        
+        
         return managedHookedMethod;
     }
 
-    /// <inheritdoc />
+    
     public override DynamicMethodDefinition CopyOriginal()
     {
         var dmd = new DynamicMethodDefinition(Original);
@@ -160,7 +160,7 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
         var cursor = new ILCursor(new ILContext(dmd.Definition));
 
 
-        // Remove il2cpp_object_get_virtual_method
+        
         if (cursor.TryGotoNext(x => x.MatchLdarg(0),
                 x => x.MatchCall(typeof(IL2CPP),
                     nameof(IL2CPP.Il2CppObjectBaseToPtr)),
@@ -179,7 +179,7 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
                 .Remove();
         }
 
-        // Replace original IL2CPPMethodInfo pointer with a modified one that points to the trampoline
+        
         cursor
             .Emit(Mono.Cecil.Cil.OpCodes.Ldc_I8, modifiedNativeMethodInfo.Pointer.ToInt64())
             .Emit(Mono.Cecil.Cil.OpCodes.Conv_I);
@@ -187,29 +187,29 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
         return dmd;
     }
 
-    // Tries to guess whether a function needs a return buffer for the return struct, in all cases except win64 it's undefined behaviour
+    
     private static bool IsReturnBufferNeeded(int size)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            // https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170#return-values
+            
             return size != 1 && size != 4 && size != 8;
         }
 
         if (Environment.Is64BitProcess)
         {
-            // x64 gcc and clang seem to use a return buffer for everything above 16 bytes
+            
             return size > 16;
         }
 
-        // Looks like on x32 gcc and clang return buffer is always used
+        
         return true;
     }
 
     private DynamicMethodDefinition GenerateNativeToManagedTrampoline(MethodInfo targetManagedMethodInfo)
     {
-        // managedParams are the interop types used on the managed side
-        // unmanagedParams are IntPtr references that are used by IL2CPP compiled assembly
+        
+        
         var paramStartIndex = 0;
 
         var managedReturnType = AccessTools.GetReturnedType(Original);
@@ -226,9 +226,9 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
 
         var hasReturnBuffer = isReturnValueType && IsReturnBufferNeeded(returnSize);
         if (hasReturnBuffer)
-        // C compilers seem to return large structs by allocating a return buffer on caller's side and passing it as the first parameter
-        // TODO: Handle ARM
-        // TODO: Check if this applies to values other than structs
+        
+        
+        
         {
             unmanagedReturnType = typeof(IntPtr);
             paramStartIndex++;
@@ -242,10 +242,10 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
         var managedParams = Original.GetParameters().Select(x => x.ParameterType).ToArray();
         var unmanagedParams =
             new Type[managedParams.Length + paramStartIndex +
-                     1]; // +1 for methodInfo at the end
+                     1]; 
 
         if (hasReturnBuffer)
-        // With GCC the return buffer seems to be the first param, same is likely with other compilers too
+        
         {
             unmanagedParams[0] = typeof(IntPtr);
         }
@@ -267,8 +267,8 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
         var il = dmd.GetILGenerator();
         il.BeginExceptionBlock();
 
-        // Declare a list of variables to dereference back to the original pointers.
-        // This is required due to the needed interop type conversions, so we can't directly pass some addresses as byref types
+        
+        
         var indirectVariables = new LocalBuilder[managedParams.Length];
 
         if (!Original.IsStatic)
@@ -286,10 +286,10 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
                 out indirectVariables[i]);
         }
 
-        // Run the managed method
+        
         il.Emit(OpCodes.Call, targetManagedMethodInfo);
 
-        // Store the managed return type temporarily (if there was one)
+        
         LocalBuilder managedReturnVariable = null;
         if (managedReturnType != typeof(void))
         {
@@ -297,7 +297,7 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
             il.Emit(OpCodes.Stloc, managedReturnVariable);
         }
 
-        // Convert any managed byref values into their relevant IL2CPP types, and then store the values into their relevant dereferenced pointers
+        
         for (var i = 0; i < managedParams.Length; ++i)
         {
             if (indirectVariables[i] == null)
@@ -312,12 +312,12 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
             il.Emit(StIndOpcodes.TryGetValue(directType, out var stindOpCodde) ? stindOpCodde : OpCodes.Stind_I);
         }
 
-        // Handle any lingering exceptions
+        
         il.BeginCatchBlock(typeof(Exception));
         il.Emit(OpCodes.Call, ReportExceptionMethodInfo);
         il.EndExceptionBlock();
 
-        // Convert the return value back to an IL2CPP friendly type (if there was a return value), and then return
+        
         if (managedReturnVariable != null)
         {
             if (hasReturnBuffer)
@@ -329,7 +329,7 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
                 il.Emit(OpCodes.Ldc_I4, returnSize);
                 il.Emit(OpCodes.Cpblk);
 
-                // Return the same pointer to the return buffer
+                
                 il.Emit(OpCodes.Ldarg_0);
             }
             else
@@ -384,8 +384,8 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
                 ? nativeParameterClass
                 : Il2CppClassPointerStore.GetNativeClassPointer(managedParamType);
 
-            // il2cpp_value_box uses .NET boxing semantics which boxes Nullable<T> as just T,
-            // losing the HasValue field. Manually box Nullable<T> to preserve full data.
+            
+            
             bool isNullable = managedParamType.IsGenericType &&
                 managedParamType.GetGenericTypeDefinition().FullName == "Il2CppSystem.Nullable`1";
 
@@ -408,11 +408,11 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
             }
             else
             {
-                // Box struct into object first before conversion
+                
                 il.Emit(OpCodes.Ldc_I8, classPtr.ToInt64());
                 il.Emit(OpCodes.Conv_I);
-                // On x64, struct is always a pointer but it is a non-pointer on x86
-                // We don't handle byref structs on x86 yet but we're yet to encounter those
+                
+                
                 il.Emit(Environment.Is64BitProcess ? OpCodes.Ldarg : OpCodes.Ldarga_S, argIndex);
                 il.Emit(OpCodes.Call,
                     AccessTools.Method(typeof(IL2CPP),
@@ -424,7 +424,7 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
             il.Emit(OpCodes.Ldarg_S, argIndex);
         }
 
-        if (managedParamType.IsValueType) // don't need to convert blittable types
+        if (managedParamType.IsValueType) 
         {
             return;
         }
@@ -462,11 +462,11 @@ internal unsafe class Il2CppDetourMethodPatcher : MethodPatcher
         if (managedParamType.IsByRef)
         {
             var directType = managedParamType.GetElementType();
-            // blittable value type pointer, note that ref to boxed Il2CppSystem.ValueType wrapper is still not handled
+            
             if (directType.IsValueType)
                 return;
 
-            // TODO: directType being Il2CppSystem.ValueType is not handled yet (but it's not that common in games). Implement when needed.
+            
 
             variable = il.DeclareLocal(directType);
 

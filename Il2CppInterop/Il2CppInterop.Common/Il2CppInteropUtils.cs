@@ -19,7 +19,7 @@ public static class Il2CppInteropUtils
 
             if (fieldInfo.Name.StartsWith(prefix)) return fieldInfo;
 
-            // Resolve generic method info pointer fields
+            
             if (method.IsGenericMethod && fieldInfo.DeclaringType.Name.StartsWith("MethodInfoStoreGeneric_") && fieldInfo.Name == "Pointer") return fieldInfo;
         }
 

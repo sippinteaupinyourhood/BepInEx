@@ -17,7 +17,7 @@ internal static class UnityPatches
         {
             TraceFix.ApplyFix();
         }
-        catch { } //ignore everything, if it's thrown an exception, we're using an assembly that has already fixed this
+        catch { } 
     }
 
     [HarmonyPrefix]

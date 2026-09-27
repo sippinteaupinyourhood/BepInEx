@@ -171,13 +171,13 @@ public static class StringEx
         return str is not null && str.Value.StartsWith(value, StringComparison.Ordinal);
     }
 
-    /// <summary>
-    /// Construct an unmangled name for a type signature.
-    /// </summary>
-    /// <param name="typeRef"></param>
-    /// <param name="declaringType">The declaring type to use for resolving generic type parameter names.</param>
-    /// <param name="declaringMethod">The declaring method to use for resolving generic method parameter names.</param>
-    /// <returns></returns>
+    
+    
+    
+    
+    
+    
+    
     public static string GetUnmangledName(this TypeSignature typeRef, TypeDefinition? declaringType = null, MethodDefinition? declaringMethod = null)
     {
         var builder = new StringBuilder();

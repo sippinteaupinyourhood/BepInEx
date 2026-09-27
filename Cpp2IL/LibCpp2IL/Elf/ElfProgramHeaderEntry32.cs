@@ -10,7 +10,7 @@ public class ElfProgramHeaderEntry32 : ReadableClass, IElfProgramHeaderEntry
     private uint _internalPhysicalAddr;
     private uint _internalSizeRaw;
     private uint _internalSizeVirtual;
-    private ElfProgramHeaderFlags _internalFlags; //This is here in 32-bit elf files
+    private ElfProgramHeaderFlags _internalFlags; 
     private int _internalAlign;
 
     public ElfProgramHeaderFlags Flags => _internalFlags;

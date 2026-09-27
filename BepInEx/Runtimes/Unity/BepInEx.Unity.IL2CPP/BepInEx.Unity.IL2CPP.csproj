@@ -43,9 +43,9 @@
         </Reference>
     </ItemGroup>
 
-    <!-- CopyLocalLockFileAssemblies causes to also output shared assemblies: https://github.com/NuGet/Home/issues/4837#issuecomment-354536302 -->
-    <!-- Since all core assemblies usually follow naming of System.*, we just delete them for now -->
-    <!-- Also delete deps.json as they are not used by embedded CLR -->
+    
+    
+    
     <Target Name="DeleteSys" AfterTargets="Build">
         <ItemGroup>
             <FilesToDelete Include="$(OutputPath)System.*.dll" />

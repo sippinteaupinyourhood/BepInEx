@@ -22,7 +22,7 @@ public interface INativeDetour : IDetour
     public nint TrampolinePtr { get; }
 
     private static INativeDetour CreateDefault<T>(nint original, T target) where T : Delegate =>
-        // TODO: check and provide an OS accurate provider
+        
         new DobbyDetour(original, target);
 
     public static INativeDetour Create<T>(nint original, T target) where T : Delegate
@@ -51,7 +51,7 @@ public interface INativeDetour : IDetour
         return detour;
     }
 
-    // Workaround for CoreCLR collecting all delegates
+    
     private class CacheDetourWrapper : INativeDetour
     {
         private readonly INativeDetour _wrapped;

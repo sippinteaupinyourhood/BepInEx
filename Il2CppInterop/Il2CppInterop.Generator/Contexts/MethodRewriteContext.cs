@@ -85,7 +85,7 @@ public class MethodRewriteContext
             Pass15GenerateMemberContexts.HasObfuscatedMethods = true;
 
         FileOffset = originalMethod.ExtractOffset();
-        // Workaround for garbage file offsets passed by Cpp2IL
+        
         if (FileOffset < 0) FileOffset = 0;
         Rva = originalMethod.ExtractRva();
         if (FileOffset != 0)
@@ -98,7 +98,7 @@ public class MethodRewriteContext
     public TypeDefinition? GenericInstantiationsStore { get; private set; }
     public ITypeDefOrRef? GenericInstantiationsStoreSelfSubstRef { get; private set; }
     public ITypeDefOrRef? GenericInstantiationsStoreSelfSubstMethodRef { get; private set; }
-    public MemberReference NonGenericMethodInfoPointerField { get; private set; } = null!; // Initialized in CtorPhase2
+    public MemberReference NonGenericMethodInfoPointerField { get; private set; } = null!; 
 
     public bool HasExtensionAttribute { get; }
 
@@ -172,7 +172,7 @@ public class MethodRewriteContext
 
     private MethodAttributes AdjustAttributes(MethodAttributes original, bool stripVirtual)
     {
-        original &= ~MethodAttributes.MemberAccessMask; // todo: handle Object overload correctly
+        original &= ~MethodAttributes.MemberAccessMask; 
         original &= ~MethodAttributes.PInvokeImpl;
         original &= ~MethodAttributes.Abstract;
         if (stripVirtual) original &= ~MethodAttributes.Virtual;

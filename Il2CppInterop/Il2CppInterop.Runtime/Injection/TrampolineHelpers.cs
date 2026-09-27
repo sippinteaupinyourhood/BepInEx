@@ -34,7 +34,7 @@ internal static class TrampolineHelpers
         {
             var directType = managedType.GetElementType();
 
-            // bool is byte in Il2Cpp, but int in CLR => force size to be correct
+            
             if (directType == typeof(bool))
             {
                 return typeof(byte).MakeByRefType();
@@ -47,18 +47,18 @@ internal static class TrampolineHelpers
         }
         else if (managedType.IsSubclassOf(typeof(Il2CppSystem.ValueType)) && !Environment.Is64BitProcess)
         {
-            // Struct that's passed on the stack => handle as general struct
+            
             uint align = 0;
             var fixedSize = IL2CPP.il2cpp_class_value_size(Il2CppClassPointerStore.GetNativeClassPointer(managedType), ref align);
             return GetFixedSizeStructType(fixedSize);
         }
-        else if (managedType == typeof(string) || managedType.IsSubclassOf(typeof(Il2CppObjectBase))) // General reference type
+        else if (managedType == typeof(string) || managedType.IsSubclassOf(typeof(Il2CppObjectBase))) 
         {
             return typeof(IntPtr);
         }
         else if (managedType == typeof(bool))
         {
-            // bool is byte in Il2Cpp, but int in CLR => force size to be correct
+            
             return typeof(byte);
         }
 

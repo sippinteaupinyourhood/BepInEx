@@ -10,9 +10,9 @@ using StableNameDotNet;
 
 namespace Cpp2IL.Core.ProcessingLayers;
 
-/// <summary>
-/// This class is functionally adapted from parts of Il2CppAssemblyUnhollower
-/// </summary>
+
+
+
 public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
 {
     public override string Name => "Stable (Unhollower-Style) Renaming";
@@ -27,7 +27,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
             if (layers[i] is not DeobfuscationMapProcessingLayer deobf)
                 continue;
 
-            //Save this for manual invocation later
+            
             Logger.InfoNewline("Found DeobfuscationMapProcessingLayer. It will be run at the correct time", "StableRenamingProcessingLayer");
             _deobfuscationMapProcessingLayer = deobf;
             layers.RemoveAt(i);
@@ -41,13 +41,13 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
 
         var typesToProcess = appContext.AllTypes.Where(t => t is not InjectedTypeAnalysisContext).ToArray();
 
-        //Initial pass through, to find types which can be renamed trivially
+        
         foreach (var typeAnalysisContext in typesToProcess)
         {
             var stableName = StableNameGenerator.GetStableNameForTypeIfNeeded(typeAnalysisContext, false);
 
             if (stableName == null)
-                //No rename needed
+                
                 continue;
 
             stableNameStemCounts[stableName] = stableNameStemCounts.GetOrCreate(stableName, () => 0) + 1;
@@ -56,40 +56,40 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
 
         StableNameGenerator.RenamedTypes.Clear();
 
-        //Remove all types which got a non-unique name
+        
         foreach (var typeAnalysisContext in typesToProcess)
         {
             if (typeAnalysisContext.OverrideName == null)
-                //Wasn't renamed
+                
                 continue;
 
             var dupeCount = stableNameStemCounts[typeAnalysisContext.OverrideName];
             if (dupeCount > 1)
-                //Clear rename, we'll try again with methods included
+                
                 typeAnalysisContext.OverrideName = null;
             else
-                //Inform name generator of the rename so it can use them later
+                
                 StableNameGenerator.RenamedTypes[typeAnalysisContext] = typeAnalysisContext.OverrideName;
         }
 
-        //Second pass, including method params this time
+        
         foreach (var typeAnalysisContext in typesToProcess)
         {
             if (typeAnalysisContext.OverrideName != null)
-                //Already renamed
+                
                 continue;
 
             var stableName = StableNameGenerator.GetStableNameForTypeIfNeeded(typeAnalysisContext, true);
 
             if (stableName == null)
-                //No rename needed
+                
                 continue;
 
             stableNameStemCounts[stableName] = stableNameStemCounts.GetOrCreate(stableName, () => 0) + 1;
             typeAnalysisContext.OverrideName = stableName;
         }
 
-        //Now we rename duplicates to add a numerical suffix, and rename non-duplicates to add a Unique suffix.
+        
         var stableNameRenameCount = new Dictionary<string, int>();
 
         foreach (var typeAnalysisContext in typesToProcess)
@@ -97,7 +97,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
             if (typeAnalysisContext.OverrideName == null || !stableNameStemCounts.TryGetValue(typeAnalysisContext.OverrideName, out var count))
                 continue;
 
-            //Handle generic type backtick suffixes
+            
             string? backTickSuffix = null;
             if (typeAnalysisContext.OverrideName.Length > 2 && typeAnalysisContext.OverrideName[^2] == '`')
             {
@@ -117,13 +117,13 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
                 typeAnalysisContext.OverrideName += backTickSuffix;
         }
 
-        //Now rename enum values
+        
         foreach (var type in typesToProcess)
         {
             if (!type.IsEnumType)
                 continue;
 
-            //All static fields
+            
             foreach (var field in type.Fields)
             {
                 if (!field.IsStatic || !field.Attributes.HasFlag(FieldAttributes.HasDefault))
@@ -136,7 +136,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
             }
         }
 
-        //If the user wants to rename types using a deobfuscation map, do that now
+        
         if (_deobfuscationMapProcessingLayer != null)
         {
             Logger.InfoNewline("Running Deobfuscation Map Processing Layer Now...", "StableRenamingProcessingLayer");
@@ -144,7 +144,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
             Logger.InfoNewline("Deobfuscation Map Processing Layer Finished.", "StableRenamingProcessingLayer");
         }
 
-        //Now (post deobf), rename all methods
+        
         foreach (var typeAnalysisContext in typesToProcess)
         {
             var typeMethodNames = new Dictionary<string, int>();
@@ -155,7 +155,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
 
                 var stableName = StableNameGenerator.GetStableNameForMethodIfNeeded(methodAnalysisContext);
 
-                //Params first
+                
                 for (var i = 0; i < methodAnalysisContext.Parameters.Count; i++)
                 {
                     var param = methodAnalysisContext.Parameters[i];
@@ -165,7 +165,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
                 }
 
                 if (stableName == null)
-                    //No rename needed
+                    
                     continue;
 
                 var occurenceCount = typeMethodNames.GetOrCreate(stableName, () => 0);
@@ -174,7 +174,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
             }
         }
 
-        //Rename all fields
+        
         foreach (var typeAnalysisContext in typesToProcess)
         {
             var typeFieldNames = new Dictionary<string, int>();
@@ -186,7 +186,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
                 var stableName = StableNameGenerator.GetStableNameForFieldIfNeeded(fieldAnalysisContext);
 
                 if (stableName == null)
-                    //No rename needed
+                    
                     continue;
 
                 var occurenceCount = typeFieldNames.GetOrCreate(stableName, () => 0);
@@ -195,7 +195,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
             }
         }
 
-        //Rename all props
+        
         foreach (var typeAnalysisContext in typesToProcess)
         {
             var typePropNames = new Dictionary<string, int>();
@@ -204,7 +204,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
                 var stableName = StableNameGenerator.GetStableNameForPropertyIfNeeded(propAnalysisContext);
 
                 if (stableName == null)
-                    //No rename needed
+                    
                     continue;
 
                 var occurenceCount = typePropNames.GetOrCreate(stableName, () => 0);
@@ -213,7 +213,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
             }
         }
 
-        //Rename all events. This isn't done by unhollower because it doesn't generate events, but it's arguably useful
+        
         foreach (var typeAnalysisContext in typesToProcess)
         {
             var typeEventNames = new Dictionary<string, int>();
@@ -222,7 +222,7 @@ public class StableRenamingProcessingLayer : Cpp2IlProcessingLayer
                 var stableName = StableNameGenerator.GetStableNameForEventIfNeeded(eventAnalysisContext);
 
                 if (stableName == null)
-                    //No rename needed
+                    
                     continue;
 
                 var occurenceCount = typeEventNames.GetOrCreate(stableName, () => 0);

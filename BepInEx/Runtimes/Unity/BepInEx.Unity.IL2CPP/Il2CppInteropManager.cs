@@ -144,7 +144,7 @@ internal static partial class Il2CppInteropManager
     private static ILoggerFactory LoggerFactory { get; } = MSLoggerFactory.Create(b =>
     {
         b.AddProvider(new BepInExLoggerProvider())
-         .SetMinimumLevel(LogLevel.Trace); // Each BepInEx log listener has its own filtering
+         .SetMinimumLevel(LogLevel.Trace); 
     });
 
     private static bool CheckIfGenerationRequired()
@@ -199,7 +199,7 @@ internal static partial class Il2CppInteropManager
         AppendFile(typeof(InteropAssemblyGenerator).Assembly.Location);
         AppendFile(typeof(Cpp2IlApi).Assembly.Location);
         AppendFile(typeof(LibCpp2IL.LibCpp2IlMain).Assembly.Location);
-        AppendString("protected-metadata-pipeline-v7-native-names-binary-fingerprint");
+        AppendString("protected-metadata-pipeline-v6-native-names-binary-fingerprint");
         return hash.GetHashAndReset();
     }
 
@@ -353,7 +353,7 @@ internal static partial class Il2CppInteropManager
         var zipFilePath = Path.Combine(baseFolder.FullName, fileName);
         if (!File.Exists(zipFilePath))
         {
-            // Check if URI is valid before attempting download
+            
             if (!uriIsValid)
                 throw new ArgumentException($"Unity base libraries source \"{source}\" is not a valid URL and the .zip file does not exist locally. Either provide a valid HTTP/HTTPS URL, or place the .zip file in the unity-libs directory.");
 
@@ -383,7 +383,7 @@ internal static partial class Il2CppInteropManager
                 }
                 catch
                 {
-                    // Delete the incomplete file to avoid issues on next startup
+                    
                     try { File.Delete(zipFilePath); } catch { }
                     throw;
                 }
@@ -456,6 +456,13 @@ internal static partial class Il2CppInteropManager
                 result.NativeMethodNames[GeneratorOptions.NativeMemberKey(assemblyName, type.FullName, method.Name)] = method.DefaultName;
         }
 
+        var binary = LibCpp2IL.LibCpp2IlMain.Binary
+                     ?? throw new InvalidDataException("Cpp2IL binary context is unavailable");
+        var metadataRegistrationRva = binary.GetRva(binary.MetadataRegistrationAddress);
+        var resolverMapPath = Path.Combine(Paths.BepInExRootPath, "runtime-il2cpp-resolver-map.json");
+        File.WriteAllText(resolverMapPath,
+            $"{{\"metadataRegistration\":{{\"rva\":\"0x{metadataRegistrationRva:X}\"}}}}");
+
         LibCpp2IlMain.Reset();
         Cpp2IlApi.CurrentAppContext = null;
 
@@ -520,7 +527,7 @@ internal static partial class Il2CppInteropManager
             if (name.Equals("Il2Cppnetstandard", StringComparison.OrdinalIgnoreCase)) return;
             try
             {
-                // Do not use LoadFrom since it overrides preloader patches
+                
                 Assembly.Load(name);
                 Interlocked.Increment(ref loaded);
             }

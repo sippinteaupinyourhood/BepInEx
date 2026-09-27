@@ -69,9 +69,9 @@ public static class Extensions
         return true;
     }
 
-    /// <summary>
-    /// Sorts in ascending order using the provided key function
-    /// </summary>
+    
+    
+    
     public static void SortByExtractedKey<T, K>(this List<T> list, Func<T, K> keyObtainer) where K : IComparable<K>
     {
         list.Sort((a, b) =>

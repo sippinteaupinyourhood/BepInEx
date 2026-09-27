@@ -22,7 +22,7 @@ public static class Pass61ImplementAwaiters
 
         foreach (var assemblyContext in context.Assemblies)
         {
-            // Use Lazy as a lazy way to not actually import the references until they're needed
+            
 
             Lazy<ITypeDefOrRef> actionUntypedRef = new(() => assemblyContext.NewAssembly.ManifestModule!.DefaultImporter.ImportType(actionConversion.Parameters[0].ParameterType.ToTypeDefOrRef())!);
             Lazy<IMethodDefOrRef> actionConversionRef = new(() => assemblyContext.NewAssembly.ManifestModule!.DefaultImporter.ImportMethod(actionConversion));
@@ -31,7 +31,7 @@ public static class Pass61ImplementAwaiters
 
             foreach (var typeContext in assemblyContext.Types)
             {
-                // Odds are a majority of types won't implement any interfaces. Skip them to save time.
+                
                 if (typeContext.OriginalType.IsInterface || typeContext.OriginalType.Interfaces.Count == 0)
                     continue;
 
@@ -42,8 +42,8 @@ public static class Pass61ImplementAwaiters
 
                 var allOnCompleted = typeContext.Methods.Where(m => m.OriginalMethod.Name == nameof(INotifyCompletion.OnCompleted)).Select(mc => mc.NewMethod).ToArray();
 
-                // Conversion spits out an Il2CppSystem.Action, so look for methods that take that (and only that) in & return void, so the stack is balanced
-                // And use SignatureComparer because otherwise equality checks would fail due to the TypeSignatures being different references
+                
+                
                 var interopOnCompleted = allOnCompleted.FirstOrDefault(m => !m.IsStatic && m.Parameters.Count == 1 && m.Signature is not null && SignatureComparer.Default.Equals(m.Signature.ReturnType, voidRef) && SignatureComparer.Default.Equals(m.Signature.ParameterTypes[0], actionConversion.Signature?.ReturnType));
 
                 if (interopOnCompleted is null)
@@ -67,12 +67,12 @@ public static class Pass61ImplementAwaiters
                 typeContext.NewType.Methods.Add(proxyOnCompleted);
 
                 var instructions = body.Instructions;
-                instructions.Add(CilOpCodes.Ldarg_0); // load "this"
-                instructions.Add(CilOpCodes.Ldarg_1); // not static, so ldarg1 loads "continuation"
+                instructions.Add(CilOpCodes.Ldarg_0); 
+                instructions.Add(CilOpCodes.Ldarg_1); 
                 instructions.Add(CilOpCodes.Call, actionConversionRef.Value);
 
-                // The titular jump to the interop method -- it's gotta reference the method on the right type, so we need to handle generic parameters
-                // Without this, awaiters declared in generic types like UniTask<T>.Awaiter would effectively try to cast themselves to their untyped versions (UniTask<>.Awaiter in this case, which isn't a thing)
+                
+                
                 var genericParameterCount = typeContext.NewType.GenericParameters.Count;
                 if (genericParameterCount > 0)
                 {

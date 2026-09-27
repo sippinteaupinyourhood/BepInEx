@@ -10,35 +10,35 @@ using Logger = BepInEx.Logging.Logger;
 
 namespace BepInEx.Unity.Mono;
 
-/// <summary>
-///     Provides methods for running code on other threads and synchronizing with the main thread.
-/// </summary>
+
+
+
 public sealed class ThreadingHelper : MonoBehaviour, ISynchronizeInvoke
 {
     private readonly object _invokeLock = new();
     private Action _invokeList;
     private Thread _mainThread;
 
-    /// <summary>
-    ///     Current instance of the helper.
-    /// </summary>
+    
+    
+    
     public static ThreadingHelper Instance { get; private set; }
 
-    /// <summary>
-    ///     Gives methods for invoking delegates on the main unity thread, both synchronously and asynchronously.
-    ///     Can be used in many built-in framework types, for example
-    ///     <see cref="System.IO.FileSystemWatcher.SynchronizingObject" />
-    ///     and <see cref="System.Timers.Timer.SynchronizingObject" /> to make their events fire on the main unity thread.
-    /// </summary>
+    
+    
+    
+    
+    
+    
     public static ISynchronizeInvoke SynchronizingObject => Instance;
 
     private void Update()
     {
-        // The CurrentThread can change between Awake and later methods, it's safest to get it here.
+        
         if (_mainThread == null)
             _mainThread = Thread.CurrentThread;
 
-        // Safe to do outside of lock because nothing can remove callbacks, at worst we execute with 1 frame delay
+        
         if (_invokeList == null) return;
 
         Action toRun;
@@ -48,8 +48,8 @@ public sealed class ThreadingHelper : MonoBehaviour, ISynchronizeInvoke
             _invokeList = null;
         }
 
-        // Need to execute outside of the lock in case the callback itself calls Invoke we could deadlock
-        // The invocation would also block any threads that call Invoke
+        
+        
         foreach (var action in toRun.GetInvocationList().Cast<Action>())
             try
             {
@@ -68,9 +68,9 @@ public sealed class ThreadingHelper : MonoBehaviour, ISynchronizeInvoke
         Instance = go.AddComponent<ThreadingHelper>();
     }
 
-    /// <summary>
-    ///     Queue the delegate to be invoked on the main unity thread. Use to synchronize your threads.
-    /// </summary>
+    
+    
+    
     public void StartSyncInvoke(Action action)
     {
         if (action == null) throw new ArgumentNullException(nameof(action));
@@ -81,14 +81,14 @@ public sealed class ThreadingHelper : MonoBehaviour, ISynchronizeInvoke
         }
     }
 
-    /// <summary>
-    ///     Queue the delegate to be invoked on a background thread. Use this to run slow tasks without affecting the game.
-    ///     NOTE: Most of Unity API can not be accessed while running on another thread!
-    /// </summary>
-    /// <param name="action">
-    ///     Task to be executed on another thread. Can optionally return an Action that will be executed on the main thread.
-    ///     You can use this action to return results of your work safely. Return null if this is not needed.
-    /// </param>
+    
+    
+    
+    
+    
+    
+    
+    
     public void StartAsyncInvoke(Func<Action> action)
     {
         void DoWork(object _)
@@ -159,11 +159,11 @@ public sealed class ThreadingHelper : MonoBehaviour, ISynchronizeInvoke
         return ((ISynchronizeInvoke) this).EndInvoke(invokeResult);
     }
 
-    /// <summary>
-    ///     False if current code is executing on the main unity thread, otherwise True.
-    ///     Warning: Will return true before the first frame finishes (i.e. inside plugin Awake and Start methods).
-    /// </summary>
-    /// <inheritdoc />
+    
+    
+    
+    
+    
     public bool InvokeRequired => _mainThread == null || _mainThread != Thread.CurrentThread;
 
     private sealed class InvokeResult : IAsyncResult
@@ -192,12 +192,12 @@ public sealed class ThreadingHelper : MonoBehaviour, ISynchronizeInvoke
     #endregion
 }
 
-/// <summary>
-///     Convenience extensions for utilizing multiple threads and using the <see cref="ThreadingHelper" />.
-/// </summary>
+
+
+
 public static class ThreadingExtensions
 {
-    /// <inheritdoc cref="RunParallel{TIn,TOut}(IList{TIn},Func{TIn,TOut},int)" />
+    
     public static IEnumerable<TOut> RunParallel<TIn, TOut>(this IEnumerable<TIn> data,
                                                            Func<TIn, TOut> work,
                                                            int workerCount = -1)
@@ -206,20 +206,20 @@ public static class ThreadingExtensions
             yield return result;
     }
 
-    /// <summary>
-    ///     Apply a function to a collection of data by spreading the work on multiple threads.
-    ///     Outputs of the functions are returned to the current thread and yielded one by one.
-    /// </summary>
-    /// <typeparam name="TIn">Type of the input values.</typeparam>
-    /// <typeparam name="TOut">Type of the output values.</typeparam>
-    /// <param name="data">Input values for the work function.</param>
-    /// <param name="work">Function to apply to the data on multiple threads at once.</param>
-    /// <param name="workerCount">Number of worker threads. By default Environment.ProcessorCount is used.</param>
-    /// <exception cref="TargetInvocationException">
-    ///     An exception was thrown inside one of the threads, and the operation was
-    ///     aborted.
-    /// </exception>
-    /// <exception cref="ArgumentException">Need at least 1 workerCount.</exception>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public static IEnumerable<TOut> RunParallel<TIn, TOut>(this IList<TIn> data,
                                                            Func<TIn, TOut> work,
                                                            int workerCount = -1)
@@ -237,7 +237,7 @@ public static class ThreadingExtensions
         IEnumerable<TOut> doneItems = null;
         Exception exceptionThrown = null;
 
-        // Start threads to process the data
+        
         for (var i = 0; i < workerCount; i++)
         {
             var first = i * perThreadCount;
@@ -271,7 +271,7 @@ public static class ThreadingExtensions
                                          });
         }
 
-        // Main thread waits for results and returns them until all threads finish
+        
         while (true)
         {
             are.WaitOne();
@@ -298,16 +298,16 @@ public static class ThreadingExtensions
                                                 exceptionThrown);
     }
 
-    /// <summary>
-    /// Apply a function to a collection of data by spreading the work on multiple threads.
-    /// Lower overhead than RunParallel but it blocks the main thread until all work is completed or an exception has been thrown.
-    /// </summary>
-    /// <typeparam name="T">Type of the input values.</typeparam>
-    /// <param name="data">Input values for the work function.</param>
-    /// <param name="work">Function to apply to the data on multiple threads at once.</param>
-    /// <param name="workerCount">Number of worker threads. By default Environment.ProcessorCount is used.</param>
-    /// <exception cref="TargetInvocationException">An exception was thrown inside one of the threads, and the operation was aborted.</exception>
-    /// <exception cref="ArgumentException">Need at least 1 workerCount.</exception>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public static void ForEachParallel<T>(this IList<T> data, Action<T> work, int workerCount = -1)
     {
         if (workerCount < 0)
@@ -349,7 +349,7 @@ public static class ThreadingExtensions
             }
         }
 
-        // Start threads to process the data
+        
         for (var i = 0; i < workerCount - 1; i++)
             ThreadPool.QueueUserWorkItem(DoWork);
 

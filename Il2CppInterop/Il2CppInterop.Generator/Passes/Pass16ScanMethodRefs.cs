@@ -92,7 +92,7 @@ public static class Pass16ScanMethodRefs
                 MarkMethodAlive(callee);
         }
 
-        // Now decided which of them are possible dead code
+        
         foreach (var assemblyRewriteContext in context.Assemblies)
             foreach (var typeRewriteContext in assemblyRewriteContext.Types)
                 foreach (var methodRewriteContext in typeRewriteContext.Methods)

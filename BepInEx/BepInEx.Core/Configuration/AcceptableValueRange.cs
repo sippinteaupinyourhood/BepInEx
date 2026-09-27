@@ -2,13 +2,13 @@
 
 namespace BepInEx.Configuration;
 
-/// <summary>
-///     Specify the range of acceptable values for a setting.
-/// </summary>
+
+
+
 public class AcceptableValueRange<T> : AcceptableValueBase where T : IComparable
 {
-    /// <param name="minValue">Lowest acceptable value</param>
-    /// <param name="maxValue">Highest acceptable value</param>
+    
+    
     public AcceptableValueRange(T minValue, T maxValue) : base(typeof(T))
     {
         if (maxValue == null)
@@ -22,17 +22,17 @@ public class AcceptableValueRange<T> : AcceptableValueBase where T : IComparable
         MaxValue = maxValue;
     }
 
-    /// <summary>
-    ///     Lowest acceptable value
-    /// </summary>
+    
+    
+    
     public virtual T MinValue { get; }
 
-    /// <summary>
-    ///     Highest acceptable value
-    /// </summary>
+    
+    
+    
     public virtual T MaxValue { get; }
 
-    /// <inheritdoc />
+    
     public override object Clamp(object value)
     {
         if (MinValue.CompareTo(value) > 0)
@@ -44,9 +44,9 @@ public class AcceptableValueRange<T> : AcceptableValueBase where T : IComparable
         return value;
     }
 
-    /// <inheritdoc />
+    
     public override bool IsValid(object value) => MinValue.CompareTo(value) <= 0 && MaxValue.CompareTo(value) >= 0;
 
-    /// <inheritdoc />
+    
     public override string ToDescriptionString() => $"# Acceptable value range: From {MinValue} to {MaxValue}";
 }

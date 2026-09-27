@@ -12,7 +12,7 @@ public static class ChainloaderLogHelper
 {
     private static Dictionary<string, string> MacOSVersions { get; } = new()
     {
-        // https://en.wikipedia.org/wiki/Darwin_%28operating_system%29#Release_history
+        
         ["16.0.0"] = "10.12",
         ["16.5.0"] = "10.12.4",
         ["16.6.0"] = "10.12.6",
@@ -55,19 +55,19 @@ public static class ChainloaderLogHelper
 
         var osVersion = Environment.OSVersion.Version;
 
-        // NOTE: this logic needs to be different for .NET 5.
-        // We don't use it and I don't think we will for a long time (possibly ever), but upgrading will break Environment.OSVersion
-        // https://docs.microsoft.com/en-us/dotnet/core/compatibility/core-libraries/5.0/environment-osversion-returns-correct-version#change-description
+        
+        
+        
 
-        // Some additional notes
-        // On .NET Framework and .NET Core platforms before 5, Environment.OSVersion does not work as you would expect.
+        
+        
 
-        // On Windows, it returns at maximum 6.3 (Windows 8) if you don't specify that your application is specifically compatible with Windows 10, due to compatibility layer stuff.
-        // So we have to call RtlGetVersion which bypasses that and gets the values for us. This is done in PlatformUtils
+        
+        
 
-        // On macOS it returns the Darwin kernel version. I've included a mapping of most versions, but there's definitely some missing versions
+        
 
-        // Not sure what it does on Linux. I think it returns the kernel version there too, but we already get the utsname structure from SetPlatform() regardless
+        
 
         if (PlatformHelper.Is(Platform.Windows))
         {
@@ -75,7 +75,7 @@ public static class ChainloaderLogHelper
 
             builder.Append("Windows ");
 
-            // https://stackoverflow.com/a/2819962
+            
 
             if (osVersion.Major >= 10 && osVersion.Build >= 22000)
                 builder.Append("11");
@@ -144,7 +144,7 @@ public static class ChainloaderLogHelper
         if (PreloaderConsoleListener.LogEvents == null || PreloaderConsoleListener.LogEvents.Count == 0)
             return;
 
-        // Temporarily disable the console log listener (if there is one from preloader) as we replay the preloader logs
+        
         var logListener = Logger.Listeners.FirstOrDefault(logger => logger is ConsoleLogListener);
 
         if (logListener != null)

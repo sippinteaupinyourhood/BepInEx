@@ -17,7 +17,7 @@ public class WasmDataSegment
             Index = 0;
 
         if (mode is 0 or 2)
-            //"Active" segment
+            
             OffsetExpr = new(readFrom);
         else
             OffsetExpr = null;

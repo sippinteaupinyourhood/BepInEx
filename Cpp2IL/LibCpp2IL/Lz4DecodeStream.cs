@@ -19,17 +19,17 @@ public class Lz4DecodeStream : Stream
 
     public Lz4DecodeStream(byte[] buffer, int offset, int length) : this(new MemoryStream(buffer, offset, length), length, false) { }
 
-    /// <summary>
-    /// Whole base stream is compressed data
-    /// </summary>
-    /// <param name="baseStream">Stream with compressed data</param>
+    
+    
+    
+    
     public Lz4DecodeStream(Stream baseStream, bool leaveOpen = true) : this(baseStream, baseStream.Length, leaveOpen) { }
 
-    /// <summary>
-    /// Part of base stream is compressed data
-    /// </summary>
-    /// <param name="baseStream">Stream with compressed data</param>
-    /// <param name="compressedSize">Amount of comprassed data</param>
+    
+    
+    
+    
+    
     public Lz4DecodeStream(Stream baseStream, long compressedSize, bool leaveOpen = true)
     {
         if (compressedSize <= 0)
@@ -248,9 +248,9 @@ public class Lz4DecodeStream : Stream
         base.Dispose(disposing);
     }
 
-    // =====================================
-    // Buffer processing
-    // =====================================
+    
+    
+    
 
     private int ReadInputByte()
     {
@@ -370,9 +370,9 @@ public class Lz4DecodeStream : Stream
     private int m_inputBufferPosition = InputBufferCapacity;
     private int m_decodeBufferPosition = 0;
 
-    /// <summary>
-    /// State within interruptable phases and across phase boundaries is kept here - again, so that we can punt out and restart freely
-    /// </summary>
+    
+    
+    
     private DecodePhase m_phase;
 
     private int m_literalLength;

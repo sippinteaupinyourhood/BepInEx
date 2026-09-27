@@ -11,7 +11,7 @@ public class Il2CppAssemblyDefinition : ReadableClass
     [Version(Max = 24.0f)] public int CustomAttributeIndex;
     public int ReferencedAssemblyStart;
     public int ReferencedAssemblyCount;
-    public Il2CppAssemblyNameDefinition AssemblyName = null!; //Late-read
+    public Il2CppAssemblyNameDefinition AssemblyName = null!; 
 
     public Il2CppImageDefinition Image => LibCpp2IlMain.TheMetadata!.imageDefinitions[ImageIndex];
 
@@ -35,7 +35,7 @@ public class Il2CppAssemblyDefinition : ReadableClass
         ReferencedAssemblyStart = reader.ReadInt32();
         ReferencedAssemblyCount = reader.ReadInt32();
 
-        //We use ReadReadableHereNoLock because we're already in a lock, because we're in Read.
+        
         AssemblyName = reader.ReadReadableHereNoLock<Il2CppAssemblyNameDefinition>();
     }
 }

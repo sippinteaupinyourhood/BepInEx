@@ -11,7 +11,7 @@ public class IsilBuilder
 
     public Dictionary<ulong, List<InstructionSetIndependentInstruction>> InstructionAddressMap;
 
-    // (Goto instruction, target instruction address)
+    
     private readonly List<(InstructionSetIndependentInstruction, ulong)> _jumpsToFix;
 
     public IsilBuilder()
@@ -79,8 +79,8 @@ public class IsilBuilder
 
     public void Xor(ulong instructionAddress, InstructionSetIndependentOperand dest, InstructionSetIndependentOperand left, InstructionSetIndependentOperand right) => AddInstruction(new(InstructionSetIndependentOpCode.Xor, instructionAddress, IsilFlowControl.Continue, dest, left, right));
 
-    // The following 4 had their opcode implemented but not the builder func
-    // I don't know why
+    
+    
     public void ShiftLeft(ulong instructionAddress, InstructionSetIndependentOperand left, InstructionSetIndependentOperand right) => AddInstruction(new(InstructionSetIndependentOpCode.ShiftLeft, instructionAddress, IsilFlowControl.Continue, left, right));
     public void ShiftRight(ulong instructionAddress, InstructionSetIndependentOperand left, InstructionSetIndependentOperand right) => AddInstruction(new(InstructionSetIndependentOpCode.ShiftRight, instructionAddress, IsilFlowControl.Continue, left, right));
     public void And(ulong instructionAddress, InstructionSetIndependentOperand dest, InstructionSetIndependentOperand left, InstructionSetIndependentOperand right) => AddInstruction(new(InstructionSetIndependentOpCode.And, instructionAddress, IsilFlowControl.Continue, dest, left, right));

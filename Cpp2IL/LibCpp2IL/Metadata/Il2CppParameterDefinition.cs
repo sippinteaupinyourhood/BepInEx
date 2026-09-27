@@ -19,7 +19,7 @@ public class Il2CppParameterDefinition : ReadableClass, IIl2CppTokenProvider
     {
         nameIndex = reader.ReadInt32();
 
-        //Cache name now
+        
         var pos = reader.Position;
         Name = ((Il2CppMetadata)reader).ReadStringFromIndexNoReadLock(nameIndex);
         reader.Position = pos;

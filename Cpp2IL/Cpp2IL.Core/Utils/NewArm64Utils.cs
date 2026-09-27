@@ -14,7 +14,7 @@ public static class NewArm64Utils
         {
             var startOfNext = MiscUtils.GetAddressOfNextFunctionStart(virtAddress);
 
-            //We have to fall through to default behavior for the last method because we cannot accurately pinpoint its end
+            
             if (startOfNext > 0)
             {
                 var rawStartOfNextMethod = LibCpp2IlMain.Binary!.MapVirtualAddressToRaw(startOfNext);
@@ -29,7 +29,7 @@ public static class NewArm64Utils
             }
         }
 
-        //Unmanaged function, look for first b
+        
         var pos = (int)LibCpp2IlMain.Binary!.MapVirtualAddressToRaw(virtAddress);
         var allBytes = LibCpp2IlMain.Binary.GetRawBinaryContent();
         var span = allBytes.AsSpan(pos, 4);
@@ -39,7 +39,7 @@ public static class NewArm64Utils
         {
             ret = Disassemble(span, virtAddress);
 
-            //All arm64 instructions are 4 bytes
+            
             span = allBytes.AsSpan(pos, span.Length + 4);
         }
 

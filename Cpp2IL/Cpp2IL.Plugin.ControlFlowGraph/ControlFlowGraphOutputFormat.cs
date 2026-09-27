@@ -148,11 +148,11 @@ public class ControlFlowGraphOutputFormat : Cpp2IlOutputFormat
         TypeAnalysisContext type = method.DeclaringType!;
 
 
-        //Get root assembly directory
+        
         var assemblyDir = Path.Combine(outputRoot, assemblyNameClean);
 
-        //If type is nested, we should use namespace of ultimate declaring type, which could be an arbitrary depth
-        //E.g. rewired has a type Rewired.Data.Mapping.HardwareJoystickMap, which contains a nested class Platform_Linux_Base, which contains MatchingCriteria, which contains ElementCount.
+        
+        
         var ultimateDeclaringType = type;
         while (ultimateDeclaringType.DeclaringType != null)
             ultimateDeclaringType = ultimateDeclaringType.DeclaringType;
@@ -163,7 +163,7 @@ public class ControlFlowGraphOutputFormat : Cpp2IlOutputFormat
             .Select(n => MiscUtils.InvalidPathElements.Contains(n) ? $"__illegalwin32name_{n}__" : n)
             .ToArray();
 
-        //Ok so we have the namespace directory. Now we need to join all the declaring type hierarchy together for a filename.
+        
         var declaringTypeHierarchy = new List<string>();
         var declaringType = type.DeclaringType;
         while (declaringType != null)
@@ -172,22 +172,22 @@ public class ControlFlowGraphOutputFormat : Cpp2IlOutputFormat
             declaringType = declaringType.DeclaringType;
         }
 
-        //Reverse so we have top-level type first.
+        
         declaringTypeHierarchy.Reverse();
 
-        //Join the hierarchy together with _NestedType_ separators
+        
         string filename;
         if (declaringTypeHierarchy.Count > 0)
             filename = $"{string.Join("_NestedType_", declaringTypeHierarchy)}_NestedType_{type.Name}";
         else
             filename = $"{type.Name}";
 
-        //Get directory from assembly root + namespace
+        
         var directory = Path.Combine(namespaceSplit.Prepend(assemblyDir).ToArray());
         if (!Directory.Exists(directory))
             Directory.CreateDirectory(directory);
 
-        //Clean up the filename
+        
         MiscUtils.InvalidPathChars.ForEach(c => filename = filename.Replace(c, '_'));
 
         filename = Path.Combine(directory, filename);
@@ -210,12 +210,12 @@ public class ControlFlowGraphOutputFormat : Cpp2IlOutputFormat
         MiscUtils.InvalidPathChars.ForEach(c => methodFileName = methodFileName.Replace(c, '_'));
 
 
-        //Combine the directory and filename
+        
         var fullPath = Path.Combine(filename, methodFileName);
 
         if (fullPath.Length > 260)
         {
-            //Too long, trim it
+            
             fullPath = fullPath[..250];
 
             fullPath += ".dot";
@@ -228,13 +228,13 @@ public class ControlFlowGraphOutputFormat : Cpp2IlOutputFormat
     {
         var file = GetFilePathForMethod(outputRoot, method, assemblyNameClean);
 
-        // Library doesn't provide a non async option :(
+        
         await using var writer = new StringWriter();
         var context = new CompilationContext(writer, new CompilationOptions());
         await graph.CompileAsync(context);
         var result = writer.GetStringBuilder().ToString();
 
-        // Save it to a file
+        
         File.WriteAllText(file, result);
     }
 }

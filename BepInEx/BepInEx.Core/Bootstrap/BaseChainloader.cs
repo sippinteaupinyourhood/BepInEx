@@ -19,12 +19,12 @@ public abstract class BaseChainloader<TPlugin>
 
     private static Regex allowedGuidRegex { get; } = new(@"^[a-zA-Z0-9\._\-]+$");
 
-    /// <summary>
-    ///     Analyzes the given type definition and attempts to convert it to a valid <see cref="PluginInfo" />
-    /// </summary>
-    /// <param name="type">Type definition to analyze.</param>
-    /// <param name="assemblyLocation">The filepath of the assembly, to keep as metadata.</param>
-    /// <returns>If the type represent a valid plugin, returns a <see cref="PluginInfo" /> instance. Otherwise, return null.</returns>
+    
+    
+    
+    
+    
+    
     public static PluginInfo ToPluginInfo(TypeDefinition type, string assemblyLocation)
     {
         if (type.IsInterface || type.IsAbstract)
@@ -37,13 +37,13 @@ public abstract class BaseChainloader<TPlugin>
         }
         catch (AssemblyResolutionException)
         {
-            // Can happen if this type inherits a type from an assembly that can't be found. Safe to assume it's not a plugin.
+            
             return null;
         }
 
         var metadata = BepInPlugin.FromCecilType(type);
 
-        // Perform checks that will prevent the plugin from being loaded in ALL cases
+        
         if (metadata == null)
         {
             Logger.Log(LogLevel.Warning, $"Skipping over type [{type.FullName}] as no metadata attribute is specified");
@@ -102,7 +102,7 @@ public abstract class BaseChainloader<TPlugin>
     protected static bool PluginTargetsWrongBepin(PluginInfo pluginInfo)
     {
         var pluginTarget = pluginInfo.TargettedBepInExVersion;
-        // X.X.X.x - compare normally. x.x.x.X - nightly build number, ignore
+        
         if (pluginTarget.Major != CurrentAssemblyVersion.Major) return true;
         if (pluginTarget.Minor > CurrentAssemblyVersion.Minor) return true;
         if (pluginTarget.Minor < CurrentAssemblyVersion.Minor) return false;
@@ -115,25 +115,25 @@ public abstract class BaseChainloader<TPlugin>
 
     private bool _initialized;
 
-    /// <summary>
-    ///     List of all <see cref="PluginInfo" /> instances loaded via the chainloader.
-    /// </summary>
+    
+    
+    
     public Dictionary<string, PluginInfo> Plugins { get; } = new();
 
-    /// <summary>
-    ///     Collection of error chainloader messages that occured during plugin loading.
-    ///     Contains information about what certain plugins were not loaded.
-    /// </summary>
+    
+    
+    
+    
     public List<string> DependencyErrors { get; } = new();
 
-    /// <summary>
-    ///     Occurs after a plugin is loaded.
-    /// </summary>
+    
+    
+    
     public event Action<PluginInfo> PluginLoaded;
 
-    /// <summary>
-    ///     Occurs after all plugins are loaded.
-    /// </summary>
+    
+    
+    
     public event Action Finished;
 
     public virtual void Initialize(string gameExePath = null)
@@ -141,10 +141,10 @@ public abstract class BaseChainloader<TPlugin>
         if (_initialized)
             throw new InvalidOperationException("Chainloader cannot be initialized multiple times");
 
-        // Set vitals
+        
         if (gameExePath != null)
-            // Checking for null allows a more advanced initialization workflow, where the Paths class has been initialized before calling Chainloader.Initialize
-            // This is used by Preloader to use environment variables, for example
+            
+            
             Paths.SetExecutablePath(gameExePath);
 
         InitializeLoggers();
@@ -185,15 +185,15 @@ public abstract class BaseChainloader<TPlugin>
             Logger.Sources.Add(new HarmonyLogSource());
     }
 
-    /// <summary>
-    /// Discovers all plugins in the plugin directory without loading them.
-    /// </summary>
-    /// <remarks>
-    /// This is useful for discovering BepInEx plugin metadata.
-    /// </remarks>
-    /// <param name="path">Path from which to search the plugins.</param>
-    /// <param name="cacheName">Cache name to use. If null, results are not cached.</param>
-    /// <returns>List of discovered plugins and their metadata.</returns>
+    
+    
+    
+    
+    
+    
+    
+    
+    
     protected IList<PluginInfo> DiscoverPluginsFrom(string path, string cacheName = "chainloader")
     {
         var pluginsToLoad =
@@ -201,24 +201,24 @@ public abstract class BaseChainloader<TPlugin>
         return pluginsToLoad.SelectMany(p => p.Value).ToList();
     }
 
-    /// <summary>
-    /// Discovers plugins to load.
-    /// </summary>
-    /// <returns>List of plugins to be loaded.</returns>
+    
+    
+    
+    
     protected virtual IList<PluginInfo> DiscoverPlugins()
     {
         return DiscoverPluginsFrom(Paths.PluginPath);
     }
 
-    /// <summary>
-    /// Preprocess the plugins and modify the load order.
-    /// </summary>
-    /// <remarks>Some plugins may be skipped if they cannot be loaded (wrong metadata, etc).</remarks>
-    /// <param name="plugins">Plugins to process.</param>
-    /// <returns>List of plugins to load in the correct load order.</returns>
+    
+    
+    
+    
+    
+    
     protected virtual IList<PluginInfo> ModifyLoadOrder(IList<PluginInfo> plugins)
     {
-        // We use a sorted dictionary to ensure consistent load order
+        
         var dependencyDict =
             new SortedDictionary<string, IEnumerable<string>>(StringComparer.InvariantCultureIgnoreCase);
         var pluginsByGuid = new Dictionary<string, PluginInfo>();
@@ -242,7 +242,7 @@ public abstract class BaseChainloader<TPlugin>
                     continue;
                 }
 
-                // Perform checks that will prevent loading plugins in this run
+                
                 var filters = pluginInfo.Processes.ToList();
                 var invalidProcessName = filters.Count != 0 &&
                                          filters.All(x => !string.Equals(x.ProcessName.Replace(".exe", ""),
@@ -290,12 +290,12 @@ public abstract class BaseChainloader<TPlugin>
                 Logger.Log(LogLevel.Warning, message);
             }
 
-        // We don't add already loaded plugins to the dependency graph as they are already loaded
+        
 
         var emptyDependencies = new string[0];
 
-        // Sort plugins by their dependencies.
-        // Give missing dependencies no dependencies of its own, which will cause missing plugins to be first in the resulting list.
+        
+        
         var sortedPlugins = Utility.TopologicalSort(dependencyDict.Keys,
                                                     x =>
                                                         dependencyDict.TryGetValue(x, out var deps)
@@ -305,9 +305,9 @@ public abstract class BaseChainloader<TPlugin>
         return sortedPlugins.Where(pluginsByGuid.ContainsKey).Select(x => pluginsByGuid[x]).ToList();
     }
 
-    /// <summary>
-    /// Run the chainloader and load all plugins from the plugins folder.
-    /// </summary>
+    
+    
+    
     public virtual void Execute()
     {
         try
@@ -358,17 +358,17 @@ public abstract class BaseChainloader<TPlugin>
                 static bool IsHardDependency(BepInDependency dep) =>
                     (dep.Flags & BepInDependency.DependencyFlags.HardDependency) != 0;
 
-                // If the dependency wasn't already processed, it's missing altogether
+                
                 var dependencyExists =
                     processedPlugins.TryGetValue(dependency.DependencyGUID, out var pluginVersion);
-                // Alternatively, if the dependency hasn't been loaded before, it's missing too
+                
                 if (!dependencyExists)
                 {
                     dependencyExists = Plugins.TryGetValue(dependency.DependencyGUID, out var pluginInfo);
                     pluginVersion = pluginInfo?.Metadata.Version;
                 }
 
-                // The dependency is not installed at all.
+                
                 if (!dependencyExists)
                 {
                     if (IsHardDependency(dependency))
@@ -376,7 +376,7 @@ public abstract class BaseChainloader<TPlugin>
                     continue;
                 }
 
-                // The dependency is installed, but its version does not satisfy the requested range.
+                
                 if (dependency.VersionRange != null && !dependency.VersionRange.IsSatisfied(pluginVersion))
                 {
                     if (IsHardDependency(dependency))
@@ -384,7 +384,7 @@ public abstract class BaseChainloader<TPlugin>
                     continue;
                 }
 
-                // If the dependency is a hard and is invalid (e.g. has missing dependencies), report that to the user
+                
                 if (invalidPlugins.Contains(dependency.DependencyGUID) && IsHardDependency(dependency))
                 {
                     dependsOnInvalidPlugin = true;
@@ -454,18 +454,18 @@ public abstract class BaseChainloader<TPlugin>
         return loadedPlugins;
     }
 
-    /// <summary>
-    /// Detects and loads all plugins in the specified directories.
-    /// </summary>
-    /// <remarks>
-    /// It is better to collect all paths at once and use a single call to LoadPlugins than multiple calls.
-    /// This allows to run proper dependency resolving and to load all plugins in one go.
-    /// </remarks>
-    /// <param name="pluginsPaths">Directories to search the plugins from.</param>
-    /// <returns>List of loaded plugin infos.</returns>
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public IList<PluginInfo> LoadPlugins(params string[] pluginsPaths)
     {
-        // TODO: This is a temporary solution for 3rd party loaders. Instead, this should be done via metaplugins.
+        
         var plugins = new List<PluginInfo>();
         foreach (var pluginsPath in pluginsPaths)
             plugins.AddRange(DiscoverPluginsFrom(pluginsPath));

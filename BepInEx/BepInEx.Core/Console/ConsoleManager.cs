@@ -57,7 +57,7 @@ public static class ConsoleManager
 
     static ConsoleManager()
     {
-        // Ensure GetCommandLineArgs failing (e.g. on unix) does not kill bepin
+        
         try
         {
             var args = Environment.GetCommandLineArgs();
@@ -70,7 +70,7 @@ public static class ConsoleManager
         }
         catch (Exception)
         {
-            // Skip
+            
         }
     }
 
@@ -78,19 +78,19 @@ public static class ConsoleManager
 
     internal static IConsoleDriver Driver { get; set; }
 
-    /// <summary>
-    ///     True if an external console has been started, false otherwise.
-    /// </summary>
+    
+    
+    
     public static bool ConsoleActive => Driver?.ConsoleActive ?? false;
 
-    /// <summary>
-    ///     The stream that writes to the standard out stream of the process. Should never be null.
-    /// </summary>
+    
+    
+    
     public static TextWriter StandardOutStream => Driver?.StandardOut;
 
-    /// <summary>
-    ///     The stream that writes to an external console. Null if no such console exists
-    /// </summary>
+    
+    
+    
     public static TextWriter ConsoleStream => Driver?.ConsoleOut;
 
 
@@ -120,9 +120,9 @@ public static class ConsoleManager
 
         DriverCheck();
 
-        // Apparently some versions of Mono throw a "Encoding name 'xxx' not supported"
-        // if you use Encoding.GetEncoding
-        // That's why we use of codepages directly and handle then in console drivers separately
+        
+        
+        
         var codepage = ConfigConsoleShiftJis.Value ? SHIFT_JIS_CP : (uint) Encoding.UTF8.CodePage;
 
         Driver.CreateConsole(codepage);

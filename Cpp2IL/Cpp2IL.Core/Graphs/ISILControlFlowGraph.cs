@@ -43,7 +43,7 @@ public class ISILControlFlowGraph
         }
         catch
         {
-            // ignore
+            
         }
 
         return false;
@@ -72,7 +72,7 @@ public class ISILControlFlowGraph
                         AddNode(newNodeFromJmp);
                         if (TryGetTargetJumpInstructionIndex(instructions[i], out uint jumpTargetIndex))
                         {
-                            // var result = instructions.Any(instruction => instruction.InstructionIndex == jumpTargetIndex);
+                            
                             currentBlock.Dirty = true;
                         }
                         else
@@ -111,8 +111,8 @@ public class ISILControlFlowGraph
                     currentBlock.AddInstruction(instructions[i]);
                     if (isLast)
                     {
-                        // TODO: Investiage
-                        /* This shouldn't happen, we've either smashed into another method or random data such as a jump table */
+                        
+                        
                     }
 
                     break;
@@ -159,7 +159,7 @@ public class ISILControlFlowGraph
                     currentBlock = newNodeFromInterrupt;
                     break;
                 case IsilFlowControl.IndexedJump:
-                    // This could be a part of either 2 things, a jmp to a jump table (switch statement) or a tail call to another function maybe? I dunno
+                    
                     throw new NotImplementedException("Indirect branch not implemented currently");
                 default:
                     throw new NotImplementedException($"{instructions[i]} {instructions[i].FlowControl}");
@@ -196,7 +196,7 @@ public class ISILControlFlowGraph
 
         if (destination == null)
         {
-            //We assume that we're tail calling another method somewhere. Need to verify if this breaks anywhere but it shouldn't in general
+            
             block.BlockType = BlockType.Call;
             return;
         }
@@ -239,33 +239,33 @@ public class ISILControlFlowGraph
         if (index < 0 || index >= target.isilInstructions.Count)
             throw new ArgumentOutOfRangeException(nameof(index));
 
-        // Don't need to split...
+        
         if (index == 0)
             return target;
 
         var newNode = new Block() { ID = idCounter++ };
 
-        // target split in two
-        // targetFirstPart -> targetSecondPart aka newNode
+        
+        
 
-        // Take the instructions for the secondPart
+        
         var instructions = target.isilInstructions.GetRange(index, target.isilInstructions.Count - index);
         target.isilInstructions.RemoveRange(index, target.isilInstructions.Count - index);
 
-        // Add those to the newNode
+        
         newNode.isilInstructions.AddRange(instructions);
-        // Transfer control flow
+        
         newNode.BlockType = target.BlockType;
         target.BlockType = BlockType.Fall;
 
-        // Transfer successors
+        
         newNode.Successors = target.Successors;
         if (target.Dirty)
             newNode.Dirty = true;
         target.Dirty = false;
         target.Successors = [];
 
-        // Correct the predecessors for all the successors
+        
         foreach (var successor in newNode.Successors)
         {
             for (int i = 0; i < successor.Predecessors.Count; i++)
@@ -275,7 +275,7 @@ public class ISILControlFlowGraph
             }
         }
 
-        // Add newNode and connect it
+        
         AddNode(newNode);
         AddDirectedEdge(target, newNode);
 

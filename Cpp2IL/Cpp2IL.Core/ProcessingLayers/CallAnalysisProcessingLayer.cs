@@ -17,9 +17,9 @@ public class CallAnalysisProcessingLayer : Cpp2IlProcessingLayer
     public override string Name => "Call Analyzer";
     public override string Id => "callanalyzer";
 
-    /// <summary>
-    /// We don't want 1000 attributes on a single method
-    /// </summary>
+    
+    
+    
     const int MaximumCalledByAttributes = 20;
 
     public override void Process(ApplicationAnalysisContext appContext, Action<int, int>? progressCallback = null)
@@ -261,7 +261,7 @@ public class CallAnalysisProcessingLayer : Cpp2IlProcessingLayer
         TypeAnalysisContext? returnType;
         if (targetMethod is NativeMethodAnalysisContext)
         {
-            returnType = null; //Native methods don't have identifiable return types.
+            returnType = null; 
         }
         else
         {
@@ -321,7 +321,7 @@ public class CallAnalysisProcessingLayer : Cpp2IlProcessingLayer
             return true;
         }
 
-        // We attempt to unify multiple concrete generic methods into a common base method.
+        
 
         var firstMethod = GetBaseMethodIfConcrete(methods[0]);
 

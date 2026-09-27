@@ -48,9 +48,9 @@ internal static class UnixStreamHelper
         {
             ["libc"] = new()
             {
-                "libc.so.6",               // Ubuntu glibc
-                "libc",                    // Linux glibc
-                "/usr/lib/libSystem.dylib" // OSX POSIX
+                "libc.so.6",               
+                "libc",                    
+                "/usr/lib/libSystem.dylib" 
             }
         };
 

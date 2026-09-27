@@ -11,12 +11,12 @@ namespace Cpp2IL;
 public class CommandLineArgs
 {
     [Option("game-path", HelpText = "Specify path to the game folder (containing the exe)")]
-    public string? GamePath { get; set; } = null!; //Suppressed because it's set by CommandLineParser.
+    public string? GamePath { get; set; } = null!; 
 
     [Option("exe-name", HelpText = "Specify an override for the unity executable name in case the auto-detection doesn't work.")]
     public string? ExeName { get; set; }
 
-    //Force options
+    
 
     [Option("force-binary-path", HelpText = "Force the path to the il2cpp binary. Don't use unless you know what you're doing, and use in conjunction with the other force options.")]
     public string? ForcedBinaryPath { get; set; }
@@ -27,7 +27,7 @@ public class CommandLineArgs
     [Option("force-unity-version", HelpText = "Override the unity version detection. Don't use unless you know what you're doing, and use in conjunction with the other force options.")]
     public string? ForcedUnityVersion { get; set; }
 
-    //Processor options
+    
 
     [Option("list-processors", HelpText = "List the available processing layers and exit.")]
     public bool ListProcessors { get; set; }
@@ -38,19 +38,19 @@ public class CommandLineArgs
     [Option("processor-config", HelpText = "Specify a configuration option for one of the processors you have selected to use, in the format key=value. Multiple key-value pairs can be separated using the backtick character (`). The configuration options are used as needed by the selected processors.", Separator = '`')]
     public IEnumerable<string> ProcessorConfigOptions { get; set; } = new List<string>();
 
-    //Output options
+    
 
     [Option("list-output-formats", HelpText = "List the available output formats and exit.")]
     public bool ListOutputFormats { get; set; }
 
-    //FUTURE: Allow multiple of these?
+    
     [Option("output-as", HelpText = "Specify the ID of the output format you wish to use.")]
     public string? OutputFormatId { get; set; }
 
     [Option("output-to", HelpText = "Root directory to output to. Defaults to cpp2il_out in the current working directory.")]
     public string OutputRootDir { get; set; } = Path.GetFullPath("cpp2il_out");
 
-    //Flags
+    
 
     [Option("verbose", HelpText = "Enable Verbose Logging.")]
     public bool Verbose { get; set; }

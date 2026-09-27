@@ -6,10 +6,10 @@ using HarmonyLib;
 
 namespace BepInEx.Unity.Mono.Preloader.RuntimeFixes;
 
-/// <summary>
-///     This exists because the Mono implementation of <see cref="Trace" /> is/was broken, and would call Write directly
-///     instead of calling TraceEvent.
-/// </summary>
+
+
+
+
 internal static class TraceFix
 {
     private static Type TraceImplType;
@@ -27,7 +27,7 @@ internal static class TraceFix
                                  .First(x => x.GetName().Name == "System")
                                  .GetTypes()
                                  .FirstOrDefault(x => x.Name == "TraceImpl");
-        // assembly that has already fixed this
+        
         if (TraceImplType == null) return;
 
         ListenersSyncRoot = AccessTools.Property(TraceImplType, "ListenersSyncRoot").GetValue(null, null);

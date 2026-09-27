@@ -35,8 +35,8 @@ internal static class ConsoleWriter
 
             var ctorParams = new[]
             {
-                new[] { 0, 1, 2 }, // Unity 5.x and up
-                new[] { 0, 1 }     // Unity 4.7 and older
+                new[] { 0, 1, 2 }, 
+                new[] { 0, 1 }     
             };
 
             cStreamWriterConstructor = ctorParams.Select(GetCtor).FirstOrDefault(f => f != null);

@@ -1,7 +1,7 @@
-﻿// --------------------------------------------------
-// UnityInjector - ConsoleWindow.cs
-// Copyright (c) Usagirei 2015 - 2015
-// --------------------------------------------------
+﻿
+
+
+
 
 using System;
 using System.ComponentModel;
@@ -60,7 +60,7 @@ internal class ConsoleWindow
 
         if (cur == IntPtr.Zero)
         {
-            // Store Current Window
+            
             var currWnd = getForeground();
 
             if (!AllocConsole())
@@ -69,7 +69,7 @@ internal class ConsoleWindow
                 if (error != 5) throw new Win32Exception("AllocConsole() failed");
             }
 
-            // Restore Foreground
+            
             setForeground(currWnd);
         }
 
@@ -123,7 +123,7 @@ internal class ConsoleWindow
             return;
         methodsInited = true;
 
-        // Some games may ship user32.dll with some methods missing. As such, we load the DLL explicitly from system folder
+        
         var user32Dll = LoadLibraryEx("user32.dll", IntPtr.Zero, LOAD_LIBRARY_SEARCH_SYSTEM32);
         setForeground = GetProcAddress(user32Dll, "SetForegroundWindow").AsDelegate<SetForegroundWindowDelegate>();
         getForeground = GetProcAddress(user32Dll, "GetForegroundWindow").AsDelegate<GetForegroundWindowDelegate>();

@@ -57,7 +57,7 @@ public class Il2CppFieldDefinition : ReadableClass
     {
         nameIndex = reader.ReadInt32();
 
-        //Cache name now
+        
         var pos = reader.Position;
         Name = ((Il2CppMetadata)reader).ReadStringFromIndexNoReadLock(nameIndex);
         reader.Position = pos;

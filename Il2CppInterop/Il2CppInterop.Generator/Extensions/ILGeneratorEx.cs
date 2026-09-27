@@ -15,8 +15,8 @@ public static class ILGeneratorEx
     public static void EmitObjectStore(this ILProcessor body, TypeSignature originalType, TypeSignature newType,
         TypeRewriteContext enclosingType, int argumentIndex)
     {
-        // input stack: object address, target address
-        // output: nothing
+        
+        
         if (originalType is GenericParameterSignature)
         {
             EmitObjectStoreGeneric(body, originalType, newType, enclosingType, argumentIndex);
@@ -74,8 +74,8 @@ public static class ILGeneratorEx
     private static void EmitObjectStoreGeneric(ILProcessor body, TypeSignature originalType, TypeSignature newType,
         TypeRewriteContext enclosingType, int argumentIndex)
     {
-        // input stack: object address, target address
-        // output: nothing
+        
+        
 
         var imports = enclosingType.AssemblyContext.Imports;
 
@@ -136,7 +136,7 @@ public static class ILGeneratorEx
         body.Add(OpCodes.Br_S, finalNop);
 
         valueTypeNop.Instruction = body.Add(OpCodes.Nop);
-        body.Add(OpCodes.Pop); // pop extra typeof(T)
+        body.Add(OpCodes.Pop); 
         body.AddLoadArgument(argumentIndex);
         body.Add(OpCodes.Stobj, newType.ToTypeDefOrRef());
         body.Add(OpCodes.Pop);
@@ -148,8 +148,8 @@ public static class ILGeneratorEx
         TypeRewriteContext enclosingType, int argumentIndex, bool valueTypeArgument0IsAPointer, bool allowNullable,
         bool unboxNonBlittableType, bool unboxNonBlittableGeneric, out CilLocalVariable? refVariable)
     {
-        // input stack: not used
-        // output stack: IntPtr to either Il2CppObject or IL2CPP value type
+        
+        
         refVariable = null;
 
         if (originalType is GenericParameterSignature)
@@ -260,11 +260,11 @@ public static class ILGeneratorEx
         if (unboxNonBlittableType)
         {
             body.Add(OpCodes.Dup);
-            body.Add(OpCodes.Brfalse_S, finalNop); // return null immediately
+            body.Add(OpCodes.Brfalse_S, finalNop); 
             body.Add(OpCodes.Dup);
             body.Add(OpCodes.Call, imports.IL2CPP_il2cpp_object_get_class.Value);
             body.Add(OpCodes.Call, imports.IL2CPP_il2cpp_class_is_valuetype.Value);
-            body.Add(OpCodes.Brfalse_S, finalNop); // return reference types immediately
+            body.Add(OpCodes.Brfalse_S, finalNop); 
             body.Add(OpCodes.Call, imports.IL2CPP_il2cpp_object_unbox.Value);
         }
 
@@ -285,8 +285,8 @@ public static class ILGeneratorEx
         TypeSignature convertedReturnType, TypeRewriteContext enclosingType, CilLocalVariable pointerVariable,
         bool extraDerefForNonValueTypes, bool unboxValueType)
     {
-        // input stack: not used
-        // output stack: converted result
+        
+        
 
         if (originalReturnType is GenericParameterSignature)
         {
@@ -298,7 +298,7 @@ public static class ILGeneratorEx
         var imports = enclosingType.AssemblyContext.Imports;
         if (originalReturnType.FullName == "System.Void")
         {
-            // do nothing
+            
         }
         else if (originalReturnType.IsPointerLike())
         {
@@ -343,9 +343,9 @@ public static class ILGeneratorEx
         }
         else if (originalReturnType is ArrayBaseTypeSignature && originalReturnType.GetElementType() is GenericParameterSignature genericParameterSignature)
         {
-            // Note:
-            // The method reference parent is constructed relative to the calling method.
-            // The return type and parameter types are constructed relative to the called method.
+            
+            
+            
             body.Add(OpCodes.Ldloc, pointerVariable);
             if (extraDerefForNonValueTypes) body.Add(OpCodes.Ldind_I);
             var actualReturnType = imports.Module.DefaultImporter.ImportTypeSignature(imports.Il2CppArrayBase.MakeGenericInstanceType(new GenericParameterSignature(GenericParameterType.Type, 0)));

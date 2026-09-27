@@ -17,7 +17,7 @@ public class AttributeAnalysisProcessingLayer : Cpp2IlProcessingLayer
         int count = 0;
         appContext.Assemblies.ForEach(a => AnalyzeAndRaise(a, ref count, total, progressCallback));
 
-        //TODO look into making this parallel
+        
         foreach (var type in appContext.AllTypes)
         {
             AnalyzeAndRaise(type, ref count, total, progressCallback);

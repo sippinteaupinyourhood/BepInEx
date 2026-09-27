@@ -5,7 +5,7 @@ using Cpp2IL.Core.Attributes;
 using Cpp2IL.Core.InstructionSets;
 using Cpp2IL.Core.OutputFormats;
 using Cpp2IL.Core.ProcessingLayers;
-//Need this for the assembly attribute definition below.
+
 using LibCpp2IL;
 
 [assembly: RegisterCpp2IlPlugin(typeof(Cpp2IlCorePlugin))]

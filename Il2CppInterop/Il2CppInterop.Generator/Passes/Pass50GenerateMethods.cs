@@ -34,10 +34,10 @@ public static class Pass50GenerateMethods
                     if (valueTypeLocal.VariableType.FullName != "System.Void")
                         newMethod.CilMethodBody.LocalVariables.Add(valueTypeLocal);
 
-                    // Pre-initialize any present params
-                    // TODO: This doesn't account for params T[] (i.e. generic element type) yet; may emit incorrect IL
-                    // TODO: Do we really need a loop here? C# allows only one params array.
-                    //       On the other hand, CreateParamsMethod accommodates multiple ParamArrayAttribute as well
+                    
+                    
+                    
+                    
                     CilInstructionLabel? nextInstruction = null;
                     for (var paramIndex = 0; paramIndex < originalMethod.Parameters.Count; paramIndex++)
                     {
@@ -120,15 +120,15 @@ public static class Pass50GenerateMethods
                         }
 
                         var newParam = newMethod.Parameters[i];
-                        // TODO: create a default instance for Il2CppSystem.ValueType wrapped value type
-                        // NOTE(Kas): out parameters of value type are passed directly as a pointer to the il2cpp method
-                        // since we don't need to perform any additional copies
+                        
+                        
+                        
                         if (newParam.Definition!.IsOut && newParam.ParameterType is ByReferenceTypeSignature && !newParam.ParameterType.GetElementType().IsValueType())
                         {
                             var elementType = newParam.ParameterType.GetElementType();
 
-                            // Storage for the output Il2CppObjectBase pointer, it's
-                            // unused if there's a generic value type parameter
+                            
+                            
                             var outVar = new CilLocalVariable(imports.Module.IntPtr());
                             bodyBuilder.Owner.LocalVariables.Add(outVar);
 
@@ -143,7 +143,7 @@ public static class Pass50GenerateMethods
 
                                 bodyBuilder.Add(OpCodes.Brtrue, valueTypeBlock);
 
-                                // The generic parameter is an Il2CppObjectBase => set the output storage to a nullptr
+                                
                                 bodyBuilder.Add(OpCodes.Ldc_I4, 0);
                                 bodyBuilder.Add(OpCodes.Stloc, outVar);
                                 bodyBuilder.Add(OpCodes.Ldloca, outVar);
@@ -151,8 +151,8 @@ public static class Pass50GenerateMethods
 
                                 bodyBuilder.Add(OpCodes.Br_S, continueBlock);
 
-                                // Instruction block that handles generic value types, we only need to return a reference
-                                // to the output argument since it is already allocated for us
+                                
+                                
                                 valueTypeBlock.Instruction = bodyBuilder.Add(OpCodes.Nop);
                                 bodyBuilder.AddLoadArgument(argOffset + i);
 
@@ -232,13 +232,13 @@ public static class Pass50GenerateMethods
 
                             bodyBuilder.Add(OpCodes.Brtrue, continueBlock);
 
-                            // The generic parameter is an Il2CppObjectBase => update the reference appropriately
+                            
                             bodyBuilder.EmitUpdateRef(newMethod.Parameters[paramIndex], paramIndex + argOffset, paramVariable,
                                 imports);
 
                             bodyBuilder.Add(OpCodes.Br_S, continueBlock);
 
-                            // There is no need to handle generic value types, they are already passed by reference
+                            
 
                             continueBlock.Instruction = bodyBuilder.Add(OpCodes.Nop);
                         }

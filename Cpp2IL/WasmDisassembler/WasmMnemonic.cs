@@ -21,10 +21,10 @@ public enum WasmMnemonic : byte
     BrIf,
     BrTable,
     Return,
-    Call, //0x10
+    Call, 
     CallIndirect,
     Proposed_ReturnCall,
-    Proposed_ReturnCallIndirect, //0x13. Reserved block start
+    Proposed_ReturnCallIndirect, 
     Reserved_14,
     Reserved_15,
     Reserved_16,
@@ -37,7 +37,7 @@ public enum WasmMnemonic : byte
     Reserved_1D,
     Reserved_1E,
     Reserved_1F,
-    LocalGet, //0x20
+    LocalGet, 
     LocalSet,
     LocalTee,
     GlobalGet,
@@ -53,7 +53,7 @@ public enum WasmMnemonic : byte
     I32Load8_U,
     I32Load16_S,
     I32Load16_U,
-    I64Load8_S, //0x30
+    I64Load8_S, 
     I64Load8_U,
     I64Load16_S,
     I64Load16_U,
@@ -69,7 +69,7 @@ public enum WasmMnemonic : byte
     I64Store16,
     I64Store32,
     MemorySize,
-    MemoryGrow, //0x40
+    MemoryGrow, 
     I32Const,
     I64Const,
     F32Const,
@@ -85,7 +85,7 @@ public enum WasmMnemonic : byte
     I32Le_U,
     I32Ge_S,
     I32Ge_U,
-    I64Eqz, //0x50
+    I64Eqz, 
     I64Eq,
     I64Ne,
     I64Lt_S,
@@ -101,7 +101,7 @@ public enum WasmMnemonic : byte
     F32Lt,
     F32Gt,
     F32Le,
-    F32Ge, //0x60
+    F32Ge, 
     F64Eq,
     F64Ne,
     F64Lt,
@@ -117,7 +117,7 @@ public enum WasmMnemonic : byte
     I32Div_S,
     I32Div_U,
     I32Rem_S,
-    I32Rem_U, //0x70
+    I32Rem_U, 
     I32And,
     I32Or,
     I32Xor,
@@ -133,7 +133,7 @@ public enum WasmMnemonic : byte
     I64Sub,
     I64Mul,
     I64Div_S,
-    I64Div_U, //0x80
+    I64Div_U, 
     I64Rem_S,
     I64Rem_U,
     I64And,
@@ -149,7 +149,7 @@ public enum WasmMnemonic : byte
     F32Ceil,
     F32Floor,
     F32Trunc,
-    F32Nearest, //0x90
+    F32Nearest, 
     F32Sqrt,
     F32Add,
     F32Sub,
@@ -165,7 +165,7 @@ public enum WasmMnemonic : byte
     F64Trunc,
     F64Nearest,
     F64Sqrt,
-    F64Add, //0xA0
+    F64Add, 
     F64Sub,
     F64Mul,
     F64Div,
@@ -181,7 +181,7 @@ public enum WasmMnemonic : byte
     I64Extend_I32_U,
     I64Trunc_F32_S,
     I64Trunc_F32_U,
-    I64Trunc_F64_S, //0xB0
+    I64Trunc_F64_S, 
     I64Trunc_F64_U,
     F32Convert_I32_S,
     F32Convert_I32_U,
@@ -199,19 +199,19 @@ public enum WasmMnemonic : byte
     F64Reinterpret_I64,
     LastValid = F64Reinterpret_I64,
 
-    Proposed_I32Extend8_S, //0xC0
+    Proposed_I32Extend8_S, 
     Proposed_I32Extend16_S,
     Proposed_I64Extend8_S,
     Proposed_I64Extend16_S,
     Proposed_I64Extend32_S,
 
-    //Reserved: 0xC5-CF
+    
     Proposed_RefNull = 0xD0,
     Proposed_RefIsNull,
     Proposed_RefFunc,
 
-    //Reserved: 0xD3-FB,
+    
     Proposed_FC_Extensions = 0xFC,
     Proposed_SIMD,
-    //Reserved: 0xFE-FF
+    
 }

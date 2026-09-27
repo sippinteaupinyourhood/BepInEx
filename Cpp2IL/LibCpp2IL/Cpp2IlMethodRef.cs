@@ -15,24 +15,24 @@ public class Cpp2IlMethodRef(Il2CppMethodSpec methodSpec)
 
     public ulong GenericVariantPtr;
 
-    // var declaringTypeGenericParams = Array.Empty<Il2CppTypeReflectionData>();
-    // if (methodSpec.classIndexIndex != -1)
-    // {
-    //     var classInst = methodSpec.GenericClassInst;
-    //     declaringTypeGenericParams = LibCpp2ILUtils.GetGenericTypeParams(classInst!)!;
-    // }
-    //
-    // var genericMethodParameters = Array.Empty<Il2CppTypeReflectionData>();
-    // if (methodSpec.methodIndexIndex != -1)
-    // {
-    //     var methodInst = methodSpec.GenericMethodInst;
-    //     genericMethodParameters = LibCpp2ILUtils.GetGenericTypeParams(methodInst!)!;
-    // }
-    //
-    // BaseMethod = methodSpec.MethodDefinition!;
-    // DeclaringType = methodSpec.MethodDefinition!.DeclaringType!;
-    // TypeGenericParams = declaringTypeGenericParams;
-    // MethodGenericParams = genericMethodParameters;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     public override string ToString()
     {

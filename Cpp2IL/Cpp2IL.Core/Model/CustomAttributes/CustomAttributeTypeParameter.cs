@@ -8,9 +8,9 @@ using LibCpp2IL.Metadata;
 
 namespace Cpp2IL.Core.Model.CustomAttributes;
 
-/// <summary>
-/// Represents a <see cref="BaseCustomAttributeTypeParameter"/> for a <see cref="Il2CppType"/>.
-/// </summary>
+
+
+
 public class CustomAttributeTypeParameter : BaseCustomAttributeTypeParameter
 {
     private Il2CppType? _type;
@@ -45,7 +45,7 @@ public class CustomAttributeTypeParameter : BaseCustomAttributeTypeParameter
             _type = null;
         else
         {
-            _type = context.Binary.GetType(Il2CppVariableWidthIndex<Il2CppType>.MakeTemporaryForFixedWidthUsage(typeIndex)); //DynWidth: typeIndex is already compressed, they didn't make it dynamic
+            _type = context.Binary.GetType(Il2CppVariableWidthIndex<Il2CppType>.MakeTemporaryForFixedWidthUsage(typeIndex)); 
         }
         _typeContext = null;
     }
@@ -63,7 +63,7 @@ public class CustomAttributeTypeParameter : BaseCustomAttributeTypeParameter
             return $"typeof({TypeContext.GetCSharpSourceString()})";
         }
 
-        //Basic class/struct
+        
         return $"typeof({TypeContext.Name})";
     }
 }

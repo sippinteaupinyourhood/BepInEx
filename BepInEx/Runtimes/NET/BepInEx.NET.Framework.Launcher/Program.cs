@@ -36,7 +36,7 @@ internal class Program
                              Path.GetFileName(Process.GetCurrentProcess().MainModule.FileName));
             ResolveDirectories.Add(Path.GetDirectoryName(filename));
 
-            // for debugging within VS
+            
             ResolveDirectories.Add(Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName));
 #else
             filename = Process.GetCurrentProcess().MainModule.FileName;

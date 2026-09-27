@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
+
 VisualStudioVersion = 16.0.31402.337
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Il2CppInterop.Generator", "Il2CppInterop.Generator\Il2CppInterop.Generator.csproj", "{7C3FD45B-A563-47AF-90DF-8B051A8C33A0}"

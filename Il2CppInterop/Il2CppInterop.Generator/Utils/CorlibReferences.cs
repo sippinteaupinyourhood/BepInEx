@@ -7,9 +7,9 @@ namespace Il2CppInterop.Generator.Utils;
 
 internal static class CorlibReferences
 {
-    /// <summary>
-    /// This is used in the TargetFrameworkAttribute.
-    /// </summary>
+    
+    
+    
     public static string TargetFrameworkName => ".NET 6.0";
     public static AssemblyReference TargetCorlib => KnownCorLibs.SystemRuntime_v6_0_0_0;
 

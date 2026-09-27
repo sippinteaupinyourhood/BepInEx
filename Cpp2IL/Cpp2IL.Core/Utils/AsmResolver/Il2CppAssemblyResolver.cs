@@ -17,12 +17,12 @@ internal class Il2CppAssemblyResolver : IAssemblyResolver
 
     public void AddToCache(AssemblyDescriptor descriptor, AssemblyDefinition definition)
     {
-        //no-op
+        
     }
 
     public bool RemoveFromCache(AssemblyDescriptor descriptor)
     {
-        //no-op
+        
         return true;
     }
 
@@ -33,6 +33,6 @@ internal class Il2CppAssemblyResolver : IAssemblyResolver
 
     public void ClearCache()
     {
-        //no-op
+        
     }
 }

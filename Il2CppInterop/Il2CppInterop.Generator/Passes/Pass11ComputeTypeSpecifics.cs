@@ -27,7 +27,7 @@ public static class Pass11ComputeTypeSpecifics
 
         foreach (var originalField in typeContext.OriginalType.Fields)
         {
-            // Sometimes il2cpp metadata has invalid field offsets for some reason (https://github.com/SamboyCoding/Cpp2IL/issues/167)
+            
             if (originalField.ExtractFieldOffset() >= 0x8000000)
             {
                 typeContext.ComputedTypeSpecifics = TypeRewriteContext.TypeSpecifics.NonBlittableStruct;

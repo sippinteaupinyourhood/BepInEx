@@ -3,13 +3,13 @@
 public class ElfFileHeader : ReadableClass
 {
     public ElfFileType Type;
-    public short Machine; //3 => x86, 0x3e => x86_64, 0x28 => ARM (v7, 32-bit), 0xB7 => ARM64 (v8, 64-bit)
-    public int Version; //Should be 1
-    public long pEntryPoint; //arch-dependent length
-    public long pProgramHeader; //arch-dependent length
-    public long pSectionHeader; //arch-dependent length
+    public short Machine; 
+    public int Version; 
+    public long pEntryPoint; 
+    public long pProgramHeader; 
+    public long pSectionHeader; 
     public int Flags;
-    public short HeaderSize; //Meta!
+    public short HeaderSize; 
 
     public short ProgramHeaderEntrySize;
     public short ProgramHeaderEntryCount;
@@ -17,7 +17,7 @@ public class ElfFileHeader : ReadableClass
     public short SectionHeaderEntrySize;
     public short SectionHeaderEntryCount;
 
-    public short SectionNameSectionOffset; //Offset in the Section Header of the Section containing the names of all the Sections.
+    public short SectionNameSectionOffset; 
 
     public override void Read(ClassReadingBinaryReader reader)
     {

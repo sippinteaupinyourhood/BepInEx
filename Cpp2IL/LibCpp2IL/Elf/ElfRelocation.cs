@@ -1,8 +1,8 @@
 ﻿namespace LibCpp2IL.Elf;
 
-/// <summary>
-/// Not an actual Elf struct, but an internal representation for a bunch of them.
-/// </summary>
+
+
+
 public class ElfRelocation
 {
     public ElfRelocationType Type;
@@ -27,7 +27,7 @@ public class ElfRelocation
     public ElfRelocation(ElfFile f, ElfRelaEntry relocation, ulong tablePointer)
     {
         Offset = relocation.Offset;
-        Addend = relocation.Addend; //Same as the above ctor except for this.
+        Addend = relocation.Addend; 
         Type = (ElfRelocationType)GetTypeBitsFromInfo(relocation.Info, f);
         IndexInSymbolTable = GetSymBitsFromInfo(relocation.Info, f);
         pRelatedSymbolTable = tablePointer;

@@ -14,9 +14,9 @@ using BepInEx.Unity.Mono.Preloader.Utils;
 
 namespace BepInEx.Unity.Mono.Preloader;
 
-/// <summary>
-///     The main entrypoint of BepInEx, and initializes all patchers and the chainloader.
-/// </summary>
+
+
+
 internal static class UnityPreloader
 {
     #region Config
@@ -28,9 +28,9 @@ internal static class UnityPreloader
 
     #endregion
 
-    /// <summary>
-    ///     The log writer that is specific to the preloader.
-    /// </summary>
+    
+    
+    
     private static PreloaderConsoleListener PreloaderLog { get; set; }
 
     private static ManualLogSource Log => PreloaderLogger.Log;
@@ -103,7 +103,7 @@ internal static class UnityPreloader
 
                 if (!ConsoleManager.ConsoleActive)
                 {
-                    //if we've already attached the console, then the log will already be written to the console
+                    
                     AllocateConsole();
                     Console.Write(PreloaderLog);
                 }
@@ -114,7 +114,7 @@ internal static class UnityPreloader
 
             try
             {
-                // We could use platform-dependent newlines, however the developers use Windows so this will be easier to read :)
+                
 
                 log = string.Join("\r\n", PreloaderConsoleListener.LogEvents.Select(x => x.ToString()).ToArray());
                 log += "\r\n";
@@ -130,9 +130,9 @@ internal static class UnityPreloader
         }
     }
 
-    /// <summary>
-    ///     Allocates a console window for use by BepInEx safely.
-    /// </summary>
+    
+    
+    
     public static void AllocateConsole()
     {
         if (!ConsoleManager.ConsoleEnabled)

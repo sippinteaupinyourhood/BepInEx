@@ -21,10 +21,10 @@ public class InstructionSetIndependentInstruction : IsilOperandData
 
     public override string ToString() => $"{InstructionIndex:000} {OpCode} {string.Join(", ", Operands)}";
 
-    /// <summary>
-    /// Marks the instruction as <see cref="IsilMnemonic.Invalid"/>.
-    /// </summary>
-    /// <param name="reason">The reason that this instruction is being invalidated.</param>
+    
+    
+    
+    
     public void Invalidate(string reason)
     {
         OpCode = InstructionSetIndependentOpCode.Invalid;

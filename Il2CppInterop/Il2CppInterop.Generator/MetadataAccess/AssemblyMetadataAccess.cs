@@ -17,8 +17,8 @@ public class AssemblyMetadataAccess : IIl2CppMetadataAccess
 
     public AssemblyMetadataAccess(IEnumerable<AssemblyDefinition> assemblies)
     {
-        // Note: At the moment this assumes that passed assemblies have their own assembly resolver set up
-        // If this is not true, this can cause issues with reference resolving
+        
+        
         Load(assemblies);
     }
 
@@ -70,7 +70,7 @@ public class AssemblyMetadataAccess : IIl2CppMetadataAccess
         {
             var sourceAssemblyName = sourceAssembly.Name!;
             foreach (var type in sourceAssembly.ManifestModule!.TopLevelTypes)
-                // todo: nested types?
+                
                 myTypesByName[(sourceAssemblyName, type.FullName)] = type;
         }
     }

@@ -45,7 +45,7 @@ internal class DeobfuscationAnalyzerRunner : IRunner
                 var uniqueTypes = rewriteContext.RenameGroups.Values.Count(it => it.Count == 1);
                 var nonUniqueTypes = rewriteContext.RenameGroups.Values.Count(it => it.Count > 1);
 
-                // Ensure the output is written to stdout
+                
                 Console.WriteLine($"Chars=\t{chars}\tMaxU=\t{uniq}\tUniq=\t{uniqueTypes}\tNonUniq=\t{nonUniqueTypes}");
             }
     }

@@ -2,19 +2,19 @@ namespace LibCpp2IL.BinaryStructures;
 
 public class Il2CppCodeGenModule : ReadableClass
 {
-    public ulong moduleName; //pointer
-    public long methodPointerCount; //ulong
-    public ulong methodPointers; //pointer
+    public ulong moduleName; 
+    public long methodPointerCount; 
+    public ulong methodPointers; 
 
-    //Present in v27.1 and v24.5, but not v27.0
+    
     [Version(Min = 27.1f)] [Version(Min = 24.5f, Max = 24.5f)]
     public long adjustorThunkCount;
 
     [Version(Min = 27.1f)] [Version(Min = 24.5f, Max = 24.5f)]
-    public ulong adjustorThunks; //Pointer
+    public ulong adjustorThunks; 
 
-    public ulong invokerIndices; //ulong
-    public ulong reversePInvokeWrapperCount; //ulong
+    public ulong invokerIndices; 
+    public ulong reversePInvokeWrapperCount; 
     public ulong reversePInvokeWrapperIndices;
 
     public long rgctxRangesCount;
@@ -24,11 +24,11 @@ public class Il2CppCodeGenModule : ReadableClass
     public ulong rgctxs;
     public ulong debuggerMetadata;
 
-    [Version(Min = 27, Max = 27.9f)] public ulong customAttributeCacheGenerator; //Removed in v29
+    [Version(Min = 27, Max = 27.9f)] public ulong customAttributeCacheGenerator; 
     [Version(Min = 27)] public ulong moduleInitializer;
     [Version(Min = 27)] public ulong staticConstructorTypeIndices;
-    [Version(Min = 27)] public ulong metadataRegistration; //Per-assembly mode only
-    [Version(Min = 27)] public ulong codeRegistration; //Per-assembly mode only.
+    [Version(Min = 27)] public ulong metadataRegistration; 
+    [Version(Min = 27)] public ulong codeRegistration; 
 
     private string? _cachedName;
 

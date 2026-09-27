@@ -44,15 +44,15 @@ public static class Pass79UnstripTypes
         if (unityType.Name == "<Module>")
             return;
 
-        // Don't unstrip delegates, the il2cpp runtime methods are stripped and we cannot recover them
+        
         if (unityType.BaseType != null && unityType.BaseType.FullName == "System.MulticastDelegate")
             return;
         var newModule = processedAssembly.NewAssembly.ManifestModule!;
         var processedType = processedAssembly.TryGetTypeByName(unityType.FullName)?.NewType;
         var convertedTypeName = GetConvertedUnityTypeName(processedAssembly.GlobalContext, unityType);
 
-        // If the parent type does not exist in the rewritten assembly, this nested type cannot be emitted safely.
-        // Promoting it to a top-level type creates orphan compiler-generated types such as __O/__c.
+        
+        
         if ((unityType.DeclaringType is null) != (enclosingNewType is null))
             return;
 
@@ -102,8 +102,8 @@ public static class Pass79UnstripTypes
                 clonedType.GenericParameters.Add(clonedParameter);
             }
 
-            // Unity assemblies sometimes have struct layouts on classes.
-            // This gets overlooked on mono but not on coreclr.
+            
+            
             if (!clonedType.IsValueType() && (clonedType.IsExplicitLayout || clonedType.IsSequentialLayout))
             {
                 clonedType.IsExplicitLayout = clonedType.IsSequentialLayout = false;

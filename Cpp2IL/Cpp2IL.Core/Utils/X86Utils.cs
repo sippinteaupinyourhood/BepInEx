@@ -17,7 +17,7 @@ public static class X86Utils
     private static readonly ConcurrentDictionary<string, string> CachedUpscaledRegisters = new();
     private static readonly ConcurrentDictionary<Register, string> CachedX86RegNamesNew = new();
 
-    //TODO Consider implementing a CodeReader for Memory
+    
     public static InstructionList Disassemble(Memory<byte> bytes, ulong methodBase)
         => Disassemble(bytes.ToArray(), methodBase);
 
@@ -83,7 +83,7 @@ public static class X86Utils
 
         if (ra2 <= 0)
         {
-            //Don't have a known end point => fall back
+            
             GetMethodBodyAtVirtAddressNew(ptr, false, out var ret);
             return ret;
         }
@@ -114,13 +114,13 @@ public static class X86Utils
 
         if (TryFindJumpTableStart(memArray, ptr, virtStartNextFunc, out var startIndex, out var jumpTableElements))
         {
-            // TODO: Figure out what to do with jumpTableElements, how do we handle returning it from this function?
-            // we might need to return the address it was found at in TryFindJumpTableStart function too 
-            // Should clean up the way we handle the bytes array too
-            /*
-            foreach (var element in jumpTableElements)
-                //Logger.InfoNewline($"Jump table element: 0x{element:x8}.");
-            */
+            
+            
+            
+            
+
+
+
             memArray = memArray.Slice(0, startIndex);
         }
 
@@ -135,10 +135,10 @@ public static class X86Utils
         for (int i = (int)(methodPtr % 4); i < methodBytes.Length; i += 4)
         {
             var result = (ulong)methodBytes.Span.ReadUInt(i);
-            var possibleJumpAddress = result + 0x180000000; // image base
+            var possibleJumpAddress = result + 0x180000000; 
             if (possibleJumpAddress > methodPtr && possibleJumpAddress < nextMethodPtr)
             {
-                // Sound the alarms, we've more than likely ran into a jump table  
+                
                 if (!foundTable)
                 {
                     startIndex = i;
@@ -185,7 +185,7 @@ public static class X86Utils
             if (peek && buff.Count > 50)
                 con = false;
             else if (buff.Count > 50000)
-                con = false; //Sanity breakout.
+                con = false; 
 
             addr++;
             rawAddr++;
@@ -205,7 +205,7 @@ public static class X86Utils
 
         if (replaceIn.Length < 2) return replaceIn;
 
-        //Special case the few 8-bit register: "al" => "rax" etc
+        
         if (replaceIn == "al")
             return "rax";
         if (replaceIn == "bl")
@@ -217,7 +217,7 @@ public static class X86Utils
         if (replaceIn == "cx" || replaceIn == "cl")
             return "rcx";
 
-        //R9d, etc.
+        
         if (replaceIn[0] == 'r' && replaceIn[^1] == 'd')
             return replaceIn.Substring(0, replaceIn.Length - 1);
 

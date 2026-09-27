@@ -3,7 +3,7 @@
     public class MachODyldChainedFixupsHeader : ReadableClass
     {
         public const uint SupportedFixupsVersion = 0;
-        public const uint SupportedImportsFormat = 1; //DYLD_CHAINED_IMPORT
+        public const uint SupportedImportsFormat = 1; 
         
         public uint FixupsVersion;
         public uint StartsOffset;

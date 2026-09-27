@@ -3,9 +3,9 @@ using LibCpp2IL.Elf;
 
 namespace LibCpp2IL;
 
-/// <summary>
-/// Full credit for most of this file goes to djKaty in the il2cppinspector project.
-/// </summary>
+
+
+
 internal static class MiniArm64Decompiler
 {
     private static (uint reg, ulong page)? GetAdrp(uint inst, ulong pc)
@@ -22,8 +22,8 @@ internal static class MiniArm64Decompiler
         return (reg, page + addend);
     }
 
-    // https://static.docs.arm.com/100878/0100/fundamentals_of_armv8_a_100878_0100_en.pdf states:
-    // Unlike ARMv7-A, there is no implied offset of 4 or 8 bytes
+    
+    
     private static (uint reg, ulong addr)? GetAdr(uint inst, ulong pc)
     {
         if (inst.Bits(24, 5) != 0b10000 || inst.Bits(31, 1) != 0)
@@ -31,7 +31,7 @@ internal static class MiniArm64Decompiler
 
         ulong imm = (inst.Bits(5, 19) << 2) + inst.Bits(29, 2);
 
-        // Sign extend the 21-bit number to 64 bits
+        
         imm = (imm & (1 << 20)) == 0 ? imm : imm | unchecked((ulong)-(1 << 21));
 
         var reg = inst.Bits(0, 5);
@@ -72,35 +72,35 @@ internal static class MiniArm64Decompiler
         var pc = baseAddress;
         foreach (var inst in funcBody)
         {
-            //ADRP Xn, #page instruction
+            
             if (GetAdrp(inst, pc) is var (reg, page))
             {
                 ret[reg] = page;
             }
 
-            //ADR Xn, addr
+            
             if (GetAdr(inst, pc) is var (adrReg, addr))
             {
                 ret[adrReg] = addr;
             }
 
-            //Add Xn, Xd, #imm
+            
             if (GetAdd64(inst) is var (regN, regD, imm))
             {
-                //Check adding to self (n == d) and we have the register
+                
                 if (regN == regD && ret.ContainsKey(regD))
                     ret[regD] += imm;
             }
 
-            //LDR Xm, [Xn, #offset]
+            
             if (GetLdr64ImmOffset(inst) is var (regT, regLdrN, simm))
             {
-                //Check ldr is to self and we have the reg
+                
                 if (regT == regLdrN && ret.ContainsKey(regLdrN))
                 {
                     ret[regLdrN] += simm * 8;
 
-                    //Dereference resulting pointer
+                    
                     ret[regLdrN] = image.ReadPointerAtVirtualAddress(ret[regLdrN]);
                 }
             }
@@ -113,7 +113,7 @@ internal static class MiniArm64Decompiler
 
     public static List<uint> ReadFunctionAtRawAddress(ElfFile file, uint loc, uint maxLength)
     {
-        //Either we find a b (hard jump), or we exceed maxLength
+        
 
         var ret = new List<uint>();
 

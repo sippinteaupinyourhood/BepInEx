@@ -5,28 +5,28 @@ using UnityEngine;
 
 namespace BepInEx.Unity.Mono.Logging;
 
-/// <summary>
-///     Logs entries using Unity specific outputs.
-/// </summary>
+
+
+
 public class UnityLogSource : ILogSource
 {
     private bool disposed;
 
-    /// <summary>
-    ///     Creates a new Unity log source.
-    /// </summary>
+    
+    
+    
     public UnityLogSource()
     {
         InternalUnityLogMessage += UnityLogMessageHandler;
     }
 
-    /// <inheritdoc />
+    
     public string SourceName { get; } = "Unity Log";
 
-    /// <inheritdoc />
+    
     public event EventHandler<LogEventArgs> LogEvent;
 
-    /// <inheritdoc />
+    
     public void Dispose()
     {
         if (!disposed)
@@ -55,14 +55,14 @@ public class UnityLogSource : ILogSource
         if (logEvent != null)
         {
             logEvent.AddEventHandler(null, callback);
-            //UnsubscribeAction = () => logEvent.RemoveEventHandler(null, callback);
+            
         }
         else
         {
             var registerLogCallback =
                 typeof(Application).GetMethod("RegisterLogCallback", BindingFlags.Public | BindingFlags.Static);
             registerLogCallback.Invoke(null, new object[] { callback });
-            //UnsubscribeAction = () => registerLogCallback.Invoke(null, new object[] { null });
+            
         }
     }
 

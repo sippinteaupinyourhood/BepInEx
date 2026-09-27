@@ -6,7 +6,7 @@ namespace LibCpp2IL.Metadata;
 
 public class Il2CppGenericParameter : ReadableClass
 {
-    public Il2CppVariableWidthIndex<Il2CppGenericContainer> ownerIndex; /* Type or method this parameter was defined in. */
+    public Il2CppVariableWidthIndex<Il2CppGenericContainer> ownerIndex; 
     public int nameIndex;
     public short constraintsStart;
     public short constraintsCount;
@@ -25,9 +25,9 @@ public class Il2CppGenericParameter : ReadableClass
             .Select(LibCpp2IlMain.Binary!.GetType)
             .ToArray();
 
-    /// <summary>
-    /// The index of this generic parameter to be passed to <see cref="Il2CppMetadata.GetGenericParameterFromIndex"/> to obtain this instance
-    /// </summary>
+    
+    
+    
     public Il2CppVariableWidthIndex<Il2CppGenericParameter> Index { get; internal set; }
 
     public Il2CppGenericContainer Owner => LibCpp2IlMain.TheMetadata!.GetGenericContainerFromIndex(ownerIndex);

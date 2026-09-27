@@ -4,7 +4,7 @@ namespace LibCpp2IL.Elf;
 
 public interface IElfProgramHeaderEntry
 {
-    //This interface exists purely because the flags are in different places on 32-bit and 64-bit elf files.
+    
     public ElfProgramHeaderFlags Flags { get; }
 
     public ElfProgramEntryType Type { get; }

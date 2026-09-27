@@ -7,18 +7,18 @@ namespace Cpp2IL.Core;
 
 public static class Il2CppMethodDefinitionUsefulOffsets
 {
-    public const int X86_SLOT_OFFSET = 0x00; //TODO
+    public const int X86_SLOT_OFFSET = 0x00; 
     public const int X86_64_SLOT_OFFSET = 0x48;
 
     public static readonly List<UsefulOffset> UsefulOffsets =
     [
         new UsefulOffset("slot", X86_SLOT_OFFSET, typeof(ushort), true),
 
-        //64-bit offsets:
+        
         new UsefulOffset("slot", X86_64_SLOT_OFFSET, typeof(ushort), false),
         new UsefulOffset("klass", 0x18, typeof(IntPtr), false),
 
-        //TODO What *exactly* is this and when is it present? Found in Audica - TargetSpawnerLayoutUtil#UpdatePositions.
+        
         new UsefulOffset("methodPtr", 0x30, typeof(IntPtr), false)
     ];
 

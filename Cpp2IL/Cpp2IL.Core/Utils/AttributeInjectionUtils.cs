@@ -12,10 +12,10 @@ namespace Cpp2IL.Core.Utils;
 
 public static class AttributeInjectionUtils
 {
-    /// <summary>
-    /// Inject an attribute with no fields nor properties into the <see cref="ApplicationAnalysisContext"/>.
-    /// </summary>
-    /// <returns>A dictionary of assembly contexts to their inject attribute constructors.</returns>
+    
+    
+    
+    
     public static Dictionary<AssemblyAnalysisContext, InjectedMethodAnalysisContext> InjectZeroParameterAttribute(ApplicationAnalysisContext appContext, string ns, string name, AttributeTargets attributeTargets, bool allowMultiple)
     {
         var multiInjectType = appContext.InjectTypeIntoAllAssemblies(ns, name, appContext.SystemTypes.SystemAttributeType);
@@ -113,7 +113,7 @@ public static class AttributeInjectionUtils
     public static void AddZeroParameterAttribute(HasCustomAttributes customAttributeHolder, MethodAnalysisContext constructor)
     {
         var newAttribute = new AnalyzedCustomAttribute(constructor);
-        customAttributeHolder.CustomAttributes!.Add(newAttribute); //Nullability checked elsewhere
+        customAttributeHolder.CustomAttributes!.Add(newAttribute); 
     }
 
     public static void AddOneParameterAttribute(HasCustomAttributes customAttributeHolder, (MethodAnalysisContext, FieldAnalysisContext) attributeInfo, object fieldValue)
@@ -125,7 +125,7 @@ public static class AttributeInjectionUtils
     {
         var newAttribute = new AnalyzedCustomAttribute(constructor);
         newAttribute.Fields.Add(new(field, MakeFieldParameter(fieldValue, newAttribute, 0)));
-        customAttributeHolder.CustomAttributes!.Add(newAttribute); //Nullability checked elsewhere
+        customAttributeHolder.CustomAttributes!.Add(newAttribute); 
     }
 
     public static void AddTwoParameterAttribute(HasCustomAttributes customAttributeHolder, (MethodAnalysisContext, FieldAnalysisContext, FieldAnalysisContext) attributeInfo, object fieldValue1, object fieldValue2)
@@ -138,7 +138,7 @@ public static class AttributeInjectionUtils
         var newAttribute = new AnalyzedCustomAttribute(constructor);
         newAttribute.Fields.Add(new(field1, MakeFieldParameter(fieldValue1, newAttribute, 0)));
         newAttribute.Fields.Add(new(field2, MakeFieldParameter(fieldValue2, newAttribute, 1)));
-        customAttributeHolder.CustomAttributes!.Add(newAttribute); //Nullability checked elsewhere
+        customAttributeHolder.CustomAttributes!.Add(newAttribute); 
     }
 
     public static void AddAttribute(HasCustomAttributes customAttributeHolder, MethodAnalysisContext constructor, params (FieldAnalysisContext, object)[] fields)
@@ -156,7 +156,7 @@ public static class AttributeInjectionUtils
             i++;
         }
 
-        customAttributeHolder.CustomAttributes!.Add(newAttribute); //Nullability checked elsewhere
+        customAttributeHolder.CustomAttributes!.Add(newAttribute); 
     }
 
     private static Il2CppType GetAttributeTargetsType(AssemblyAnalysisContext mscorlibAssembly)

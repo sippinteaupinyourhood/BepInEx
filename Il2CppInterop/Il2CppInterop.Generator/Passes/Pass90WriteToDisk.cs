@@ -18,7 +18,7 @@ public static class Pass90WriteToDisk
         {
             var module = asmContext.NewAssembly.ManifestModule!;
 
-            // Add TargetFrameworkAttribute to the assembly.
+            
             {
                 var importedConstructor = (ICustomAttributeType)module.DefaultImporter.ImportMethod(targetAttributeConstructor);
 
@@ -37,11 +37,11 @@ public static class Pass90WriteToDisk
                 asmContext.NewAssembly.CustomAttributes.Add(targetFrameworkAttribute);
             }
 
-            // Rewrite corlib references.
+            
             foreach (var reference in module.AssemblyReferences)
             {
-                // System.Private.CoreLib needs rewriting because references can get created during the rewrite process.
-                // mscorlib and netstandard are included for completeness.
+                
+                
                 if (reference.Name?.Value is "System.Private.CoreLib" or "mscorlib" or "netstandard")
                 {
                     CorlibReferences.RewriteCorlibReference(reference);
@@ -49,7 +49,7 @@ public static class Pass90WriteToDisk
                 }
             }
 
-            // Optimize macros in all methods and assign tokens.
+            
             foreach (var type in module.GetAllTypes())
             {
                 foreach (var method in type.Methods)

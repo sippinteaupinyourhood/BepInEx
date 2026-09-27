@@ -20,7 +20,7 @@ public class AttributeInjectorProcessingLayer : Cpp2IlProcessingLayer
 
     public override void Process(ApplicationAnalysisContext appContext, Action<int, int>? progressCallback = null)
     {
-        //EZ diff mode removes token attributes and method address/rva fields to make diffing using e.g. git easier
+        
         _useEzDiffMode = appContext.GetExtraData<string>("attr-injector-use-ez-diff") != null;
 
         InjectAttributeAttribute(appContext);
@@ -53,7 +53,7 @@ public class AttributeInjectorProcessingLayer : Cpp2IlProcessingLayer
 
                 var newAttribute = new AnalyzedCustomAttribute(fieldOffsetConstructor);
 
-                //This loop is not done parallel because f.Offset has heavy lock contention
+                
                 newAttribute.Fields.Add(new(offsetField, new CustomAttributePrimitiveParameter($"0x{f.Offset:X}", newAttribute, CustomAttributeParameterKind.Field, 0)));
                 f.CustomAttributes.Add(newAttribute);
             }
@@ -135,8 +135,8 @@ public class AttributeInjectorProcessingLayer : Cpp2IlProcessingLayer
     {
         if (appContext.MetadataVersion >= 29f)
         {
-            //All attributes should be fully serializable anyway, as they're stored in metadata
-            //However, we still need to read them all
+            
+            
             var toAnalyze = appContext.Assemblies.SelectMany(ctx => ctx.Types)
                 .SelectMany(ctx => ctx.Methods
                     .SelectMany(m => m.Parameters.Cast<HasCustomAttributes>().Append(m))
@@ -148,7 +148,7 @@ public class AttributeInjectorProcessingLayer : Cpp2IlProcessingLayer
             foreach (var hasCustomAttributes in toAnalyze)
                 hasCustomAttributes.AnalyzeCustomAttributeData();
 
-            // MiscUtils.ExecuteParallel(toAnalyze, ctx => ctx.AnalyzeCustomAttributeData());
+            
             return;
         }
 
@@ -197,24 +197,24 @@ public class AttributeInjectorProcessingLayer : Cpp2IlProcessingLayer
             var attribute = context.CustomAttributes[index];
 
             if (attribute.IsSuitableForEmission)
-                //Attribute has all required parameters, so we don't need an injected one
+                
                 continue;
 
-            //Create replacement attribute
+            
             var replacementAttribute = new AnalyzedCustomAttribute(ctor);
 
-            //Get ptr, and from it, rva and offset
+            
             var generatorPtr = context.CaCacheGeneratorAnalysis!.UnderlyingPointer;
             var generatorRva = context.AppContext.Binary.GetRva(generatorPtr);
             if (!context.AppContext.Binary.TryMapVirtualAddressToRaw(generatorPtr, out var offsetInBinary))
                 offsetInBinary = 0;
 
-            //Add the 3 fields to the replacement attribute
+            
             replacementAttribute.Fields.Add(new(typeField, new CustomAttributeTypeParameter(attribute.Constructor.DeclaringType, replacementAttribute, CustomAttributeParameterKind.Field, 0)));
             replacementAttribute.Fields.Add(new(rvaField, new CustomAttributePrimitiveParameter($"0x{generatorRva:X}", replacementAttribute, CustomAttributeParameterKind.Field, 1)));
             replacementAttribute.Fields.Add(new(offsetField, new CustomAttributePrimitiveParameter($"0x{offsetInBinary:X}", replacementAttribute, CustomAttributeParameterKind.Field, 2)));
 
-            //Replace the original attribute with the replacement attribute
+            
             context.CustomAttributes[index] = replacementAttribute;
         }
     }
